@@ -8,6 +8,7 @@ Vector front views of HP and Compaq iPAQ handhelds, used as frames around screen
 | iPAQ h3900 | [h3900/h3900-framed-template.svg](h3900/h3900-framed-template.svg) | ![h3900](h3900/preview.png) | x=137.5 y=244.75 525 x 700 | 240x320 |
 | iPAQ h5550 | [h5550/h5550-framed-template.svg](h5550/h5550-framed-template.svg) | ![h5550](h5550/preview.png) | x=137.5 y=244.75 525 x 700 | 240x320 |
 | iPAQ hx4700 | [hx4700/hx4700-framed-template.svg](hx4700/hx4700-framed-template.svg) | ![hx4700](hx4700/preview.png) | x=137.5 y=244.75 525 x 700 | 480x640 |
+| iPAQ h2200 with the HP Photosmart Mobile Camera | [hp-photosmart-camera/on-h2200.svg](hp-photosmart-camera/on-h2200.svg) | ![h2200 with camera](hp-photosmart-camera/preview-on-h2200.png) | x=137.5 y=168 525 x 700 | 240x320 |
 
 The h3900 and h5550 share a body outline (same width, same expansion sleeves). The glass is 3:4 in every file; the 240x320 files use 2.1875 units per pixel and the hx4700 1.09375.
 
@@ -26,6 +27,10 @@ IPAQ_FONTS=/usr/share/fonts/truetype/ python3 h5550/gen_h5550_final3.py out.svg
 They need Python 3 with fontTools and these fonts in `IPAQ_FONTS` (default `/Library/Fonts/`): Mukta_Regular, OpenSans_Bold, OpenSans_BoldItalic, Roboto_Bold, Roboto_Regular. The printed marks (iPAQ, Pocket PC, COMPAQ) are converted to glyph outlines in the SVG, so the fonts are only needed to regenerate. The output is byte for byte the committed SVG when the same font files are used. The generators measure positions on reference photographs (rectified so the glass is an upright 3:4 rectangle); the photographs are not part of this repository, and nothing from them is copied into the drawings. `notes.md` in each directory lists the measurements and the decisions made.
 
 The h2200 drawing was written by hand and has no generator.
+
+## The camera
+
+`hp-photosmart-camera/` has the HP Photosmart Mobile Camera that plugs into the SD slot of the h2200: front, back-of-head, from-above and an animated swivel (the head with its lens barrel turning), plus the h2200 frame with the camera clipped on (`on-h2200.svg`, and `on-h2200-swivel.svg`) for screenshots of camera and recorder programs. `notes.md` there describes the files, the axis of the swivel and the measurements.
 
 ## Credits
 

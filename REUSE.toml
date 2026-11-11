@@ -1,12 +1,12 @@
 version = 1
 
 [[annotations]]
-path = ["h2200/*.svg", "h3900/*.svg", "h5550/*.svg", "hx4700/*.svg", "*/preview.png", "*/notes.md", "README.md"]
+path = ["h2200/*.svg", "h3900/*.svg", "h5550/*.svg", "hx4700/*.svg", "hp-photosmart-camera/*.svg", "*/preview*.png", "*/notes.md", "README.md"]
 SPDX-FileCopyrightText = "2026 Koen Kooi"
 SPDX-License-Identifier = "CC-BY-SA-4.0"
 
 [[annotations]]
-path = ["*/gen_*.py", "REUSE.toml"]
+path = ["*/gen_*.py", "*/gen-*.js", "*/compose-*.py", "REUSE.toml"]
 SPDX-FileCopyrightText = "2026 Koen Kooi"
 SPDX-License-Identifier = "GPL-2.0-or-later"
 
