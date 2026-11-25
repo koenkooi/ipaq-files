@@ -5,6 +5,7 @@ Vector front views of HP and Compaq iPAQ and Sharp Zaurus handhelds, used as fra
 | Device | Drawing | Preview | Glass in the SVG | Screen |
 |---|---|---|---|---|
 | iPAQ h2200 | [h2200/ipaq-h2200.svg](h2200/ipaq-h2200.svg) | ![h2200](h2200/preview.png) | x=137.5 y=168 525 x 700 | 240x320 |
+| iPAQ h2200 with thumb keyboard | [h2200/ipaq-h2200-keyboard.svg](h2200/ipaq-h2200-keyboard.svg) | <img src="h2200/preview-keyboard.png" width="183" alt="h2200 with keyboard"> | x=137.5 y=168 525 x 700 | 240x320 |
 | iPAQ h3900 | [h3900/h3900-framed-template.svg](h3900/h3900-framed-template.svg) | ![h3900](h3900/preview.png) | x=137.5 y=244.75 525 x 700 | 240x320 |
 | iPAQ h5550 | [h5550/h5550-framed-template.svg](h5550/h5550-framed-template.svg) | ![h5550](h5550/preview.png) | x=137.5 y=244.75 525 x 700 | 240x320 |
 | iPAQ hx4700 | [hx4700/hx4700-framed-template.svg](hx4700/hx4700-framed-template.svg) | ![hx4700](hx4700/preview.png) | x=137.5 y=244.75 525 x 700 | 480x640 |
@@ -61,6 +62,8 @@ The SL-5500 US QWERTY layout follows Sharp's [Start-up Guide](https://archive.or
 
 The black SL-6000 follows Sharp's [product photographs and specifications](https://jp.sharp/products/sl6000/) and [operation manual](https://www.manualslib.com/manual/807955/Sharp-Sl-6000l.html?page=27). Its protective flip cover is omitted. The small left dot-marked button is a second OK control, not a printed Ctrl key. Wireless indicators vary between N/L/W models; the drawing exposes both wireless lights for simulation.
 
+The optional h2200 keyboard follows the owner's attached and detached photographs: 37 domed keys in bowed rows, orange alternate legends and blue casing legends. It covers the lower controls, as the real accessory does, without moving or covering the screen. `addon-keyboard` contains independent `key-*` targets. The original h2200 SVG remains unchanged.
+
 ## SL-C700 views and controls
 
 The laptop and folded frames are separate SVGs. Use a landscape 640x480 capture for the laptop, or a portrait 480x640 capture for the folded view. Replace `#screen` as above, selecting `#c700-laptop` or `#c700-pda` instead of `#collie`.
@@ -101,7 +104,7 @@ These are measured front-view approximations, not CAD or traced photographs. Ref
 | C700 reference photograph (geometry measured, nothing traced) | ["Sharp Zaurus SL-C700.jpg"](https://commons.wikimedia.org/wiki/File:Sharp_Zaurus_SL-C700.jpg) by ポリンキ, Wikimedia Commons | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) |
 | C700 reference photographs | [HPC.ru SL-C700 review](https://hpc.ru/lib/arts/1927/) by Vladimir Speransky | reference only, not distributed |
 | SL-6000 reference photographs | [Sharp product catalogue](https://jp.sharp/products/sl6000/) and [Roberto Innocenti's photographs](https://www.flickr.com/photos/12161791@N00/792844922/) | reference only, not distributed |
-| h2200, h3900, h5550, Collie and C700 keyboard references | the author's own devices and photographs | not distributed |
+| h2200 and its keyboard, h3900, h5550, Collie and C700 keyboard references | the author's own devices and photographs | not distributed |
 | Glyph outlines: Mukta | Ek Type | SIL OFL 1.1 |
 | Glyph outlines: Open Sans | Steve Matteson | SIL OFL 1.1 |
 | Glyph outlines: Noto Sans CJK JP | Google | SIL OFL 1.1 |
