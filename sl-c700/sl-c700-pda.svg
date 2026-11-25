@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" id="c700-pda" viewBox="0 0 800 1170" role="group" aria-labelledby="title description">
+<!--
+  Original vector drawing of the Sharp Zaurus SL-C700.
+  SPDX-FileCopyrightText: 2026 Koen Kooi
+  SPDX-License-Identifier: CC-BY-SA-4.0
+  Geometry informed by device photographs; no photograph is embedded.
+  Lettering uses Open Sans and Noto Sans CJK JP outlines (SIL OFL 1.1).
+  Sharp and Zaurus are trademarks used only to identify the device.
+-->
+<title id="title">Sharp Zaurus SL-C700, folded view</title>
+<desc id="description">Folded SL-C700 with a portrait 480 by 640 screen.</desc>
+<defs>
+<linearGradient id="shell" x1="0" y1="0" x2="1" y2="0">
+<stop stop-color="#777d82"/><stop offset=".025" stop-color="#f8fafc"/><stop offset=".09" stop-color="#d5d9de"/><stop offset=".48" stop-color="#e7e9ed"/><stop offset=".9" stop-color="#c5cbd0"/><stop offset=".975" stop-color="#fbfcfd"/><stop offset="1" stop-color="#8f969b"/>
+</linearGradient>
+<linearGradient id="shell-light" x1="0" y1="0" x2="0" y2="1">
+<stop stop-color="#fff" stop-opacity=".48"/><stop offset=".35" stop-color="#fff" stop-opacity=".08"/><stop offset=".8" stop-color="#000" stop-opacity=".03"/><stop offset="1" stop-color="#000" stop-opacity=".22"/>
+</linearGradient>
+<linearGradient id="deck" x1="0" y1="0" x2="0" y2="1">
+<stop stop-color="#f1f2f5"/><stop offset=".16" stop-color="#c7cbd3"/><stop offset=".62" stop-color="#d9dce1"/><stop offset="1" stop-color="#a1a8b0"/>
+</linearGradient>
+<linearGradient id="hinge" x1="0" y1="0" x2="0" y2="1">
+<stop stop-color="#777e86"/><stop offset=".08" stop-color="#f8fbff"/><stop offset=".27" stop-color="#d1d6dd"/><stop offset=".62" stop-color="#c2c8ce"/><stop offset=".9" stop-color="#eff2f5"/><stop offset="1" stop-color="#7c848c"/>
+</linearGradient>
+<linearGradient id="hinge-vertical" x1="0" y1="0" x2="1" y2="0">
+<stop stop-color="#858c92"/><stop offset=".13" stop-color="#f7f9fa"/><stop offset=".42" stop-color="#c4cbd0"/><stop offset=".75" stop-color="#eef1f3"/><stop offset="1" stop-color="#7a8084"/>
+</linearGradient>
+<linearGradient id="dark-key" x1="0" y1="0" x2="0" y2="1">
+<stop stop-color="#37373d"/><stop offset=".18" stop-color="#24242a"/><stop offset=".85" stop-color="#17181c"/><stop offset="1" stop-color="#08090c"/>
+</linearGradient>
+<linearGradient id="light-key" x1="0" y1="0" x2="0" y2="1">
+<stop stop-color="#fafbfc"/><stop offset=".22" stop-color="#dde0e5"/><stop offset=".8" stop-color="#b7bdc5"/><stop offset="1" stop-color="#929aa4"/>
+</linearGradient>
+<linearGradient id="button" x1="0" y1="0" x2="0" y2="1">
+<stop stop-color="#f8fafb"/><stop offset=".25" stop-color="#d7dbe0"/><stop offset=".8" stop-color="#acb3bc"/><stop offset="1" stop-color="#e3e7e9"/>
+</linearGradient>
+<linearGradient id="bezel" x1="0" y1="0" x2="1" y2="1">
+<stop stop-color="#24272a"/><stop offset=".22" stop-color="#0e1012"/><stop offset=".75" stop-color="#151719"/><stop offset="1" stop-color="#383c3e"/>
+</linearGradient>
+<linearGradient id="led-shade" x1="0" y1="0" x2="1" y2="0">
+<stop stop-color="#000" stop-opacity=".48"/><stop offset=".4" stop-color="#fff" stop-opacity=".28"/><stop offset=".7" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".4"/>
+</linearGradient>
+<filter id="shadow" x="-10%" y="-10%" width="120%" height="125%"><feGaussianBlur stdDeviation="7"/></filter>
+</defs>
+<rect x="94" y="51" width="660" height="1050" rx="26" fill="#30343a" opacity=".28" filter="url(#shadow)"/>
+<rect x="94" y="51" width="660" height="1050" rx="26" fill="url(#shell)" stroke="#7e858a" stroke-width="3"/>
+<rect x="100" y="57" width="648" height="1038" rx="22" fill="url(#shell-light)"/>
+<path d="M122 65 H724 M744 78 V1077" fill="none" stroke="#fff" stroke-opacity=".6" stroke-width="3"/>
+<rect x="38" y="64" width="68" height="1027" rx="16" fill="url(#hinge-vertical)" stroke="#838b91" stroke-width="3"/>
+<path d="M42 67 H102 M42 448 H102 M42 1036 H102 M42 1087 H102" stroke="#8a9297" stroke-width="4"/>
+<path d="M52 78 V1071" stroke="#fff" stroke-opacity=".65" stroke-width="3"/>
+<rect id="led-charge" x="51" y="1062" width="13" height="8" rx="3" fill="#252626"/>
+<rect x="51" y="1062" width="13" height="8" rx="3" fill="url(#led-shade)" pointer-events="none"/>
+<rect id="led-mail" x="78" y="1062" width="13" height="8" rx="3" fill="#252626"/>
+<rect x="78" y="1062" width="13" height="8" rx="3" fill="url(#led-shade)" pointer-events="none"/>
+<g transform="translate(0 40)">
+<rect x="145" y="130" width="570" height="790" rx="10" fill="#121416" stroke="#73797e" stroke-width="3"/>
+<rect x="153" y="138" width="554" height="774" rx="5" fill="url(#bezel)"/>
+</g>
+<rect id="screen" x="165" y="195" width="525" height="700" fill="#c3c6c9"/>
+<g transform="translate(0 40)">
+<path d="M161 151 H694 M161 151 V858" fill="none" stroke="#62696d" stroke-opacity=".42" stroke-width="2"/>
+
+<g id="touch-clock" aria-label="Clock shortcut" transform="translate(329 879)">
+<rect x="-21" y="-20" width="42" height="40" fill="transparent" stroke="none" pointer-events="all"/>
+<g data-shortcut="clock" transform="rotate(30)" fill="#8b9296"><path d="M0 -10 V10 M-10 0 H10 M-7 -7 L7 7 M7 -7 L-7 7" fill="none" stroke="#8b9296" stroke-width="3" stroke-linecap="round"/></g>
+</g>
+<g id="touch-calendar" aria-label="Calendar shortcut" transform="translate(397 879)">
+<rect x="-21" y="-20" width="42" height="40" fill="transparent" stroke="none" pointer-events="all"/>
+<g data-shortcut="calendar" transform="rotate(30)" fill="#8b9296"><path fill-rule="evenodd" d="M-9 -10 H9 V10 H-9 Z M-5.5 -4.5 h2.5 v2.5 h-2.5 Z M-1.25 -4.5 h2.5 v2.5 h-2.5 Z M3 -4.5 h2.5 v2.5 h-2.5 Z M-5.5 -0.25 h2.5 v2.5 h-2.5 Z M-1.25 -0.25 h2.5 v2.5 h-2.5 Z M3 -0.25 h2.5 v2.5 h-2.5 Z M-5.5 4 h2.5 v2.5 h-2.5 Z M-1.25 4 h2.5 v2.5 h-2.5 Z M3 4 h2.5 v2.5 h-2.5 Z"/></g>
+</g>
+<g id="touch-address" aria-label="Address shortcut" transform="translate(464 879)">
+<rect x="-21" y="-20" width="42" height="40" fill="transparent" stroke="none" pointer-events="all"/>
+<g data-shortcut="address" transform="rotate(30)" fill="#8b9296"><circle cy="-6.5" r="4"/><path d="M-7 10 V3.5 Q-7 -1 0 -1 Q7 -1 7 3.5 V10 Z"/></g>
+</g>
+<g id="touch-mail" aria-label="Mail shortcut" transform="translate(535 879)">
+<rect x="-21" y="-20" width="42" height="40" fill="transparent" stroke="none" pointer-events="all"/>
+<g data-shortcut="mail" transform="rotate(30)" fill="#8b9296"><path fill-rule="evenodd" d="M-10 -7 H10 V7 H-10 Z M-8 -5 L0 1 8 -5 V-2.5 L0 3.5 -8 -2.5 Z"/></g>
+</g>
+<g id="touch-home" aria-label="Home shortcut" transform="translate(600 879)">
+<rect x="-21" y="-20" width="42" height="40" fill="transparent" stroke="none" pointer-events="all"/>
+<g data-shortcut="home" transform="rotate(30)" fill="#8b9296"><path fill-rule="evenodd" d="M-11 -1 L0 -11 11 -1 H8 V10 H-8 V-1 Z M-2 10 H2 V3 H-2 Z"/></g>
+</g>
+<path d="M174.777 892.986Q172.964 892.986 171.914 894.193Q170.865 895.401 170.865 897.5Q170.865 899.659 171.877 900.837Q172.889 902.014 174.762 902.014Q175.913 902.014 177.388 901.601V902.722Q176.244 903.15 174.566 903.15Q172.136 903.15 170.816 901.676Q169.495 900.201 169.495 897.485Q169.495 895.785 170.131 894.505Q170.767 893.226 171.967 892.534Q173.167 891.842 174.792 891.842Q176.523 891.842 177.817 892.474L177.275 893.573Q176.026 892.986 174.777 892.986ZM184.626 897.237H188.365V902.586Q187.492 902.865 186.59 903.008Q185.687 903.15 184.498 903.15Q182 903.15 180.608 901.665Q179.216 900.179 179.216 897.5Q179.216 895.785 179.905 894.494Q180.593 893.204 181.887 892.523Q183.181 891.842 184.919 891.842Q186.68 891.842 188.2 892.489L187.703 893.618Q186.213 892.986 184.837 892.986Q182.828 892.986 181.699 894.182Q180.57 895.378 180.57 897.5Q180.57 899.727 181.658 900.878Q182.745 902.029 184.852 902.029Q185.995 902.029 187.086 901.766V898.38H184.626ZM201.216 900.073Q201.216 901.525 200.163 902.338Q199.109 903.15 197.304 903.15Q195.347 903.15 194.294 902.646V901.412Q194.971 901.698 195.769 901.864Q196.566 902.029 197.349 902.029Q198.628 902.029 199.275 901.544Q199.922 901.059 199.922 900.194Q199.922 899.622 199.693 899.257Q199.463 898.892 198.925 898.583Q198.387 898.275 197.289 897.884Q195.754 897.334 195.095 896.582Q194.437 895.83 194.437 894.618Q194.437 893.347 195.393 892.594Q196.348 891.842 197.921 891.842Q199.561 891.842 200.938 892.444L200.539 893.557Q199.177 892.986 197.891 892.986Q196.875 892.986 196.303 893.422Q195.731 893.858 195.731 894.633Q195.731 895.205 195.942 895.57Q196.153 895.935 196.653 896.24Q197.153 896.544 198.184 896.913Q199.915 897.53 200.565 898.237Q201.216 898.945 201.216 900.073ZM204.527 903H203.278V894.754H204.527ZM203.172 892.519Q203.172 892.09 203.383 891.891Q203.594 891.692 203.91 891.692Q204.211 891.692 204.429 891.895Q204.647 892.098 204.647 892.519Q204.647 892.94 204.429 893.147Q204.211 893.354 203.91 893.354Q203.594 893.354 203.383 893.147Q203.172 892.94 203.172 892.519ZM208.424 903H207.175V891.293H208.424ZM212.321 903H211.073V894.754H212.321ZM210.967 892.519Q210.967 892.09 211.178 891.891Q211.389 891.692 211.705 891.692Q212.005 891.692 212.224 891.895Q212.442 892.098 212.442 892.519Q212.442 892.94 212.224 893.147Q212.005 893.354 211.705 893.354Q211.389 893.354 211.178 893.147Q210.967 892.94 210.967 892.519ZM218.265 903.15Q216.475 903.15 215.493 902.048Q214.511 900.946 214.511 898.93Q214.511 896.86 215.508 895.732Q216.505 894.603 218.348 894.603Q218.943 894.603 219.537 894.731Q220.131 894.859 220.47 895.032L220.086 896.093Q219.672 895.927 219.183 895.818Q218.694 895.709 218.318 895.709Q215.805 895.709 215.805 898.915Q215.805 900.434 216.418 901.247Q217.031 902.06 218.235 902.06Q219.266 902.06 220.35 901.616V902.722Q219.522 903.15 218.265 903.15ZM229.423 898.869Q229.423 900.886 228.408 902.018Q227.392 903.15 225.601 903.15Q224.495 903.15 223.637 902.631Q222.78 902.112 222.313 901.142Q221.847 900.171 221.847 898.869Q221.847 896.853 222.855 895.728Q223.863 894.603 225.654 894.603Q227.384 894.603 228.404 895.754Q229.423 896.906 229.423 898.869ZM223.141 898.869Q223.141 900.449 223.773 901.277Q224.405 902.105 225.631 902.105Q226.858 902.105 227.494 901.281Q228.129 900.457 228.129 898.869Q228.129 897.297 227.494 896.481Q226.858 895.664 225.616 895.664Q224.39 895.664 223.765 896.469Q223.141 897.274 223.141 898.869ZM237.256 903V897.666Q237.256 896.657 236.797 896.161Q236.338 895.664 235.36 895.664Q234.066 895.664 233.464 896.364Q232.862 897.064 232.862 898.674V903H231.613V894.754H232.629L232.832 895.882H232.892Q233.276 895.273 233.968 894.938Q234.66 894.603 235.51 894.603Q237 894.603 237.752 895.322Q238.505 896.04 238.505 897.62V903Z" fill="#a9b0b4" />
+</g></svg>
