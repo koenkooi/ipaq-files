@@ -18,6 +18,8 @@ Vector front views of HP and Compaq iPAQ and Sharp Zaurus handhelds, used as fra
 
 The h3900 and h5550 share a body outline (same width, same expansion sleeves). The 240x320 screens use 2.1875 units per pixel; the VGA screens use 1.09375.
 
+The h2200 and Zaurus frames have no fixed display dimensions and scale to the browser window. Set an explicit width when embedding them if needed; the viewBox preserves their proportions.
+
 ## Using a frame
 
 Put the screenshot in the glass rectangle, for example as an `<image>` element with the rectangle's position and size, and draw it before the bezel highlights if you need the reflection on top. The SVGs contain no external references.
@@ -77,15 +79,50 @@ The key faces and lower controls share one perspective plane; their legends use 
 
 ## Regenerating
 
-The h3900, h5550 and hx4700 generators write the SVG to the file named on the command line:
+`generate.py` draws the h3900, h5550, hx4700, SL-5500, SL-5600, SL-6000, both C700 views, h2200 keyboard and Photosmart camera from geometry. The h2200 frame is manually maintained: accessory generation reads that SVG without modifying it.
 
+```sh
+python3 generate.py --list
+python3 generate.py all --output-dir out
+python3 generate.py h3900 sl-5600 --output-dir out
+python3 generate.py sl-c700 --output-dir out       # both views
+python3 generate.py sl-c700-pda --output folded.svg
+python3 generate.py sl-6000
+python3 generate.py h2200 --keyboard
+python3 generate.py sl-6000 --keyboard --camera front --output-dir out
+python3 generate.py sl-c700 --keyboard --output-dir out
+python3 generate.py all --keyboard --camera swivel --output-dir out
+python3 generate.py h2200 --keyboard --camera swivel --output-dir out
+python3 generate.py all --camera front --output-dir out
+python3 generate.py camera                        # four standalone camera views
+python3 generate.py all --check                   # compare committed SVGs, no writes
+python3 generate.py camera --check
+python3 generate.py h2200 --keyboard --check
+python3 generate.py all --check --output-dir out
+python3 -m unittest -v test_generate
 ```
-IPAQ_FONTS=/usr/share/fonts/truetype/ python3 h5550/gen_h5550_final3.py out.svg
-```
 
-They need Python 3 with fontTools and these fonts in `IPAQ_FONTS` (default `/Library/Fonts/`): Mukta_Regular, OpenSans_Bold, OpenSans_BoldItalic, Roboto_Bold, Roboto_Regular. The printed marks (iPAQ, Pocket PC, COMPAQ) are converted to glyph outlines in the SVG, so the fonts are only needed to regenerate. The output is byte for byte the committed SVG when the same font files are used. The generators measure positions on reference photographs (rectified so the glass is an upright 3:4 rectangle); the photographs are not part of this repository, and nothing from them is copied into the drawings.
+Use Python 3.8+ and [fontTools](https://pypi.org/project/fonttools/) (`python3 -m pip install fonttools` if missing). No NumPy or OpenCV is required. Put the following files directly in `IPAQ_FONTS` (default `/Library/Fonts`), or select a directory with `--fonts DIR`:
 
-The h2200 drawing was written by hand and has no generator.
+| Model | Font files |
+|---|---|
+| h3900 | `Mukta_Regular.ttf`, `OpenSans_BoldItalic.ttf` |
+| h5550 | `Roboto_Bold.ttf`, `Roboto_Regular.ttf` |
+| hx4700 | `OpenSans_Bold.ttf` |
+| SL-5500, SL-5600, SL-6000, C700 folded, h2200 keyboard | `OpenSans_Regular.ttf`, `OpenSans_Bold.ttf` |
+| C700 laptop | `OpenSans_Regular.ttf`, `OpenSans_Bold.ttf`, `NotoSansCJKjp_Regular.otf` |
+
+Fonts are needed only for device and keyboard regeneration; their lettering remains editable vector paths. Camera generation and camera composition onto the manual h2200 need only Python's standard library. The camera retains its small live-text labels, with the SVG's Futura/Avenir/Trebuchet font stack. Using the same font files produces byte-identical committed SVGs. Missing required fonts, glyphs or dependencies are errors, never substitutions. Artwork integration tests explicitly skip when their fonts or fontTools are unavailable; CLI failure and output-validation tests still run.
+
+`--output-dir` preserves the repository's model subdirectories; without it, outputs go beside this script in their usual model directories. `--output` selects one exact `.svg` path and requires a single view. `--check` regenerates and compares exact bytes without writing. Every CLI invocation ends with exactly one `SUCCESS` or `FAILURE` line; failures exit nonzero. All selected drawings are built and checked before writing, staged files are read back, and each destination is replaced atomically and verified. A filesystem failure during final replacement can leave a partially updated batch; a failed run must not be treated as complete. Checks include XML, unique IDs, screen geometry and sliding-frame fragment controls.
+
+`--camera front|away|swivel` writes a `-camera-VIEW.svg` variant rather than overwriting the base frame. For h2200 without the keyboard, the front and swivel views retain `hp-photosmart-camera/on-h2200.svg` and `on-h2200-swivel.svg`. With `--camera`, `all` also includes the manual h2200.
+
+`--keyboard` opens the SL-5500/5600/6000 sliders, selects laptop mode for either C700 view or the `sl-c700` alias, and attaches the h2200 thumb keyboard. It writes `-keyboard.svg` variants; combining flags writes `-keyboard-camera-VIEW.svg`. Open slider variants work in static renderers and retain interactive open/closed fragments. `all --keyboard` selects these five keyboard-capable configurations, skipping iPAQs with no supported keyboard drawing; explicitly selecting an unsupported model is an error.
+
+Custom `--output` paths must not use a protected base or other variant's filename. Accessory canvases expand without changing screen coordinates; use their own `#open` and `#closed` viewBoxes when changing slider state.
+
+The generator does not refresh previews. Existing `rsvg-convert` can render a generated SVG; for static open-keyboard exports, use `--keyboard` instead of fragment URLs. To add a device, write `build_model(fonts) -> str` and add a `Model` entry to `MODELS`; font outlining and output checks are shared.
 
 ### Measurement conventions
 
@@ -99,7 +136,7 @@ These are measured front-view approximations, not CAD or traced photographs. Ref
 
 `hp-photosmart-camera/` contains front, away-facing, elevated and animated swivel views of the 1.3 MP HP Photosmart Mobile Camera, plus `on-h2200.svg` and `on-h2200-swivel.svg`. The composites extend the viewBox upwards without moving the screen. The SD plug is scaled to 24 mm against the h2200's 71 mm body width.
 
-The head, lens barrel and focus marks rotate together around the horizontal body-to-head axis; the body and plug stay fixed. The 10-second SMIL loop needs no script. Rounded shell corners, inset bevels, the swivel seam and barrel seating replace the sharp box-like transitions. Surfaces, logos and lettering remain simplified; compare the front and elevated views rather than treating them as a CAD reconstruction.
+The head, lens barrel and focus marks rotate together around the horizontal body-to-head axis; the body and plug stay fixed. The 10-second SMIL loop needs no script. Rounded shell corners, inset bevels, the swivel seam and barrel seating replace the sharp box-like transitions. Surfaces, logos and lettering remain simplified; compare the front and elevated views rather than treating them as a CAD reconstruction. Regenerate with `python3 generate.py camera`, then `python3 generate.py h2200 --camera front` or `--camera swivel` for the legacy composites.
 
 Camera placement follows each device's SD slot, not its CompactFlash slot. Slot edges are verified; exact seating coordinates and swivel clearances are estimated from photographs and diagrams.
 
@@ -107,7 +144,7 @@ Camera placement follows each device's SD slot, not its CompactFlash slot. Slot 
 |---|---|---|
 | h2200 | top | owner's photograph with the camera attached |
 | h3900 | top | [HP QuickSpecs, item 15](https://www.manualslib.com/manual/661584/Hp-Compaq-Ipaq-H3900-Series.html) |
-| h5550 | top, left of centre | [HP QuickSpecs, item 18](https://www.manualslib.com/manual/661587/Hp-Ipaq-H5500-Series.html?page=1) |
+| h5550 | top, near centre, to the right of the WLAN antenna | [HP QuickSpecs, item 18](https://www.manualslib.com/manual/661587/Hp-Ipaq-H5500-Series.html?page=1) |
 | hx4700 | top | [HP User's Guide, printed 11-2](https://www.manualslib.com/manual/72007/Hp-Ipaq-Hx4700.html?page=144) |
 | SL-5500 | left long edge, around mid-body | [Sharp Start-up Guide, printed 20 and 63](https://archive.org/download/ZaurusSL5500Software/SL5500SUG_Final.pdf) |
 | SL-5600 | left long edge, around mid-screen | [Sharp SL-5600 brochure, expansion-slot callout 1](https://web.archive.org/web/20050128181429/http://www.sharpusa.com/files/hpc_dow_SL_5600BRO.pdf) |

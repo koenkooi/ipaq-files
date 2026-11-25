@@ -6,7 +6,7 @@ SPDX-FileCopyrightText = "2026 Koen Kooi"
 SPDX-License-Identifier = "CC-BY-SA-4.0"
 
 [[annotations]]
-path = ["*/gen_*.py", "REUSE.toml"]
+path = ["generate.py", "test_generate.py", "REUSE.toml"]
 SPDX-FileCopyrightText = "2026 Koen Kooi"
 SPDX-License-Identifier = "GPL-2.0-or-later"
 
