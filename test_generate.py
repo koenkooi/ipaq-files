@@ -205,6 +205,22 @@ class GeneratorTests(unittest.TestCase):
                 self.assertEqual(glyph, folded_glyph)
                 self.assertEqual(pda_angle - laptop_angle, 90)
 
+    def test_ipaq_leds_are_recolourable_fills(self):
+        expected = {
+            "h2200": ("bluetooth", "power"),
+            "h3900": ("bluetooth", "power"),
+            "h5550": ("bluetooth", "power", "wlan"),
+            "hx4700": ("wireless", "notification", "power"),
+        }
+        for model, leds in expected.items():
+            path = (generator.MANUAL_MODELS.get(model) or generator.MODELS[model]).path
+            root = generator.ET.parse(generator.REPOSITORY / path).getroot()
+            for name in leds:
+                with self.subTest(model=model, led=name):
+                    led = root.find(f".//*[@id='led-{name}']")
+                    self.assertIsNotNone(led)
+                    self.assertRegex(led.get("fill"), r"^#[0-9a-f]{6}$")
+
     def test_camera_failures_do_not_overwrite_base_or_guess_missing_poses(self):
         output = self.directory / "ipaq-h2200.svg"
         output.write_bytes(b"manual original")

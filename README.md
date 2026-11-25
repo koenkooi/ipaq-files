@@ -59,6 +59,17 @@ Controls have IDs such as `button-up`, `button-select`, `button-home`, `key-q` a
 
 Set the `fill` of `#led-mail` or `#led-charge` to change its colour, for example `frame.querySelector("#led-mail").setAttribute("fill", "#36d966")`. Use `#252626` for off; the SL-5500 and SL-5600 charge light defaults to `#ffb823`. The SL-6000 also has `#led-wlan` and `#led-bluetooth`, with all four off initially. The lens shading stays in place.
 
+The iPAQ frames expose their status lights the same way, all unlit initially. To switch one off again, restore the `fill` it had when the SVG loaded:
+
+| Device | LEDs | Unlit fill | Source |
+|---|---|---|---|
+| h2200 | `led-bluetooth` (left), `led-power` (right) | `#b8b2a5` | [HP QuickSpecs, items 8 and 9](https://www.manualslib.com/manual/661575/Hp-Ipaq-H2200-Series.html) and the owner's photograph |
+| h3900 | `led-bluetooth` (left light pipe, h3970 only), `led-power` (right, beside the power button) | `#8e9195` | [HP Getting Started, page 8](https://www.manualslib.com/manual/359385/Hp-Ipaq-H3900.html?page=8) |
+| h5550 | `led-power` (beside the power button); `led-bluetooth` and `led-wlan` (left column, below `light-sensor`) | `#121315`, `#2a2b2d` | [HP Getting Started](https://www.manualslib.com/manual/277300/Hp-Ipaq-H5100.html) and ["HP Ipaq 5550.jpg"](https://commons.wikimedia.org/wiki/File:HP_Ipaq_5550.jpg) |
+| hx4700 | `led-wireless` (top), `led-notification`, `led-power` | `#a1a2a4` | [HP User's Guide, printed 8-2](https://www.manualslib.com/manual/72007/Hp-Ipaq-Hx4700.html?page=100) |
+
+HP documents amber flashing for charging, solid amber for charged and green flashing for alarms on the power lights. Bluetooth is blue on all four; the h5550 WLAN light flashes green with a link and amber without; the hx4700 wireless light is solid blue for Wi-Fi or Bluetooth. The order of the h5550 left column and of the two lower hx4700 lights follows HP's callout sequence and is unverified, because no photograph found shows them lit.
+
 Some static SVG renderers ignore fragment views or CSS transforms. To export the open view with those tools, set `viewBox="0 40 800 1670"` on a Collie copy and `transform="translate(0 290)"` on its `<g id="slider">`. For the SL-5600, use `viewBox="0 40 800 1750"` and `transform="translate(0 370)"`; for the SL-6000, use `viewBox="0 40 800 1720"` and `transform="translate(0 340)"`.
 
 The SL-5500 US QWERTY layout follows Sharp's [Start-up Guide](https://archive.org/download/ZaurusSL5500Software/SL5500SUG_Final.pdf); the SL-5600 layout follows photographs. Outlines and slider travel are estimated from screen-rectified photographs, not CAD: the photos imply slightly different body widths, and the brushed finish and ball reflections are simplified.
@@ -129,7 +140,7 @@ The generator does not refresh previews. Existing `rsvg-convert` can render a ge
 These are measured front-view approximations, not CAD or traced photographs. References are rectified against the visible screen opening; no photograph is distributed or embedded.
 
 - **h3900:** the owner's front and tape photographs agree within about 1% on a body/opening width near 1.30 (roughly 76–77 mm over a 58.5–59 mm opening), rather than dividing by the smaller active display area. The body is offset right of the screen: centre 591 versus 575 in the 600-pixel-wide rectified-glass coordinates. The left shoulder and record housing are measured separately; the bottom centre is at 1389.6. Mapping uses 0.875 SVG units per photo pixel.
-- **h5550:** the same expansion-sleeve body envelope is used, despite the photograph suggesting a wider body. The envelope moves down 41 photo pixels; outside the screen band, vertical spacing scales by about 0.948, while round controls retain their size. The body is approximately 1 mm shorter than the h3900 (published 133 versus 134 mm). The photograph's warm lamp cast is neutralised to silver-grey; the power button is a chrome dome with a power symbol, and the smaller adjacent window is the ambient-light sensor. The hp letters cut through the badge disc.
+- **h5550:** the same expansion-sleeve body envelope is used, despite the photograph suggesting a wider body. The envelope moves down 41 photo pixels; outside the screen band, vertical spacing scales by about 0.948, while round controls retain their size. The body is approximately 1 mm shorter than the h3900 (published 133 versus 134 mm). The photograph's warm lamp cast is neutralised to silver-grey; the power button is a chrome dome with a power symbol, and the smaller adjacent window is the power indicator, lit in a charging photograph. The hp letters cut through the badge disc.
 - **hx4700:** the rectified glass is 1776×2368 photo pixels, mapped at 525/1776 SVG units per pixel. Face-plane features are recentered by 22 photo pixels to remove camera parallax. The body ratio is about 1.71 versus the published 131×77 mm ratio of 1.70. The asymmetric cap, chamfered lower corners and grain are intentional; unreadable small labels are represented by faint marks rather than invented words.
 
 ## The camera

@@ -434,7 +434,7 @@ def build_h3900(fonts):
     <stop offset="1" stop-color="#fff" stop-opacity="0"/>
   </linearGradient>
   <linearGradient id="ip-led-l" x1="0" y1="0" x2="1" y2="0">
-    <stop offset="0" stop-color="#5d6064"/><stop offset="0.45" stop-color="#a7abaf"/><stop offset="1" stop-color="#6a6d71"/>
+    <stop offset="0" stop-color="#000" stop-opacity="0.35"/><stop offset="0.45" stop-color="#fff" stop-opacity="0.15"/><stop offset="1" stop-color="#000" stop-opacity="0.28"/>
   </linearGradient>
   <linearGradient id="ip-led-r" href="#ip-led-l" x1="1" y1="0" x2="0" y2="0"/>
   <linearGradient id="ip-led-v" x1="0" y1="0" x2="0" y2="1">
@@ -522,10 +522,15 @@ def build_h3900(fonts):
     <path d="{cap}" fill="#141518" stroke="#0c0d0e" stroke-width="1.5"/>
     <path d="{cap_in}" fill="url(#ip-cap)"/>
     <g id="leds">
-      <path d="{led_l}" fill="url(#ip-led-l)"/><path d="{led_r}" fill="url(#ip-led-r)"/>
-      <path d="{led_l}" fill="url(#ip-led-v)"/><path d="{led_r}" fill="url(#ip-led-v)"/>
-      <path d="{led_hl_l}" fill="none" stroke="#fff" stroke-opacity="0.55" stroke-width="1.6" stroke-linecap="round"/>
-      <path d="{led_hl_r}" fill="none" stroke="#fff" stroke-opacity="0.55" stroke-width="1.6" stroke-linecap="round"/>
+      <!-- light pipes: Bluetooth left (h3970 only), power/charge right beside the power button (HP Getting Started, page 8) -->
+      <path id="led-bluetooth" aria-label="Bluetooth indicator" d="{led_l}" fill="#8e9195"/>
+      <path id="led-power" aria-label="Power and charge indicator" d="{led_r}" fill="#8e9195"/>
+      <g pointer-events="none">
+        <path d="{led_l}" fill="url(#ip-led-l)"/><path d="{led_r}" fill="url(#ip-led-r)"/>
+        <path d="{led_l}" fill="url(#ip-led-v)"/><path d="{led_r}" fill="url(#ip-led-v)"/>
+        <path d="{led_hl_l}" fill="none" stroke="#fff" stroke-opacity="0.55" stroke-width="1.6" stroke-linecap="round"/>
+        <path d="{led_hl_r}" fill="none" stroke="#fff" stroke-opacity="0.55" stroke-width="1.6" stroke-linecap="round"/>
+      </g>
     </g>
     <g clip-path="url(#ip-cap-clip)">
       <path d="M{CAPX - 200},{58} Q{CAPX},{14} {CAPX + 200},{58}" fill="none" stroke="#fff" stroke-opacity="0.14" stroke-width="9" filter="url(#ip-soft)"/>
@@ -714,7 +719,8 @@ def build_h5550(fonts):
     LEDS = [(337.5, 115, 11.5, 4.8), (342.5, 147, 12, 5.6), (345.5, 180.5, 12, 5.2)]
     GRILLE = dict(x0=463, x1=704, ridges=(154, 171.5, 189), slots=(148.5, 165, 182, 198))
     POWER = dict(cx=805, cy=145, r=39.5, dome=26.5, collar=(807, 147.5, 47.5))
-    SENSOR_ALS = (748, 172.5, 10.5)       # ambient light sensor (owner, 2026-11-08)
+    # Lit amber in a charging photo, so the power indicator (QuickSpecs item 2), not a light sensor.
+    SENSOR_ALS = (748, 172.5, 10.5)
 
     BAND = (261, 245, 889.5, 1073.6)      # outer edge of the dark band round the glass
 
@@ -936,10 +942,15 @@ def build_h5550(fonts):
         ridges = ''.join(
             f'<path d="M{gr["x0"] + 2},{y} H{gr["x1"] - 2}" stroke="url(#ip-grille-ridge)" stroke-width="1.6" stroke-linecap="round"/>'
             for y in gr['ridges'])
+        # Callout order (light sensor, Bluetooth, WLAN); unlit in every photo found, so the top-to-bottom order is unverified.
+        windows = ('id="light-sensor" aria-label="Light sensor"',
+                   'id="led-bluetooth" aria-label="Bluetooth indicator"',
+                   'id="led-wlan" aria-label="Wireless LAN indicator"')
         leds = ''.join(
-            f'<ellipse cx="{x}" cy="{y}" rx="{rx}" ry="{ry}" fill="{"#3a2420" if i == 1 else "#2a2b2d"}"/>'
-        f'<ellipse cx="{x}" cy="{y - 0.6}" rx="{rx - 2.5}" ry="{ry - 2}" fill="{"#a8706a" if i == 1 else "#77787a"}" fill-opacity="0.6" filter="url(#ip-soft)"/>'
-            for i, (x, y, rx, ry) in enumerate(LEDS))
+            f'<ellipse {w} cx="{x}" cy="{y}" rx="{rx}" ry="{ry}" fill="#2a2b2d"/>'
+            for w, (x, y, rx, ry) in zip(windows, LEDS)) + '<g pointer-events="none">' + ''.join(
+            f'<ellipse cx="{x}" cy="{y - 0.6}" rx="{rx - 2.5}" ry="{ry - 2}" fill="#fff" fill-opacity="0.22" filter="url(#ip-soft)"/>'
+            for x, y, rx, ry in LEDS) + '</g>'
         pw = POWER
         pcx, pcy = pw['cx'], pw['cy']
         cx_, cy_, cr_ = pw['collar']
@@ -1138,7 +1149,7 @@ def build_h5550(fonts):
     <path d="M{f(mxl(141, 236))},{f(my(236))} C{f(mxl(144, 262))},{f(my(262))} {f(mxl(149, 286))},{f(my(286))} {f(mxl(156, 306))},{f(my(306))}" fill="none" stroke="#8c867a" stroke-opacity="0.6" stroke-width="1.6" stroke-linecap="round"/>
   </g>
 
-  <!-- black top piece: polished cap with LEDs, grille, HP plate, ambient light sensor and power button -->
+  <!-- black top piece: polished cap with LEDs, grille, HP plate, power indicator and power button -->
   <g id="cap" clip-path="url(#ip-body-clip)">
     <path d="{cap}" fill="url(#ip-cap)"/>
     <g clip-path="url(#ip-cap-clip)"><g transform="{CAP_T}">
@@ -1158,12 +1169,11 @@ def build_h5550(fonts):
       <!-- the letters are cut out of the disc; the h's stem and the p's tail break its edge, as on the device -->
       <circle r="{HP_R}" fill="#1c1c1c" mask="url(#ip-hp-mask)"/>
     </g>
-    <!-- ambient light sensor: a thin lighter rim round a dark window (owner, 2026-11-08) -->
-    <g id="light-sensor" transform="translate(0,{f(my(ay) - ay)})">
+    <g id="power-indicator" transform="translate(0,{f(my(ay) - ay)})">
       <circle cx="{ax}" cy="{ay}" r="{ar}" fill="#0d0d0e"/>
       <circle cx="{ax}" cy="{ay}" r="{ar - 1.2}" fill="none" stroke="#d8d2c6" stroke-opacity="0.9" stroke-width="2.2"/>
-      <circle cx="{ax}" cy="{ay}" r="{ar - 3.8}" fill="#121315"/>
-      <path d="M{ax - 4.5},{ay - 3} A6,6 0 0 1 {ax + 1},{ay - 6}" fill="none" stroke="#6c6f73" stroke-opacity="0.5" stroke-width="1"/>
+      <circle id="led-power" aria-label="Power and charge indicator" cx="{ax}" cy="{ay}" r="{ar - 3.8}" fill="#121315"/>
+      <path d="M{ax - 4.5},{ay - 3} A6,6 0 0 1 {ax + 1},{ay - 6}" fill="none" stroke="#6c6f73" stroke-opacity="0.5" stroke-width="1" pointer-events="none"/>
     </g>
     <!-- power button: chrome collar, dark ring, chrome dome with the power symbol -->
     <g transform="translate(0,{f(my(pcy) - pcy)})">
@@ -1439,12 +1449,15 @@ def build_hx4700(fonts):
 
         ipaq = word_path(IPAQ['text'], IPAQ['font'], CX + IPAQ['x0'], CX + IPAQ['x1'], IPAQ['base'], IPAQ['cap'])
 
+        # The User's Guide puts the blue Wi-Fi/Bluetooth light top left; the order of the other two is unverified.
+        names = (('wireless', 'Wi-Fi and Bluetooth'), ('notification', 'Notification'), ('power', 'Power and charge'))
         leds = ''.join(
             f'<g transform="translate({f(CX + x)},{y}) rotate({LED_ANG})">'
         f'<rect x="{f(-LED_W/2 - 3)}" y="{f(-LED_L/2 - 3)}" width="{LED_W + 6}" height="{LED_L + 6}" rx="5" fill="#050506"/>'
-        f'<rect x="{f(-LED_W/2)}" y="{f(-LED_L/2)}" width="{LED_W}" height="{LED_L}" rx="2" fill="url(#hx-led)"/>'
-        f'<circle cx="{f(LED_W/2 - 3)}" cy="{f(LED_L/2 - 2)}" r="4" fill="#fff" fill-opacity="0.8"/></g>'
-            for x, y in LEDS)
+        f'<rect id="led-{n}" aria-label="{label} indicator" x="{f(-LED_W/2)}" y="{f(-LED_L/2)}" width="{LED_W}" height="{LED_L}" rx="2" fill="#a1a2a4"/>'
+        f'<g pointer-events="none"><rect x="{f(-LED_W/2)}" y="{f(-LED_L/2)}" width="{LED_W}" height="{LED_L}" rx="2" fill="url(#hx-led)"/>'
+        f'<circle cx="{f(LED_W/2 - 3)}" cy="{f(LED_L/2 - 2)}" r="4" fill="#fff" fill-opacity="0.8"/></g></g>'
+            for (x, y), (n, label) in zip(LEDS, names))
         wx, wy = WIFI
         wifi = (f'<g transform="translate({f(CX + wx)},{wy})" fill="none" stroke="#f2f2f2" stroke-linecap="round">'
             f'<path d="M-15,-14 A20,20 0 0 0 -15,14 M15,-14 A20,20 0 0 1 15,14" stroke-width="6"/>'
@@ -1567,7 +1580,7 @@ def build_hx4700(fonts):
     <stop offset="1" stop-color="#fff" stop-opacity="0"/>
   </linearGradient>
   <linearGradient id="hx-led" x1="0" y1="0" x2="1" y2="0">
-    <stop offset="0" stop-color="#8a8b8d"/><stop offset="0.45" stop-color="#b9babc"/><stop offset="1" stop-color="#76777a"/>
+    <stop offset="0" stop-color="#000" stop-opacity="0.14"/><stop offset="0.45" stop-color="#fff" stop-opacity="0.18"/><stop offset="1" stop-color="#000" stop-opacity="0.26"/>
   </linearGradient>
   <linearGradient id="hx-slot" x1="0" y1="0" x2="1" y2="0">
     <stop offset="0" stop-color="#3a3134" stop-opacity="0"/><stop offset="0.35" stop-color="#3a3134" stop-opacity="0.75"/><stop offset="1" stop-color="#000" stop-opacity="0.95"/>

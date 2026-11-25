@@ -89,11 +89,8 @@
     <stop offset="0.45" stop-color="#fff" stop-opacity="0.012" />
     <stop offset="1" stop-color="#fff" stop-opacity="0" />
   </linearGradient>
-  <linearGradient id="ip-led-a" x1="0" y1="0" x2="1" y2="0">
-    <stop offset="0" stop-color="#3b1a05" /><stop offset="0.5" stop-color="#d9741c" /><stop offset="1" stop-color="#4a2006" />
-  </linearGradient>
-  <linearGradient id="ip-led-b" x1="0" y1="0" x2="1" y2="0">
-    <stop offset="0" stop-color="#8a6a35" /><stop offset="0.5" stop-color="#fff3c8" /><stop offset="1" stop-color="#9a7a40" />
+  <linearGradient id="ip-led-shade" x1="0" y1="0" x2="1" y2="0">
+    <stop offset="0" stop-color="#000" stop-opacity="0.45" /><stop offset="0.5" stop-color="#fff" stop-opacity="0.3" /><stop offset="1" stop-color="#000" stop-opacity="0.4" />
   </linearGradient>
   <radialGradient id="ip-dish" cx="0.5" cy="0.5" r="0.5" fx="0.6" fy="0.72">
     <stop offset="0.6" stop-color="#8f8a80" /><stop offset="0.85" stop-color="#d7d2c8" /><stop offset="1" stop-color="#f6f3ec" />
@@ -208,14 +205,18 @@
     </g>
   </g>
 
-  <!-- status LEDs, top left -->
+  <!-- status LEDs, top left: Bluetooth, then power/charge (HP QuickSpecs items 8 and 9) -->
   <g id="leds">
     <rect x="174" y="62" width="14" height="56" rx="7" fill="#7d786d" />
-    <rect x="176" y="64" width="10" height="52" rx="5" fill="url(#ip-led-a)" />
+    <rect id="led-bluetooth" aria-label="Bluetooth indicator" x="176" y="64" width="10" height="52" rx="5" fill="#b8b2a5" />
     <rect x="203" y="62" width="14" height="56" rx="7" fill="#7d786d" />
-    <rect x="205" y="64" width="10" height="52" rx="5" fill="url(#ip-led-b)" />
-    <rect x="178" y="70" width="2.5" height="36" rx="1.2" fill="#fff" fill-opacity="0.35" />
-    <rect x="207" y="70" width="2.5" height="36" rx="1.2" fill="#fff" fill-opacity="0.7" />
+    <rect id="led-power" aria-label="Power and charge indicator" x="205" y="64" width="10" height="52" rx="5" fill="#b8b2a5" />
+    <g pointer-events="none">
+      <rect x="176" y="64" width="10" height="52" rx="5" fill="url(#ip-led-shade)" />
+      <rect x="205" y="64" width="10" height="52" rx="5" fill="url(#ip-led-shade)" />
+      <rect x="178" y="70" width="2.5" height="36" rx="1.2" fill="#fff" fill-opacity="0.5" />
+      <rect x="207" y="70" width="2.5" height="36" rx="1.2" fill="#fff" fill-opacity="0.5" />
+    </g>
   </g>
 
   <!-- power button, top right -->
