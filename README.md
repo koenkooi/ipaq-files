@@ -14,6 +14,7 @@ Vector front views of HP and Compaq iPAQ and Sharp Zaurus handhelds, used as fra
 | Zaurus SL-6000 (Tosa) | [sl-6000/sl-6000-framed-template.svg](sl-6000/sl-6000-framed-template.svg) | <img src="sl-6000/preview.png" width="183" alt="SL-6000 closed"> <img src="sl-6000/preview-open.png" width="183" alt="SL-6000 open"> | x=137.5 y=168 525 x 700 | 480x640 |
 | Zaurus SL-C700, laptop | [sl-c700/sl-c700-laptop.svg](sl-c700/sl-c700-laptop.svg) | ![C700 laptop](sl-c700/preview.png) | x=255 y=92 700 x 525 | 640x480 |
 | Zaurus SL-C700, folded | [sl-c700/sl-c700-pda.svg](sl-c700/sl-c700-pda.svg) | ![C700 folded](sl-c700/preview-pda.png) | x=165 y=195 525 x 700 | 480x640 |
+| iPAQ h2200 with the HP Photosmart Mobile Camera | [hp-photosmart-camera/on-h2200.svg](hp-photosmart-camera/on-h2200.svg) | ![h2200 with camera](hp-photosmart-camera/preview-on-h2200.png) | x=137.5 y=168 525 x 700 | 240x320 |
 
 The h3900 and h5550 share a body outline (same width, same expansion sleeves). The 240x320 screens use 2.1875 units per pixel; the VGA screens use 1.09375.
 
@@ -94,6 +95,27 @@ These are measured front-view approximations, not CAD or traced photographs. Ref
 - **h5550:** the same expansion-sleeve body envelope is used, despite the photograph suggesting a wider body. The envelope moves down 41 photo pixels; outside the screen band, vertical spacing scales by about 0.948, while round controls retain their size. The body is approximately 1 mm shorter than the h3900 (published 133 versus 134 mm). The photograph's warm lamp cast is neutralised to silver-grey; the power button is a chrome dome with a power symbol, and the smaller adjacent window is the ambient-light sensor. The hp letters cut through the badge disc.
 - **hx4700:** the rectified glass is 1776×2368 photo pixels, mapped at 525/1776 SVG units per pixel. Face-plane features are recentered by 22 photo pixels to remove camera parallax. The body ratio is about 1.71 versus the published 131×77 mm ratio of 1.70. The asymmetric cap, chamfered lower corners and grain are intentional; unreadable small labels are represented by faint marks rather than invented words.
 
+## The camera
+
+`hp-photosmart-camera/` contains front, away-facing, elevated and animated swivel views of the 1.3 MP HP Photosmart Mobile Camera, plus `on-h2200.svg` and `on-h2200-swivel.svg`. The composites extend the viewBox upwards without moving the screen. The SD plug is scaled to 24 mm against the h2200's 71 mm body width.
+
+The head, lens barrel and focus marks rotate together around the horizontal body-to-head axis; the body and plug stay fixed. The 10-second SMIL loop needs no script. Rounded shell corners, inset bevels, the swivel seam and barrel seating replace the sharp box-like transitions. Surfaces, logos and lettering remain simplified; compare the front and elevated views rather than treating them as a CAD reconstruction.
+
+Camera placement follows each device's SD slot, not its CompactFlash slot. Slot edges are verified; exact seating coordinates and swivel clearances are estimated from photographs and diagrams.
+
+| Device | SD insertion edge | Reference |
+|---|---|---|
+| h2200 | top | owner's photograph with the camera attached |
+| h3900 | top | [HP QuickSpecs, item 15](https://www.manualslib.com/manual/661584/Hp-Compaq-Ipaq-H3900-Series.html) |
+| h5550 | top, left of centre | [HP QuickSpecs, item 18](https://www.manualslib.com/manual/661587/Hp-Ipaq-H5500-Series.html?page=1) |
+| hx4700 | top | [HP User's Guide, printed 11-2](https://www.manualslib.com/manual/72007/Hp-Ipaq-Hx4700.html?page=144) |
+| SL-5500 | left long edge, around mid-body | [Sharp Start-up Guide, printed 20 and 63](https://archive.org/download/ZaurusSL5500Software/SL5500SUG_Final.pdf) |
+| SL-5600 | left long edge, around mid-screen | [Sharp SL-5600 brochure, expansion-slot callout 1](https://web.archive.org/web/20050128181429/http://www.sharpusa.com/files/hpc_dow_SL_5600BRO.pdf) |
+| SL-6000 | top, beside CompactFlash | [Sharp Operation Manual, printed 26 and 76](https://www.manualslib.com/manual/807955/Sharp-Sl-6000l.html?page=28) |
+| C700 | hinge edge: left when folded, rear when used as a laptop | [HPC.ru review and edge photograph](https://hpc.ru/lib/arts/1927/) |
+
+The laptop C700's display and hinge largely obscure a camera inserted at the rear edge; it is not relocated to a visible but incorrect side. These are physical-placement illustrations, not claims that the Photosmart SDIO camera has working drivers on every device or operating system.
+
 ## Credits
 
 | What | Source | Licence |
@@ -104,7 +126,8 @@ These are measured front-view approximations, not CAD or traced photographs. Ref
 | C700 reference photograph (geometry measured, nothing traced) | ["Sharp Zaurus SL-C700.jpg"](https://commons.wikimedia.org/wiki/File:Sharp_Zaurus_SL-C700.jpg) by ポリンキ, Wikimedia Commons | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) |
 | C700 reference photographs | [HPC.ru SL-C700 review](https://hpc.ru/lib/arts/1927/) by Vladimir Speransky | reference only, not distributed |
 | SL-6000 reference photographs | [Sharp product catalogue](https://jp.sharp/products/sl6000/) and [Roberto Innocenti's photographs](https://www.flickr.com/photos/12161791@N00/792844922/) | reference only, not distributed |
-| h2200 and its keyboard, h3900, h5550, Collie and C700 keyboard references | the author's own devices and photographs | not distributed |
+| Photosmart swivel reference (geometry studied, nothing traced) | ["HP PhotoSmart SDIO Kamera.jpg"](https://commons.wikimedia.org/wiki/File:HP_PhotoSmart_SDIO_Kamera.jpg) by Afrank99, Wikimedia Commons | [CC BY-SA 2.0](https://creativecommons.org/licenses/by-sa/2.0/) |
+| h2200, its keyboard and camera, h3900, h5550, Collie and C700 keyboard references | the author's own devices and photographs | not distributed |
 | Glyph outlines: Mukta | Ek Type | SIL OFL 1.1 |
 | Glyph outlines: Open Sans | Steve Matteson | SIL OFL 1.1 |
 | Glyph outlines: Noto Sans CJK JP | Google | SIL OFL 1.1 |
