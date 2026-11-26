@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SPDX-FileCopyrightText: 2026 Koen Kooi -->
+<!-- SPDX-License-Identifier: CC-BY-SA-4.0 -->
+<svg xmlns="http://www.w3.org/2000/svg" width="366" height="647.54" viewBox="0 0 1040 1840" id="navman-gps-sleeve" data-accessory="navman-gps-sleeve" data-requires="interface:ipaq-expansion-sleeve" data-provides="slot:cf" data-units-per-mm="10" role="img" aria-labelledby="title description">
+<title id="title">Navman SE GPS 3450 iPAQ GPS V2.0 expansion sleeve</title>
+<desc id="description">Front compositing view, redrawn as vectors from the owner’s photographs on a centimetre cutting grid. Legends are outlines. Sleeve openings show what the empty part shows: the GPS sleeve’s inner back shell, or nothing through the open-framed keyboard sleeve. Dimensions outside the standard 42.8 mm CF width are photo estimates.</desc>
+<defs>
+<linearGradient id="metal" x1="0" y1="0" x2="1" y2=".24">
+ <stop stop-color="#777e82"/><stop offset=".045" stop-color="#e0e1dc"/>
+ <stop offset=".12" stop-color="#b3b7b7"/><stop offset=".48" stop-color="#d0d1cb"/>
+ <stop offset=".83" stop-color="#b8bdbe"/><stop offset=".97" stop-color="#f0f1eb"/>
+ <stop offset="1" stop-color="#606b72"/>
+</linearGradient>
+<linearGradient id="silver" x1="0" y1="0" x2=".95" y2=".36">
+ <stop stop-color="#7d8b94"/><stop offset=".12" stop-color="#d8dfe0"/>
+ <stop offset=".32" stop-color="#c1c9ca"/><stop offset=".58" stop-color="#b9c3c6"/>
+ <stop offset=".82" stop-color="#e1e6e5"/><stop offset="1" stop-color="#8798a4"/>
+</linearGradient>
+<linearGradient id="silver-face" x1=".2" y1="0" x2=".8" y2="1">
+ <stop stop-color="#d3d9d7"/><stop offset=".4" stop-color="#b8c2c3"/>
+ <stop offset="1" stop-color="#9fadb4"/>
+</linearGradient>
+<linearGradient id="rail-shine">
+ <stop stop-color="#fff" stop-opacity=".04"/><stop offset=".28" stop-color="#fff" stop-opacity=".33"/>
+ <stop offset=".61" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".29"/>
+</linearGradient>
+<linearGradient id="dark" x1="0" y1="0" x2=".85" y2=".6">
+ <stop stop-color="#444348"/><stop offset=".3" stop-color="#26252b"/>
+ <stop offset=".8" stop-color="#18191e"/><stop offset="1" stop-color="#373a3f"/>
+</linearGradient>
+<linearGradient id="navy">
+ <stop stop-color="#151a20"/><stop offset=".21" stop-color="#4d5966"/>
+ <stop offset=".55" stop-color="#343e4a"/><stop offset=".85" stop-color="#273544"/>
+ <stop offset="1" stop-color="#121a24"/>
+</linearGradient>
+<linearGradient id="keycap-shade" x1=".15" y1="0" x2=".8" y2="1">
+ <stop stop-color="#f1f3ea"/><stop offset=".36" stop-color="#d4dcd7"/>
+ <stop offset=".72" stop-color="#bbc8c9"/><stop offset="1" stop-color="#7b919e"/>
+</linearGradient>
+<radialGradient id="chrome" cx=".35" cy=".2" r=".8">
+ <stop stop-color="#fff"/><stop offset=".23" stop-color="#c1cfd1"/>
+ <stop offset=".39" stop-color="#5a737f"/><stop offset=".53" stop-color="#f3f4e3"/>
+ <stop offset=".65" stop-color="#dae5e6"/><stop offset=".83" stop-color="#33454f"/>
+ <stop offset="1" stop-color="#879ba4"/>
+</radialGradient>
+<linearGradient id="blue-label" x1="0" y1="0" x2="1" y2="1">
+ <stop stop-color="#143e68"/><stop offset=".38" stop-color="#286a9b"/>
+ <stop offset=".7" stop-color="#184d83"/><stop offset="1" stop-color="#347aac"/>
+</linearGradient>
+<linearGradient id="rainbow">
+ <stop stop-color="#f02441"/><stop offset=".25" stop-color="#f1753b"/>
+ <stop offset=".45" stop-color="#f4e66a"/><stop offset=".66" stop-color="#51b594"/>
+ <stop offset=".82" stop-color="#228baa"/><stop offset="1" stop-color="#244b90"/>
+</linearGradient>
+</defs>
+<g id="backplate">
+<path d="M140 421 Q520 393 900 421 L898 1670 Q522 1780 142 1670 Z" fill="url(#dark)" stroke="#121519" stroke-width="2"/>
+<path d="M170 470 Q520 446 870 470 V1600 Q520 1690 170 1600 Z" fill="#1c1e22" stroke="#34373c" stroke-width="2" opacity=".9"/>
+<path d="M200 500 V1560" fill="none" stroke="#4a4e55" stroke-width="3" opacity=".45"/>
+</g>
+<path d="M407 421 V111 Q407 31 451 27 Q520 5 588 27 Q633 31 633 111 V421 Z" fill="#23272d" id="antenna" stroke="#141a20" stroke-width="3"/>
+<path d="M414 393 V114 Q414 39 454 35 Q518 13 582 35 Q625 40 625 114 V393 Z" fill="url(#rail-shine)" />
+<path d="M408 357 Q517 330 632 357 M410 363 Q520 338 630 363" fill="none" stroke="#0e151c" stroke-width="3"/>
+<path d="M140 414 Q520 390 900 414 V466 Q520 441 140 466 Z" fill="url(#dark)" id="carrier-top" stroke="#161c22" stroke-width="2"/>
+<path d="M145 1618 H895 V1693 Q847 1749 764 1765 H276 Q193 1749 145 1693 Z" fill="url(#dark)" id="carrier-bottom" stroke="#121a21" stroke-width="3"/>
+<path d="M260 1640 H780 V1701 H260 Z" fill="#8d9189" id="connector-frame"/>
+<rect x="268" y="1646" width="504" height="47" rx="4" fill="url(#metal)" id="connector" stroke="#d9d6c6" stroke-width="2"/>
+<rect x="278" y="1652" width="2" height="33" rx="0.5" fill="#b4ac8d" />
+<rect x="287.8" y="1652" width="2" height="33" rx="0.5" fill="#b4ac8d" />
+<rect x="297.6" y="1652" width="2" height="33" rx="0.5" fill="#b4ac8d" />
+<rect x="307.4" y="1652" width="2" height="33" rx="0.5" fill="#b4ac8d" />
+<rect x="317.2" y="1652" width="2" height="33" rx="0.5" fill="#b4ac8d" />
+<rect x="327" y="1652" width="2" height="33" rx="0.5" fill="#b4ac8d" />
+<rect x="336.8" y="1652" width="2" height="33" rx="0.5" fill="#b4ac8d" />
+<rect x="346.6" y="1652" width="2" height="33" rx="0.5" fill="#b4ac8d" />
+<rect x="356.4" y="1652" width="2" height="33" rx="0.5" fill="#b4ac8d" />
+<rect x="366.2" y="1652" width="2" height="33" rx="0.5" fill="#b4ac8d" />
+<rect x="376" y="1652" width="2" height="33" rx="0.5" fill="#b4ac8d" />
+<rect x="385.8" y="1652" width="2" height="33" rx="0.5" fill="#b4ac8d" />
+<rect x="395.6" y="1652" width="2" height="33" rx="0.5" fill="#b4ac8d" />
+<rect x="405.4" y="1652" width="2" height="33" rx="0.5" fill="#b4ac8d" />
+<rect x="415.2" y="1652" width="2" height="33" rx="0.5" fill="#b4ac8d" />
+<rect x="425" y="1652" width="2" height="33" rx="0.5" fill="#b4ac8d" />
+<rect x="434.8" y="1652" width="2" height="33" rx="0.5" fill="#b4ac8d" />
+<rect x="444.6" y="1652" width="2" height="33" rx="0.5" fill="#b4ac8d" />
+<rect x="454.4" y="1652" width="2" height="33" rx="0.5" fill="#b4ac8d" />
+<rect x="464.2" y="1652" width="2" height="33" rx="0.5" fill="#b4ac8d" />
+<rect x="474" y="1652" width="2" height="33" rx="0.5" fill="#b4ac8d" />
+<rect x="483.8" y="1652" width="2" height="33" rx="0.5" fill="#b4ac8d" />
+<rect x="493.6" y="1652" width="2" height="33" rx="0.5" fill="#b4ac8d" />
+<rect x="503.4" y="1652" width="2" height="33" rx="0.5" fill="#b4ac8d" />
+<rect x="513.2" y="1652" width="2" height="33" rx="0.5" fill="#b4ac8d" />
+<rect x="523" y="1652" width="2" height="33" rx="0.5" fill="#b4ac8d" />
+<rect x="532.8" y="1652" width="2" height="33" rx="0.5" fill="#b4ac8d" />
+<rect x="542.6" y="1652" width="2" height="33" rx="0.5" fill="#b4ac8d" />
+<rect x="552.4" y="1652" width="2" height="33" rx="0.5" fill="#b4ac8d" />
+<rect x="562.2" y="1652" width="2" height="33" rx="0.5" fill="#b4ac8d" />
+<rect x="572" y="1652" width="2" height="33" rx="0.5" fill="#b4ac8d" />
+<rect x="581.8" y="1652" width="2" height="33" rx="0.5" fill="#b4ac8d" />
+<rect x="591.6" y="1652" width="2" height="33" rx="0.5" fill="#b4ac8d" />
+<rect x="601.4" y="1652" width="2" height="33" rx="0.5" fill="#b4ac8d" />
+<rect x="611.2" y="1652" width="2" height="33" rx="0.5" fill="#b4ac8d" />
+<rect x="621" y="1652" width="2" height="33" rx="0.5" fill="#b4ac8d" />
+<rect x="630.8" y="1652" width="2" height="33" rx="0.5" fill="#b4ac8d" />
+<rect x="640.6" y="1652" width="2" height="33" rx="0.5" fill="#b4ac8d" />
+<rect x="650.4" y="1652" width="2" height="33" rx="0.5" fill="#b4ac8d" />
+<rect x="660.2" y="1652" width="2" height="33" rx="0.5" fill="#b4ac8d" />
+<rect x="670" y="1652" width="2" height="33" rx="0.5" fill="#b4ac8d" />
+<rect x="679.8" y="1652" width="2" height="33" rx="0.5" fill="#b4ac8d" />
+<rect x="689.6" y="1652" width="2" height="33" rx="0.5" fill="#b4ac8d" />
+<rect x="699.4" y="1652" width="2" height="33" rx="0.5" fill="#b4ac8d" />
+<rect x="709.2" y="1652" width="2" height="33" rx="0.5" fill="#b4ac8d" />
+<rect x="719" y="1652" width="2" height="33" rx="0.5" fill="#b4ac8d" />
+<rect x="728.8" y="1652" width="2" height="33" rx="0.5" fill="#b4ac8d" />
+<rect x="738.6" y="1652" width="2" height="33" rx="0.5" fill="#b4ac8d" />
+<rect x="748.4" y="1652" width="2" height="33" rx="0.5" fill="#b4ac8d" />
+<rect x="758.2" y="1652" width="2" height="33" rx="0.5" fill="#b4ac8d" />
+<path d="M211 1702 H829 V1741 Q679 1816 520 1816 Q361 1816 211 1741 Z" fill="#232a32" id="latch" stroke="#151b22" stroke-width="2"/>
+<rect x="467" y="1761" width="106" height="43" rx="4" fill="#171e25" />
+<path d="M479 1766 V1798" fill="none" stroke="#485059" stroke-width="3"/>
+<path d="M493 1766 V1798" fill="none" stroke="#485059" stroke-width="3"/>
+<path d="M507 1766 V1798" fill="none" stroke="#485059" stroke-width="3"/>
+<path d="M521 1766 V1798" fill="none" stroke="#485059" stroke-width="3"/>
+<path d="M535 1766 V1798" fill="none" stroke="#485059" stroke-width="3"/>
+<path d="M549 1766 V1798" fill="none" stroke="#485059" stroke-width="3"/>
+<path d="M563 1766 V1798" fill="none" stroke="#485059" stroke-width="3"/>
+<g id="rail-left">
+<path d="M48 417 Q82 391 157 391 L151 1740 Q140 1765 119 1756 Q49 1727 45 1691 Z" fill="url(#navy)" stroke="#1d2730" stroke-width="3"/>
+<path d="M150 400 L142 1739" fill="none" stroke="#7a8790" stroke-width="2" opacity=".8"/>
+<path d="M57 438 L55 1668 Q58 1719 105 1737" fill="none" stroke="#a7b0b4" stroke-width="3" opacity=".25"/>
+<rect x="151" y="486" width="12" height="1130" rx="3" fill="#111c26" />
+<path d="M159 496 V1605" fill="none" stroke="#526877" stroke-width="3"/>
+</g>
+<g id="rail-right" transform="translate(1040 0) scale(-1 1)">
+<path d="M48 417 Q82 391 157 391 L151 1740 Q140 1765 119 1756 Q49 1727 45 1691 Z" fill="url(#navy)" stroke="#1d2730" stroke-width="3"/>
+<path d="M150 400 L142 1739" fill="none" stroke="#7a8790" stroke-width="2" opacity=".8"/>
+<path d="M57 438 L55 1668 Q58 1719 105 1737" fill="none" stroke="#a7b0b4" stroke-width="3" opacity=".25"/>
+<rect x="151" y="486" width="12" height="1130" rx="3" fill="#111c26" />
+<path d="M159 496 V1605" fill="none" stroke="#526877" stroke-width="3"/>
+</g>
+<g transform="translate(955 939) rotate(-90)">
+<path d="M-119.12 0H-126.74L-158.14 -36.09H-158.46Q-157.83 -29.74 -157.83 -24.44V0H-164V-43H-156.45L-125.13 -7.06H-124.82Q-124.9 -7.85 -125.17 -12.16Q-125.45 -16.47 -125.37 -18.32V-43H-119.12ZM-67.2 0 -74.36 -13.68H-97.39L-104.46 0H-111.22L-88.5 -43.18H-82.88L-60.29 0ZM-76.44 -18.18 -83.12 -31.5Q-84.42 -34.03 -85.79 -37.71Q-86.66 -34.88 -88.27 -31.5L-95.03 -18.18ZM-19.57 -43H-12.38L-33.09 0H-39.69L-60.29 -43H-53.21L-40.01 -15.18Q-37.73 -10.38 -36.39 -5.85Q-34.98 -10.62 -32.7 -15.35ZM20.95 0 1.45 -38.12H1.14Q1.69 -33.59 1.69 -27.35V0H-4.48V-43H5.58L23.78 -7.53H24.09L42.44 -43H52.43V0H45.75V-27.71Q45.75 -32.47 46.3 -38.06H45.98L26.33 0ZM104.3 0 97.15 -13.68H74.12L67.05 0H60.29L83 -43.18H88.62L111.22 0ZM95.07 -18.18 88.39 -31.5Q87.09 -34.03 85.71 -37.71Q84.85 -34.88 83.24 -31.5L76.48 -18.18ZM164 0H156.38L124.97 -36.09H124.66Q125.29 -29.74 125.29 -24.44V0H119.12V-43H126.66L157.99 -7.06H158.3Q158.22 -7.85 157.95 -12.16Q157.67 -16.47 157.75 -18.32V-43H164Z" fill="#dedfd5" />
+<path d="M241.9 -8.25Q241.9 -4.16 237.43 -1.87Q232.95 0.42 225.28 0.42Q216.97 0.42 212.5 -1V-4.47Q215.38 -3.67 218.76 -3.2Q222.15 -2.74 225.47 -2.74Q230.91 -2.74 233.66 -4.1Q236.4 -5.47 236.4 -7.91Q236.4 -9.52 235.43 -10.55Q234.45 -11.58 232.17 -12.45Q229.88 -13.32 225.22 -14.42Q218.7 -15.97 215.9 -18.09Q213.11 -20.21 213.11 -23.62Q213.11 -27.2 217.17 -29.32Q221.22 -31.45 227.9 -31.45Q234.87 -31.45 240.72 -29.75L239.02 -26.61Q233.24 -28.22 227.78 -28.22Q223.46 -28.22 221.03 -26.99Q218.6 -25.76 218.6 -23.58Q218.6 -21.97 219.5 -20.94Q220.39 -19.91 222.52 -19.05Q224.64 -18.19 229.02 -17.15Q236.37 -15.42 239.14 -13.42Q241.9 -11.43 241.9 -8.25ZM277.5 0H251.46V-31H277.5V-27.8H256.89V-17.81H276.25V-14.63H256.89V-3.22H277.5Z" fill="#dedfd5" />
+</g>
+<rect x="35" y="1015" width="13" height="428" rx="5" fill="#101820" id="cf-slot" data-slot="slot:cf" data-geometry="estimated long-edge projection" stroke="#5d6871" stroke-width="2"/>
+<path d="M39 1024 V1431" fill="none" stroke="#050b10" stroke-width="4"/>
+<rect x="31" y="1455" width="17" height="31" rx="4" fill="#35424c" id="cf-eject"/>
+</svg>

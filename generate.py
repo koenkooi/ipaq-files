@@ -3485,7 +3485,7 @@ def build_camera(fonts=None, *, view="front"):
 -->'''
 
     def svgDoc(viewBox, w, h, title, desc, body):
-        return (f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="{value(viewBox)}" width="{value(w)}" height="{value(h)}" role="img" aria-labelledby="t d">
+        return (f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="{value(viewBox)}" width="{value(w)}" height="{value(h)}" data-accessory="photosmart-camera" data-requires="slot:sd" data-provides="" role="img" aria-labelledby="t d">
 <title id="t">{value(title)}</title>
 <desc id="d">{value(desc)}</desc>
 {value(HEADER)}
@@ -3592,6 +3592,482 @@ CAMERA_POSES = {
 }
 
 
+class AccessoryDrawing:
+    """Photo-measured accessory artwork; coordinates are ten units per mm."""
+
+    def __init__(self, fonts, identity, title, width, height, requires, provides=""):
+        self.fonts = fonts
+        self.parts = [
+            '<?xml version="1.0" encoding="UTF-8"?>',
+            '<!-- SPDX-FileCopyrightText: 2026 Koen Kooi -->',
+            '<!-- SPDX-License-Identifier: CC-BY-SA-4.0 -->',
+            f'<svg xmlns="{SVG_NS}" width="366" height="{f(366 * height / width)}" '
+            f'viewBox="0 0 {width} {height}" id="{identity}" '
+            f'data-accessory="{identity}" data-requires="{requires}" '
+            f'data-provides="{provides}" data-units-per-mm="10" '
+            'role="img" aria-labelledby="title description">',
+            f'<title id="title">{escape(title)}</title>',
+            '<desc id="description">Front compositing view, redrawn as vectors from the '
+            'owner’s photographs on a centimetre cutting grid. '
+            'Legends are outlines. Sleeve openings show what the empty part shows: '
+            'the GPS sleeve\u2019s inner back shell, or nothing through the open-framed '
+            'keyboard sleeve. '
+            'Dimensions outside the standard 42.8 mm CF width are photo estimates.</desc>',
+            '''<defs>
+<linearGradient id="metal" x1="0" y1="0" x2="1" y2=".24">
+ <stop stop-color="#777e82"/><stop offset=".045" stop-color="#e0e1dc"/>
+ <stop offset=".12" stop-color="#b3b7b7"/><stop offset=".48" stop-color="#d0d1cb"/>
+ <stop offset=".83" stop-color="#b8bdbe"/><stop offset=".97" stop-color="#f0f1eb"/>
+ <stop offset="1" stop-color="#606b72"/>
+</linearGradient>
+<linearGradient id="silver" x1="0" y1="0" x2=".95" y2=".36">
+ <stop stop-color="#7d8b94"/><stop offset=".12" stop-color="#d8dfe0"/>
+ <stop offset=".32" stop-color="#c1c9ca"/><stop offset=".58" stop-color="#b9c3c6"/>
+ <stop offset=".82" stop-color="#e1e6e5"/><stop offset="1" stop-color="#8798a4"/>
+</linearGradient>
+<linearGradient id="silver-face" x1=".2" y1="0" x2=".8" y2="1">
+ <stop stop-color="#d3d9d7"/><stop offset=".4" stop-color="#b8c2c3"/>
+ <stop offset="1" stop-color="#9fadb4"/>
+</linearGradient>
+<linearGradient id="rail-shine">
+ <stop stop-color="#fff" stop-opacity=".04"/><stop offset=".28" stop-color="#fff" stop-opacity=".33"/>
+ <stop offset=".61" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".29"/>
+</linearGradient>
+<linearGradient id="dark" x1="0" y1="0" x2=".85" y2=".6">
+ <stop stop-color="#444348"/><stop offset=".3" stop-color="#26252b"/>
+ <stop offset=".8" stop-color="#18191e"/><stop offset="1" stop-color="#373a3f"/>
+</linearGradient>
+<linearGradient id="navy">
+ <stop stop-color="#151a20"/><stop offset=".21" stop-color="#4d5966"/>
+ <stop offset=".55" stop-color="#343e4a"/><stop offset=".85" stop-color="#273544"/>
+ <stop offset="1" stop-color="#121a24"/>
+</linearGradient>
+<linearGradient id="keycap-shade" x1=".15" y1="0" x2=".8" y2="1">
+ <stop stop-color="#f1f3ea"/><stop offset=".36" stop-color="#d4dcd7"/>
+ <stop offset=".72" stop-color="#bbc8c9"/><stop offset="1" stop-color="#7b919e"/>
+</linearGradient>
+<radialGradient id="chrome" cx=".35" cy=".2" r=".8">
+ <stop stop-color="#fff"/><stop offset=".23" stop-color="#c1cfd1"/>
+ <stop offset=".39" stop-color="#5a737f"/><stop offset=".53" stop-color="#f3f4e3"/>
+ <stop offset=".65" stop-color="#dae5e6"/><stop offset=".83" stop-color="#33454f"/>
+ <stop offset="1" stop-color="#879ba4"/>
+</radialGradient>
+<linearGradient id="blue-label" x1="0" y1="0" x2="1" y2="1">
+ <stop stop-color="#143e68"/><stop offset=".38" stop-color="#286a9b"/>
+ <stop offset=".7" stop-color="#184d83"/><stop offset="1" stop-color="#347aac"/>
+</linearGradient>
+<linearGradient id="rainbow">
+ <stop stop-color="#f02441"/><stop offset=".25" stop-color="#f1753b"/>
+ <stop offset=".45" stop-color="#f4e66a"/><stop offset=".66" stop-color="#51b594"/>
+ <stop offset=".82" stop-color="#228baa"/><stop offset="1" stop-color="#244b90"/>
+</linearGradient>
+</defs>''',
+        ]
+
+    def path(self, d, fill, extra=""):
+        self.parts.append(f'<path d="{d}" fill="{fill}" {extra}/>')
+
+    def rect(self, x, y, width, height, fill, radius=0, extra=""):
+        self.parts.append(f'<rect x="{f(x)}" y="{f(y)}" width="{f(width)}" '
+                          f'height="{f(height)}" rx="{f(radius)}" fill="{fill}" {extra}/>')
+
+    def ellipse(self, x, y, rx, ry, fill, extra=""):
+        self.parts.append(f'<ellipse cx="{f(x)}" cy="{f(y)}" rx="{f(rx)}" '
+                          f'ry="{f(ry)}" fill="{fill}" {extra}/>')
+
+    def word(self, text, x, baseline, cap, width=None, fill="#eeeae1",
+             font="OpenSans_Regular.ttf", anchor="middle", extra=""):
+        d = self.fonts.word_path(text, font, cap, x, baseline, anchor, width)
+        self.path(d, fill, extra)
+
+    def finish(self):
+        return "\n".join((*self.parts, "</svg>", ""))
+
+
+def cf_shell(drawing, top, bottom):
+    a = drawing
+    a.rect(16, top, 428, bottom - top, "#20252a", 5, 'id="cf-body"')
+    a.path(f"M23 {top} H437 V{bottom-7} H23 Z", "url(#metal)",
+           'stroke="#5c6468" stroke-width="1.5"')
+    a.path(f"M20 {top+10} H28 V{bottom-10} H20 Z "
+           f"M432 {top+10} H440 V{bottom-10} H432 Z", "#616c71")
+    for x in (16, 432):
+        a.rect(x, top + 5, 12, 96, "#23262c", 1)
+        a.rect(x, top + 155, 12, bottom - top - 160, "#25292d", 1)
+        a.rect(x, top + 103, 12, 49, "url(#metal)", 1)
+    a.rect(23, bottom - 6, 414, 6, "#192027", 1, 'id="connector"')
+    for column in range(25):
+        x = 77.6 + column * 12.7
+        for y in (bottom - 5, bottom - 2.5):
+            a.rect(x, y, 3.2, 1.8, "#727c7e", .6)
+    a.path(f"M30 {bottom-10} H430", "none",
+           'stroke="#f1f0df" stroke-width="1.1" opacity=".8"')
+
+
+def build_buffalo_wli_cf_s11g(fonts):
+    """42.8 mm CF width; approximately 60 mm overall in the rectified grid."""
+    a = AccessoryDrawing(fonts, "buffalo-wli-cf-s11g",
+                         "Buffalo AirStation WLI-CF-S11G CompactFlash Wi-Fi card",
+                         460, 638, "slot:cf")
+    cf_shell(a, 222, 622)
+    a.parts.append('<defs><mask id="antenna-cutout" maskUnits="userSpaceOnUse" '
+                   'x="0" y="0" width="460" height="638">'
+                   '<rect width="460" height="638" fill="white"/>'
+                   '<rect x="36" y="73" width="33" height="28" rx="4" fill="black"/>'
+                   '</mask></defs><g mask="url(#antenna-cutout)">')
+    a.path("M16 222 V45 Q16 22 40 20 Q232 13 420 20 Q444 22 444 45 V222 Z",
+           "#28272c", 'id="antenna" stroke="#111319" stroke-width="3"')
+    a.path("M21 135 H439 V219 H21 Z", "url(#dark)")
+    a.path("M23 127 V47 Q23 28 43 27 Q235 19 416 27 Q438 28 438 49 V128 Z",
+           "url(#rail-shine)")
+    a.path("M23 133 H437 M27 47 Q230 39 432 47", "none",
+           'stroke="#c1bba8" stroke-width="1.5" opacity=".6"')
+    a.rect(31, 67, 43, 42, "#0b1014", 8,
+           'id="antenna-recess" stroke="#706d64" stroke-width="2"')
+    a.parts.append('</g>')
+    for identity, x in (("power", 302), ("active", 338)):
+        a.rect(x, 25, 13, 30, "#11191a", 4,
+               f'stroke="#636865" stroke-width="1.4"')
+        a.rect(x + 3, 29, 7, 20, "#6b7862", 2, f'id="led-{identity}"')
+        a.path(f"M{x+4} 31 V39", "none", 'stroke="#c5c6ae" stroke-width="2" opacity=".6"')
+    a.word("POWER", 289, 77, 12, 71)
+    a.word("ACTIVE", 392, 77, 12, 69)
+    a.word("BUFFALO", 338, 118, 27, 180, font="OpenSans_BoldItalic.ttf")
+    a.rect(31, 227, 398, 381, "#18181b", 9,
+           'id="label" stroke="#d3c9b0" stroke-width="2"')
+    a.path("M40 232 H421 V600 H40 Z", "url(#rail-shine)", 'opacity=".14"')
+    a.word("BUFFALO", 50, 269, 26, 150, "#e22128",
+           "OpenSans_BoldItalic.ttf", "start")
+    a.word("AirStation", 230, 380, 48, 362, "#f2efe8", "OpenSans_Bold.ttf")
+    a.word("11Mbps CF Type Card", 414, 416, 16, 218, "#e6e2d9",
+           "OpenSans_BoldItalic.ttf", "end")
+    a.word("WLI-CF-S11G", 414, 449, 24, 218, "#e6e2d9",
+           "OpenSans_Bold.ttf", "end")
+    a.rect(49, 477, 119, 49, "#e5e2d8", 17)
+    a.rect(109, 481, 53, 41, "#1c1c21", 14)
+    a.word("Wi", 78, 515, 30, 43, "#19191c", "OpenSans_Bold.ttf")
+    a.word("Fi", 135, 515, 30, 32, "#ebe8de", "OpenSans_Bold.ttf")
+    a.word("™", 174, 483, 7, 10)
+    a.word("The Standard for", 51, 550, 10, 124, anchor="start")
+    a.word("Wireless Fidelity.", 51, 565, 10, 124, anchor="start")
+    a.word("Insert", 387, 582, 14, 52)
+    a.path("M375 592 H399 L387 603 Z", "#f0eee3")
+    return a.finish()
+
+
+def build_asus_wl110(fonts):
+    """WL-110 is legible in the owner’s photographs; approximately 64 mm including its antenna."""
+    a = AccessoryDrawing(fonts, "asus-wl110",
+                         "ASUS SpaceLink WL-110 Wireless LAN CF Card",
+                         460, 674, "slot:cf")
+    cf_shell(a, 254, 658)
+    a.path("M16 255 V49 Q16 22 42 21 Q233 10 419 21 Q444 23 444 49 V255 Z",
+           "#25232b", 'id="antenna" stroke="#12151b" stroke-width="3"')
+    a.path("M25 244 V48 Q25 31 44 31 Q231 21 416 31 Q434 32 435 49 V244 Z",
+           "url(#rail-shine)", 'stroke="#5f5a60" stroke-width="1"')
+    a.path("M35 116 C91 62 171 53 162 82 C151 65 88 77 35 116 Z "
+           "M35 137 C65 153 94 146 129 130 C91 160 55 175 35 163 Z", "#cccfd0")
+    a.word("AIR", 113, 120, 19, 51, "#dce0df", "OpenSans_Bold.ttf")
+    a.parts.append('<g transform="translate(263 71)" fill="#d4d7d6">')
+    a.path("M0 32 L20 0 H46 L40 9 H25 L10 32 Z "
+           "M16 17 H37 L31 32 H22 L25 25 H11 Z "
+           "M46 0 H78 L75 9 H46 Z M43 12 H70 Q77 12 74 20 L71 27 "
+           "Q69 32 62 32 H34 L38 23 H62 L63 20 H48 Q40 20 43 12 Z "
+           "M83 0 H92 L89 9 H80 Z M78 12 H87 L83 24 H98 L102 12 H111 "
+           "L106 27 Q104 32 96 32 H79 Q70 32 73 24 Z M105 0 H114 L111 9 H102 Z "
+           "M119 0 H153 L150 9 H116 Z M114 12 H142 Q150 12 147 21 L145 26 "
+           "Q142 32 135 32 H107 L110 23 H135 L136 20 H121 Q111 20 114 12 Z",
+           "#d4d7d6")
+    a.parts.append("</g>")
+    a.path("M164 125 H426", "none", 'stroke="#cbd0d1" stroke-width="2"')
+    # The AIR swoosh is printed; the photos do not show a lamp beside its lettering.
+    a.parts.append('<g transform="translate(0 254) scale(1 .930875576) translate(0 -224)">')
+    a.rect(31, 231, 398, 412, "url(#blue-label)", 8,
+           'id="label" stroke="#c7c7bb" stroke-width="1.7"')
+    for offset in range(0, 7):
+        y = 438 + offset * 16
+        a.path(f"M34 {y} C158 {y+65} 241 {y-16} 425 {y-100}", "none",
+               f'stroke="#7cb4cc" stroke-width="{2+offset*.3}" opacity=".085"')
+    for text, baseline, cap, width, color in (
+            ("ASUS SpaceLink", 381, 24, 310, "#80b34f"),
+            ("Wireless LAN CF Card", 414, 24, 352, "#275c91")):
+        a.word(text, 230, baseline, cap, width, color, "OpenSans_Bold.ttf",
+               extra='stroke="#e8eee1" stroke-width="5.5" stroke-linejoin="round" paint-order="stroke fill"')
+    a.word("WL-110", 54, 446, 19, 100, "#eee266", "OpenSans_Bold.ttf", "start")
+    a.word("IEEE 802.11b 11 Mbps", 54, 498, 17, 295, "#e7e9df",
+           "OpenSans_Bold.ttf", "start")
+    a.path("M290 599 C330 577 404 575 414 594 C416 600 412 605 405 607 "
+           "C420 584 334 584 290 599 Z", "#e4ece8")
+    a.word("Space link", 345, 624, 24, 133, "#edf0e7", "OpenSans_Italic.ttf")
+    a.parts.append("</g>")
+    return a.finish()
+
+
+def build_sandisk_connectplus(fonts):
+    a = AccessoryDrawing(fonts, "sandisk-connectplus",
+                         "SanDisk ConnectPlus 128MB Low Power Wi-Fi CompactFlash card",
+                         488, 638, "slot:cf")
+    a.parts.append('<g transform="translate(14 0)">')
+    cf_shell(a, 244, 622)
+    a.parts.append('<g transform="translate(0 244) scale(1 .84375) translate(0 -174)">')
+    a.rect(37, 183, 386, 421, "#a9bbb0", 11, 'id="label"')
+    a.path("M38 185 H421 V226 C310 277 191 188 38 234 Z", "url(#rainbow)")
+    a.word("Connect", 181, 325, 34, 220, "#f0f2df", "OpenSans_Italic.ttf")
+    _, _, bounds, scale = fonts.glyph_run("Plus", "Courgette_Regular.ttf", 1)
+    script_cap = 32 / ((bounds[3] - bounds[1]) * scale)
+    a.word("Plus", 333, 318, script_cap, 99, "#f0f2df", "Courgette_Regular.ttf")
+    a.path("M73 331 Q225 339 382 324", "none", 'stroke="#f0f2df" stroke-width="2"')
+    a.word("Low Power Wi-Fi Card", 232, 359, 22, 319, "#eef1df", "OpenSans_Bold.ttf")
+    a.rect(139, 406, 182, 63, "#256d65", 13, 'stroke="#5b9383" stroke-width="2"')
+    a.rect(144, 411, 172, 53, "none", 10, 'stroke="#b7c8ad" stroke-width="1"')
+    a.word("128MB", 230, 441, 30, 142, "#f5f2d9", "OpenSans_BoldItalic.ttf")
+    a.word("memory", 230, 460, 15, 109, "#f5f2d9", "OpenSans_Bold.ttf")
+    a.word("CompactFlash", 230, 509, 23, 235, "#eff0da", "OpenSans_Bold.ttf")
+    a.word("®", 354, 499, 7, 8, "#eff0da")
+    a.word("802.11b", 230, 540, 27, 160, "#eff0da", "OpenSans_Bold.ttf")
+    a.parts.append("</g>")
+    a.path("M5 255 V49 Q5 29 24 26 Q228 10 436 26 Q455 29 455 49 V255 Z",
+           "#b8c2cd", 'id="antenna-frame" stroke="#788593" stroke-width="2.5"')
+    a.path("M8 53 Q8 32 29 31 Q236 17 434 31 Q450 33 450 54 L434 245 "
+           "Q232 258 21 246 Z", "url(#silver)", 'id="antenna"')
+    a.path("M33 82 Q230 68 425 82 L411 215 Q227 226 46 215 Z", "#bdc7d0",
+           'stroke="#ebeeee" stroke-width="2"')
+    a.path("M39 86 Q231 74 420 86 L409 211 Q230 221 48 211 Z", "#c5cfd7",
+           'stroke="#a5b2bf" stroke-width="1"')
+    a.word("SanDisk", 189, 167, 49, 258, "#ce2b37", "NotoSerif_Regular.ttf")
+    a.parts.append('<g transform="translate(0 42)">')
+    a.path("M337 77 H410 L401 123 H329 Z", "#cf2b38")
+    a.path("M342 82 H365 L338 103 Z M367 82 H384 L342 118 Z "
+           "M390 82 H402 L371 118 H351 Z M398 99 L395 118 H378 Z", "#dce3e1")
+    a.word("®", 417, 78, 7, 8, "#ce2b37")
+    a.parts.append("</g>")
+    a.rect(127, 185, 30, 14, "#27302e", 7,
+           'id="led-link" aria-label="Unlit indicator window" '
+           'data-evidence="Owner’s photographs: below SanDisk wordmark" '
+           'stroke="#d4dad6" stroke-width="1.8"')
+    a.path("M132 188 H149", "none", 'stroke="#85958b" stroke-width="2"')
+    a.parts.append("</g>")
+    return a.finish()
+
+
+def build_navman_gps_sleeve(fonts):
+    """SE/3450 identification and side-slot cue: pocketgpsworld.com/navman3450.php."""
+    a = AccessoryDrawing(fonts, "navman-gps-sleeve",
+                         "Navman SE GPS 3450 iPAQ GPS V2.0 expansion sleeve",
+                         1040, 1840, "interface:ipaq-expansion-sleeve", "slot:cf")
+    # The inside of the black back shell; its label is on the outside.
+    a.parts.append('<g id="backplate">')
+    a.path("M140 421 Q520 393 900 421 L898 1670 Q522 1780 142 1670 Z", "url(#dark)",
+           'stroke="#121519" stroke-width="2"')
+    a.path("M170 470 Q520 446 870 470 V1600 Q520 1690 170 1600 Z", "#1c1e22",
+           'stroke="#34373c" stroke-width="2" opacity=".9"')
+    a.path("M200 500 V1560", "none", 'stroke="#4a4e55" stroke-width="3" opacity=".45"')
+    a.parts.append("</g>")
+    a.path("M407 421 V111 Q407 31 451 27 Q520 5 588 27 Q633 31 633 111 V421 Z",
+           "#23272d", 'id="antenna" stroke="#141a20" stroke-width="3"')
+    a.path("M414 393 V114 Q414 39 454 35 Q518 13 582 35 Q625 40 625 114 V393 Z",
+           "url(#rail-shine)")
+    a.path("M408 357 Q517 330 632 357 M410 363 Q520 338 630 363", "none",
+           'stroke="#0e151c" stroke-width="3"')
+    a.path("M140 414 Q520 390 900 414 V466 Q520 441 140 466 Z", "url(#dark)",
+           'id="carrier-top" stroke="#161c22" stroke-width="2"')
+    a.path("M145 1618 H895 V1693 Q847 1749 764 1765 H276 Q193 1749 145 1693 Z",
+           "url(#dark)", 'id="carrier-bottom" stroke="#121a21" stroke-width="3"')
+    a.path("M260 1640 H780 V1701 H260 Z", "#8d9189", 'id="connector-frame"')
+    a.rect(268, 1646, 504, 47, "url(#metal)", 4,
+           'id="connector" stroke="#d9d6c6" stroke-width="2"')
+    for column in range(50):
+        x = 278 + column * 9.8
+        a.rect(x, 1652, 2, 33, "#b4ac8d", .5)
+    a.path("M211 1702 H829 V1741 Q679 1816 520 1816 Q361 1816 211 1741 Z",
+           "#232a32", 'id="latch" stroke="#151b22" stroke-width="2"')
+    a.rect(467, 1761, 106, 43, "#171e25", 4)
+    for x in range(479, 568, 14):
+        a.path(f"M{x} 1766 V1798", "none", 'stroke="#485059" stroke-width="3"')
+    for side in ("left", "right"):
+        a.parts.append(f'<g id="rail-{side}"' +
+                       (' transform="translate(1040 0) scale(-1 1)">' if side == "right" else '>'))
+        a.path("M48 417 Q82 391 157 391 L151 1740 Q140 1765 119 1756 "
+               "Q49 1727 45 1691 Z", "url(#navy)",
+               'stroke="#1d2730" stroke-width="3"')
+        a.path("M150 400 L142 1739", "none", 'stroke="#7a8790" stroke-width="2" opacity=".8"')
+        a.path("M57 438 L55 1668 Q58 1719 105 1737", "none",
+               'stroke="#a7b0b4" stroke-width="3" opacity=".25"')
+        a.rect(151, 486, 12, 1130, "#111c26", 3)
+        a.path("M159 496 V1605", "none", 'stroke="#526877" stroke-width="3"')
+        a.parts.append("</g>")
+    a.parts.append('<g transform="translate(955 939) rotate(-90)">')
+    a.word("NAVMAN", 0, 0, 43, 328, "#dedfd5", "OpenSans_Regular.ttf")
+    a.word("SE", 245, 0, 31, 65, "#dedfd5")
+    a.parts.append("</g>")
+    # The slot is on the long edge, not the top; show its narrow front projection.
+    a.rect(35, 1015, 13, 428, "#101820", 5,
+           'id="cf-slot" data-slot="slot:cf" data-geometry="estimated long-edge projection" '
+           'stroke="#5d6871" stroke-width="2"')
+    a.path("M39 1024 V1431", "none", 'stroke="#050b10" stroke-width="4"')
+    a.rect(31, 1455, 17, 31, "#35424c", 4, 'id="cf-eject"')
+    return a.finish()
+
+
+def build_ipaq_keyboard_sleeve(fonts):
+    """Approximately 95 × 173 mm on the owner’s centimetre-grid photograph; 37 + 4 keys."""
+    a = AccessoryDrawing(fonts, "ipaq-keyboard-sleeve",
+                         "iPAQ silver keyboard expansion sleeve, UK QWERTY",
+                         1040, 1770, "interface:ipaq-expansion-sleeve")
+    a.parts.append('<g id="sleeve-art" transform="scale(1 .96)">')
+    a.parts.append('<g id="carrier">')
+    a.path("M155 103 Q236 80 311 111 C392 148 421 222 520 222 "
+           "C619 222 648 148 729 111 Q804 80 885 103 V482 "
+           "Q790 494 712 475 C640 454 608 417 520 417 "
+           "C432 417 400 454 328 475 Q250 494 155 482 Z",
+           "url(#silver-face)", 'id="carrier-bridge" stroke="#909e9f" stroke-width="2"')
+    a.path("M164 114 Q241 91 308 123 C396 162 425 232 520 232 "
+           "C615 232 644 162 732 123 Q802 90 876 114", "none",
+           'stroke="#ecede1" stroke-width="3" opacity=".7"')
+    a.ellipse(520, 368, 12, 12, "#899b9c", 'stroke="#bfcac6" stroke-width="6"')
+    for side in ("left", "right"):
+        a.parts.append(f'<g id="rail-{side}"' +
+                       (' transform="translate(1040 0) scale(-1 1)">' if side == "right" else '>'))
+        a.path("M57 42 Q106 18 153 18 L155 315 Q153 353 126 369 "
+               "L157 418 V1077 Q155 1111 168 1159 L151 1220 H58 "
+               "L46 1147 Q46 1115 58 1100 V432 Q25 403 38 377 L57 355 Z",
+               "url(#silver)", 'stroke="#7a8d98" stroke-width="2"')
+        a.path("M153 24 V319 Q154 347 129 365 L58 407 M58 432 H154 "
+               "M58 1100 L134 1178", "none",
+               'stroke="#748a95" stroke-width="2" opacity=".85"')
+        a.path("M65 47 Q91 32 111 33 L107 1115", "none",
+               'stroke="#f5f5e9" stroke-width="3" opacity=".5"')
+        a.rect(154, 483, 14, 680, "#4e646e", 5)
+        a.path("M162 492 V1154", "none", 'stroke="#e1e8e4" stroke-width="3"')
+        a.rect(159, 517, 7, 519, "#203d4b", 2)
+        a.path("M160 1045 L174 1056 V1139 H161 Z", "#738d9a",
+               'stroke="#cbd5d3" stroke-width="1.5"')
+        a.parts.append("</g>")
+    a.parts.append("</g>")
+    # Dark plug under the keyboard lip; only its top edge shows in front.
+    a.path("M298 1160 Q520 1196 742 1160 V1190 H298 Z", "#1d2328",
+           'id="connector" stroke="#0e1216" stroke-width="2"')
+    a.path("M58 1122 Q53 1102 63 1088 Q94 1107 150 1158 "
+           "Q520 1207 890 1158 Q946 1107 977 1088 Q987 1102 982 1122 "
+           "L996 1443 Q998 1598 929 1674 Q762 1822 520 1822 "
+           "Q278 1822 111 1674 Q42 1598 44 1443 Z", "url(#silver)",
+           'id="keyboard-body" stroke="#7b8b92" stroke-width="3"')
+    a.path("M151 1159 Q520 1207 889 1159 L886 1683 "
+           "Q725 1809 520 1809 Q315 1809 154 1683 Z", "url(#silver-face)",
+           'id="keyboard-face" stroke="#a2afb1" stroke-width="1.5"')
+    a.path("M54 1372 Q80 1401 115 1471 Q136 1519 137 1571 L146 1677 "
+           "M986 1372 Q960 1401 925 1471 Q904 1519 903 1571 L894 1677",
+           "none", 'stroke="#6b818d" stroke-width="2.5"')
+
+    def key(identity, x, y, legend, secondary="", color="#263b4b", radius=31):
+        a.parts.append(f'<g id="key-{identity}" data-legend="{escape(legend, quote=True)}" '
+                       f'transform="translate({f(x)} {f(y)})">')
+        a.ellipse(0, 1, radius + 3, radius + 4, "#526a76")
+        a.ellipse(0, 0, radius + 1, radius + 1, "#e3e7d8",
+                  'stroke="#465d6a" stroke-width="1.8"')
+        a.ellipse(0, -1.5, radius - 1, radius - 1, "url(#keycap-shade)")
+        if secondary:
+            a.word(secondary, -15, -3, 14, None, "#526a7c", anchor="middle")
+        if legend in ("◀", "▶", "▼", "▲"):
+            triangle = {"◀": "M-9 10 L12 -1 V21 Z", "▶": "M16 10 L-5 -1 V21 Z",
+                        "▼": "M5 24 L-7 3 H17 Z", "▲": "M5 0 L-7 21 H17 Z"}[legend]
+            a.path(triangle, color)
+        elif len(legend) == 1:
+            a.word(legend, 7 if secondary else 0, 19 if secondary else 12, 25,
+                   None, color)
+        elif legend in ("NUM CAP", "ESC Ctrl"):
+            first, second = legend.split()
+            a.word(first, 0, -2, 13, 36, color)
+            a.word(second, 0, 16, 16, 38, color)
+        else:
+            a.word(legend, 0, 9, 21 if len(legend) < 4 else 15, 44, color)
+        a.parts.append("</g>")
+
+    # The owner’s photographs show every row mirror-symmetric about the sleeve centre (x=520),
+    # bowing downwards in the middle; rows narrow slightly towards the bottom.
+    def row(half_span, top, bow):
+        return [(520 - half_span + i * half_span / 4.5, top + bow * math.sin(math.pi * i / 9))
+                for i in range(10)]
+
+    first = row(367, 1228, 40)
+    for (x, y), char in zip(first, "QWERTYUIOP"):
+        key(char.lower(), x, y, char, str(("QWERTYUIOP".index(char) + 1) % 10))
+    second = row(363.5, 1314, 40)
+    for (x, y), char, secondary in zip(second, "ASDFGHJKL", ("*", "/", "+", "-", "=", ":", ";", '"', "@")):
+        key(char.lower(), x, y, char, secondary)
+    key("delete", *second[9], "Del")
+    dx, dy = second[9][0] - 879, second[9][1] - 1314
+    a.path(f"M{f(875+dx)} {f(1327+dy)} H{f(899+dx)} M{f(875+dx)} {f(1327+dy)} L{f(884+dx)} {f(1321+dy)} "
+           f"M{f(875+dx)} {f(1327+dy)} L{f(884+dx)} {f(1333+dy)}", "none",
+           'stroke="#293d4d" stroke-width="2.8"')
+    third = (("fn", "Fn", ""), ("z", "Z", "$"), ("x", "X", "("),
+             ("c", "C", ")"), ("v", "V", "?"), ("b", "B", "!"),
+             ("n", "N", "'"), ("m", "M", ","), ("num-caps", "NUM CAP", ""),
+             ("tab", "Tab", ""))
+    third_positions = row(356, 1400, 34)
+    for (x, y), (identity, char, secondary) in zip(third_positions, third):
+        key(identity, x, y, char, secondary, "#3d6c90" if identity == "fn" else "#263b4b")
+    dx = third_positions[9][0] - 898.5
+    a.path(f"M{f(885+dx)} 1417 H{f(908+dx)} M{f(885+dx)} 1417 L{f(894+dx)} 1411 "
+           f"M{f(885+dx)} 1417 L{f(894+dx)} 1423", "none",
+           'stroke="#293d4d" stroke-width="2.8"')
+    for identity, x, y, legend, secondary in (
+            ("shift", 178, 1482, "Shift", ""),
+            ("left", 252, 1506, "◀", "%"), ("right", 332, 1522, "▶", "\\"),
+            ("down", 708, 1522, "▼", "€"), ("up", 788, 1506, "▲", "_"),
+            ("escape-control", 862, 1482, "ESC Ctrl", "")):
+        if identity == "escape-control":
+            a.ellipse(x, y, 37, 37, "#8c4145")
+        key(identity, x, y, legend, secondary)
+    a.path("M173 1458 L166 1469 H170 V1475 H177 V1469 H182 Z", "#32485a")
+    a.rect(290, 1468, 29, 9, "#182e3d", 4.5,
+           'id="led-status" aria-label="Unlit indicator window; function unverified" '
+           'data-evidence="Owner’s photograph: horizontal dark window below Z, above left arrow"')
+    a.parts.append('<g id="key-space" data-legend="SPACE" transform="translate(-10.5 0)">')
+    a.path("M402 1508 Q520 1518 659 1508 Q682 1508 679 1535 "
+           "Q674 1593 637 1598 Q521 1614 419 1597 Q384 1591 382 1540 "
+           "Q380 1510 402 1508 Z", "#5d737d", 'stroke="#435d6b" stroke-width="2"')
+    a.path("M404 1512 Q522 1523 657 1512 Q676 1511 674 1535 "
+           "Q668 1586 635 1590 Q520 1606 421 1590 Q390 1584 387 1540 "
+           "Q386 1516 404 1512 Z", "url(#keycap-shade)")
+    a.word("SPACE", 530, 1575, 26, 106, "#293f50")
+    a.parts.append("</g>")
+    a.word("£", first[4][0] - 25, 1231, 19, None, "#8b4955")
+    for identity, x, y, symbol in (
+            ("calendar", 211, 1642, "calendar"),
+            ("contacts", 367.5, 1696, "contacts"),
+            ("mail", 672.5, 1696, "mail"),
+            ("tasks", 829, 1642, "tasks")):
+        a.parts.append(f'<g id="key-{identity}" data-legend="{symbol}" '
+                       f'transform="translate({x} {y})">')
+        a.ellipse(0, 1, 42, 42, "#708995")
+        a.ellipse(0, -1, 38, 38, "url(#chrome)", 'stroke="#d7e0dd" stroke-width="2"')
+        a.ellipse(0, 1, 29, 30, "none", 'stroke="#546770" stroke-width="1.3"')
+        if symbol == "calendar":
+            a.rect(-17, -15, 34, 33, "none", 1, 'stroke="#263b46" stroke-width="2.5"')
+            a.path("M-17 -5 H17 M-8 -20 V-10 M8 -20 V-10 "
+                   "M-6 -5 V18 M6 -5 V18 M-17 3 H17 M-17 11 H17", "none",
+                   'stroke="#263b46" stroke-width="2"')
+        elif symbol == "contacts":
+            a.rect(-18, -19, 35, 39, "none", 2, 'stroke="#263b46" stroke-width="2.5"')
+            a.ellipse(0, -8, 6, 7, "#344750")
+            a.path("M-11 13 Q-10 -2 0 -2 Q10 -2 11 13 Z", "#344750")
+            a.path("M-24 -11 H-16 M-24 0 H-16 M-24 11 H-16", "none",
+                   'stroke="#263b46" stroke-width="2.5"')
+        elif symbol == "mail":
+            a.path("M-21 -12 H21 V18 H-21 Z M-21 -12 L0 5 L21 -12 "
+                   "M-21 18 L-5 2 M21 18 L5 2", "none",
+                   'stroke="#253a46" stroke-width="2.5" stroke-linejoin="round"')
+        else:
+            a.path("M-16 -9 Q-13 -21 0 -21 Q17 -20 20 -4 H12 L25 7 L30 -8 H23 "
+                   "M17 11 Q9 23 -6 18 Q-21 14 -20 -1 H-12 L-25 -12 L-29 3 H-22",
+                   "#2b414e")
+        a.parts.append("</g>")
+    a.word("iPAQ", 520, 1743, 33, 99, "#71858d", "OpenSans_Bold.ttf")
+    a.parts.append("</g>")
+    return a.finish()
+
+
 @dataclass(frozen=True)
 class Model:
     """Builder: Fonts -> SVG text; path: repository-relative.
@@ -3645,10 +4121,26 @@ MANUAL_MODELS = {
     "h2200": Model("h2200/ipaq-h2200.svg", None, (137.5, 168, 525, 700), (),
                   source="h2200/ipaq-h2200.svg"),
 }
+ACCESSORY_MODELS = {
+    name: Model(f"accesoires/{name}/{name}.svg", builder, None, fonts)
+    for name, builder, fonts in (
+        ("buffalo-wli-cf-s11g", build_buffalo_wli_cf_s11g,
+         ("OpenSans_Regular.ttf", "OpenSans_Bold.ttf", "OpenSans_BoldItalic.ttf")),
+        ("asus-wl110", build_asus_wl110,
+         ("OpenSans_Regular.ttf", "OpenSans_Bold.ttf", "OpenSans_Italic.ttf")),
+        ("sandisk-connectplus", build_sandisk_connectplus,
+         ("OpenSans_Regular.ttf", "OpenSans_Bold.ttf", "OpenSans_BoldItalic.ttf",
+          "OpenSans_Italic.ttf", "NotoSerif_Regular.ttf", "Courgette_Regular.ttf")),
+        ("navman-gps-sleeve", build_navman_gps_sleeve, ("OpenSans_Regular.ttf",)),
+        ("ipaq-keyboard-sleeve", build_ipaq_keyboard_sleeve,
+         ("OpenSans_Regular.ttf", "OpenSans_Bold.ttf")),
+    )
+}
 ALIASES = {
     "sl-c700": ("sl-c700-laptop", "sl-c700-pda"),
     "all": tuple(MODELS),
     "camera": tuple(CAMERA_MODELS),
+    "accessories": tuple(ACCESSORY_MODELS),
 }
 
 
@@ -3708,6 +4200,9 @@ def compose_keyboard(drawing, fonts):
     root.append(component)
     root.set("viewBox", "0 0 800 1400")
     root.set("data-keyboard-accessory", "attached")
+    root.set("data-accessory", "h2200-keyboard")
+    root.set("data-requires", "device:h2200")
+    root.set("data-provides", "")
     ET.register_namespace("", SVG_NS)
     return ET.tostring(root, encoding="unicode") + "\n"
 
@@ -3894,7 +4389,7 @@ def validate_svg(drawing, model):
 
 def select_models(names, camera=None, keyboard=False):
     selected = {}
-    available = {**MODELS, **CAMERA_MODELS, **MANUAL_MODELS}
+    available = {**MODELS, **CAMERA_MODELS, **MANUAL_MODELS, **ACCESSORY_MODELS}
     for name in names:
         keys = ALIASES.get(name, (name,))
         if name == "all":
@@ -4060,10 +4555,11 @@ def main(argv=None):
         elif args.list:
             if args.models or args.output or args.output_dir or args.check or args.camera or args.keyboard:
                 raise ValueError("--list cannot be combined with generation options")
-            for name, model in {**MODELS, **CAMERA_MODELS}.items():
+            for name, model in {**MODELS, **CAMERA_MODELS, **ACCESSORY_MODELS}.items():
                 print(f"{name:16} {model.path}")
             print("sl-c700          both C700 views\nall              all generated handheld views")
             print("camera           all four standalone camera views")
+            print("accessories      three CF cards and two iPAQ expansion sleeves")
             print("h2200            manual source; compose with --camera and/or --keyboard")
             print("Camera poses: " + ", ".join(CAMERA_POSES))
         else:
@@ -4072,7 +4568,7 @@ def main(argv=None):
                 raise ValueError("--output requires exactly one view and a .svg filename")
             if args.output:
                 name, model = next(iter(selected.items()))
-                available = {**MODELS, **CAMERA_MODELS, **MANUAL_MODELS}
+                available = {**MODELS, **CAMERA_MODELS, **MANUAL_MODELS, **ACCESSORY_MODELS}
                 reserved = {Path(item.path).name for item in available.values()}
                 for item in (*MODELS.values(), *MANUAL_MODELS.values()):
                     stem = Path(item.path).stem

@@ -303,6 +303,45 @@ class GeneratorTests(unittest.TestCase):
         self.cli("--with-accessory", "cf-sleeve", success=False)
         self.cli("--compatible", "h2200", "--keyboard", success=False)
 
+    def test_catalog_drawings_expose_matching_compatibility_tags(self):
+        catalog = generator.json.loads(
+            (generator.REPOSITORY / "accesoires/compatibility.json").read_text())
+        for name, item in catalog["accessories"].items():
+            if item["drawing"] is None:
+                continue
+            with self.subTest(accessory=name):
+                root = generator.ET.parse(generator.REPOSITORY / item["drawing"]).getroot()
+                self.assertEqual(root.get("data-accessory"), name)
+                self.assertEqual(root.get("data-requires", "").split(), item["requires"])
+                self.assertEqual(root.get("data-provides", "").split(), item["provides"])
+
+    def test_accessory_indicator_windows_are_addressable(self):
+        indicators = {
+            "buffalo-wli-cf-s11g": ("led-power", "led-active"),
+            "sandisk-connectplus": ("led-link",),
+            "ipaq-keyboard-sleeve": ("led-status",),
+        }
+        for accessory, expected_ids in indicators.items():
+            path = generator.REPOSITORY / generator.ACCESSORY_MODELS[accessory].path
+            root = generator.ET.parse(path).getroot()
+            elements = {element.get("id"): element for element in root.iter() if element.get("id")}
+            for identity in expected_ids:
+                with self.subTest(accessory=accessory, indicator=identity):
+                    self.assertIn(identity, elements)
+                    self.assertTrue(elements[identity].get("fill"))
+
+    def test_buffalo_antenna_hole_is_transparent(self):
+        if shutil.which("rsvg-convert") is None or importlib.util.find_spec("PIL") is None:
+            self.skipTest("transparency check needs rsvg-convert and Pillow")
+        from PIL import Image
+        path = generator.REPOSITORY / generator.ACCESSORY_MODELS["buffalo-wli-cf-s11g"].path
+        result = subprocess.run(
+            ["rsvg-convert", "-w", "460", str(path)], capture_output=True, check=True)
+        with Image.open(io.BytesIO(result.stdout)) as image:
+            alpha = image.convert("RGBA").getchannel("A")
+            self.assertEqual(alpha.getpixel((52, 87)), 0)
+            self.assertEqual(alpha.getpixel((90, 87)), 255)
+
     def test_composition_preserves_all_screens_and_expands_slider_fragments(self):
         # Synthetic side pose exercises composition, not an assertion about device slots.
         pose = generator.CameraPose(-100, 80, 1.08, rotation=90)
