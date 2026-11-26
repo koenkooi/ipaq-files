@@ -2,20 +2,35 @@
 
 Vector front views of HP and Compaq iPAQ and Sharp Zaurus handhelds, used as frames around screenshots in the documentation of picowl, picoUI, picoplayer and the other pico* projects. Each SVG has a rectangle `id="screen"` where the screenshot goes.
 
-| Device | Drawing | Preview | Glass in the SVG | Screen |
-|---|---|---|---|---|
-| iPAQ h2200 | [h2200/ipaq-h2200.svg](h2200/ipaq-h2200.svg) | ![h2200](h2200/preview.png) | x=137.5 y=168 525 x 700 | 240x320 |
-| iPAQ h2200 with thumb keyboard | [h2200/ipaq-h2200-keyboard.svg](h2200/ipaq-h2200-keyboard.svg) | <img src="h2200/preview-keyboard.png" width="183" alt="h2200 with keyboard"> | x=137.5 y=168 525 x 700 | 240x320 |
-| iPAQ h3900 | [h3900/h3900-framed-template.svg](h3900/h3900-framed-template.svg) | ![h3900](h3900/preview.png) | x=137.5 y=244.75 525 x 700 | 240x320 |
-| iPAQ h5550 | [h5550/h5550-framed-template.svg](h5550/h5550-framed-template.svg) | ![h5550](h5550/preview.png) | x=137.5 y=244.75 525 x 700 | 240x320 |
-| iPAQ hx2700 | [hx2700/hx2700-framed-template.svg](hx2700/hx2700-framed-template.svg) | ![hx2700](hx2700/preview.png) | x=137.5 y=244.75 525 x 700 | 240x320 |
-| iPAQ hx4700 | [hx4700/hx4700-framed-template.svg](hx4700/hx4700-framed-template.svg) | ![hx4700](hx4700/preview.png) | x=137.5 y=244.75 525 x 700 | 480x640 |
-| Zaurus SL-5500 (Collie) | [sl-5500/sl-5500-framed-template.svg](sl-5500/sl-5500-framed-template.svg) | <img src="sl-5500/preview.png" width="183" alt="Collie closed"> <img src="sl-5500/preview-open.png" width="183" alt="Collie open"> | x=137.5 y=168 525 x 700 | 240x320 |
-| Zaurus SL-5600 (Poodle) | [sl-5600/sl-5600-framed-template.svg](sl-5600/sl-5600-framed-template.svg) | <img src="sl-5600/preview.png" width="183" alt="SL-5600 closed"> <img src="sl-5600/preview-open.png" width="183" alt="SL-5600 open"> | x=137.5 y=168 525 x 700 | 240x320 |
-| Zaurus SL-6000 (Tosa) | [sl-6000/sl-6000-framed-template.svg](sl-6000/sl-6000-framed-template.svg) | <img src="sl-6000/preview.png" width="183" alt="SL-6000 closed"> <img src="sl-6000/preview-open.png" width="183" alt="SL-6000 open"> | x=137.5 y=168 525 x 700 | 480x640 |
-| Zaurus SL-C700, laptop | [sl-c700/sl-c700-laptop.svg](sl-c700/sl-c700-laptop.svg) | ![C700 laptop](sl-c700/preview.png) | x=255 y=92 700 x 525 | 640x480 |
-| Zaurus SL-C700, folded | [sl-c700/sl-c700-pda.svg](sl-c700/sl-c700-pda.svg) | ![C700 folded](sl-c700/preview-pda.png) | x=165 y=195 525 x 700 | 480x640 |
-| iPAQ h2200 with the HP Photosmart Mobile Camera | [hp-photosmart-camera/on-h2200.svg](hp-photosmart-camera/on-h2200.svg) | ![h2200 with camera](hp-photosmart-camera/preview-on-h2200.png) | x=137.5 y=168 525 x 700 | 240x320 |
+Previews share an approximate physical scale of 1.5 CSS pixels per millimetre, based on case width rather than canvas size. Keyboard and camera variants keep the same device scale; the C700 retains its perspective. Click a preview for its SVG.
+
+<table>
+<thead><tr><th>Device</th><th nowrap>Regular (closed or folded)</th><th nowrap>Keyboard (opened or attached)</th><th nowrap>Camera attached</th></tr></thead>
+<tbody>
+<tr valign="top"><td>iPAQ h2200</td><td><a href="h2200/ipaq-h2200.svg"><img src="h2200/preview.png" width="119" alt="h2200"></a></td><td><a href="h2200/ipaq-h2200-keyboard.svg"><img src="h2200/preview-keyboard.png" width="119" alt="h2200 with thumb keyboard"></a></td><td><a href="hp-photosmart-camera/on-h2200.svg"><img src="hp-photosmart-camera/preview-on-h2200.png" width="119" alt="h2200 with Photosmart camera"></a></td></tr>
+<tr valign="top"><td>iPAQ h3900</td><td><a href="h3900/h3900-framed-template.svg"><img src="h3900/preview.png" width="136" alt="h3900"></a></td><td></td><td></td></tr>
+<tr valign="top"><td>iPAQ h5550</td><td><a href="h5550/h5550-framed-template.svg"><img src="h5550/preview.png" width="136" alt="h5550"></a></td><td></td><td></td></tr>
+<tr valign="top"><td>iPAQ hx2700</td><td><a href="hx2700/hx2700-framed-template.svg"><img src="hx2700/preview.png" width="124" alt="hx2700"></a></td><td></td><td></td></tr>
+<tr valign="top"><td>iPAQ hx4700</td><td><a href="hx4700/hx4700-framed-template.svg"><img src="hx4700/preview.png" width="144" alt="hx4700"></a></td><td></td><td></td></tr>
+<tr valign="top"><td>Zaurus SL-5500 (Collie)</td><td><a href="sl-5500/sl-5500-framed-template.svg"><img src="sl-5500/preview.png" width="126" alt="SL-5500 closed"></a></td><td><a href="sl-5500/sl-5500-framed-template.svg#open"><img src="sl-5500/preview-open.png" width="126" alt="SL-5500 keyboard open"></a></td><td></td></tr>
+<tr valign="top"><td>Zaurus SL-5600 (Poodle)</td><td><a href="sl-5600/sl-5600-framed-template.svg"><img src="sl-5600/preview.png" width="126" alt="SL-5600 closed"></a></td><td><a href="sl-5600/sl-5600-framed-template.svg#open"><img src="sl-5600/preview-open.png" width="126" alt="SL-5600 keyboard open"></a></td><td></td></tr>
+<tr valign="top"><td>Zaurus SL-6000 (Tosa)</td><td><a href="sl-6000/sl-6000-framed-template.svg"><img src="sl-6000/preview.png" width="139" alt="SL-6000 closed"></a></td><td><a href="sl-6000/sl-6000-framed-template.svg#open"><img src="sl-6000/preview-open.png" width="139" alt="SL-6000 keyboard open"></a></td><td></td></tr>
+<tr valign="top"><td>Zaurus SL-C700</td><td><a href="sl-c700/sl-c700-pda.svg"><img src="sl-c700/preview-pda.png" width="139" alt="C700 folded"></a></td><td><a href="sl-c700/sl-c700-laptop.svg"><img src="sl-c700/preview.png" width="213" alt="C700 laptop"></a></td><td></td></tr>
+</tbody>
+</table>
+
+| Device | Glass in the SVG | Screen |
+|---|---|---|
+| iPAQ h2200, all variants | x=137.5 y=168 525 x 700 | 240x320 |
+| iPAQ h3900 | x=137.5 y=244.75 525 x 700 | 240x320 |
+| iPAQ h5550 | x=137.5 y=244.75 525 x 700 | 240x320 |
+| iPAQ hx2700 | x=137.5 y=244.75 525 x 700 | 240x320 |
+| iPAQ hx4700 | x=137.5 y=244.75 525 x 700 | 480x640 |
+| Zaurus SL-5500 (Collie) | x=137.5 y=168 525 x 700 | 240x320 |
+| Zaurus SL-5600 (Poodle) | x=137.5 y=168 525 x 700 | 240x320 |
+| Zaurus SL-6000 (Tosa) | x=137.5 y=168 525 x 700 | 480x640 |
+| Zaurus SL-C700, folded | x=165 y=195 525 x 700 | 480x640 |
+| Zaurus SL-C700, laptop | x=255 y=92 700 x 525 | 640x480 |
 
 The h3900 and h5550 share a body outline (same width, same expansion sleeves). The 240x320 screens use 2.1875 units per pixel; the VGA screens use 1.09375.
 
