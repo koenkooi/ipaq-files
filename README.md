@@ -7,7 +7,7 @@ Previews share an approximate physical scale of 1.5 CSS pixels per millimetre, b
 <table>
 <thead><tr><th>Device</th><th nowrap>Regular (closed or folded)</th><th nowrap>Keyboard (opened or attached)</th><th nowrap>Camera attached</th></tr></thead>
 <tbody>
-<tr valign="top"><td>iPAQ h2200</td><td><a href="h2200/ipaq-h2200.svg"><img src="h2200/preview.png" width="119" alt="h2200"></a></td><td><a href="h2200/ipaq-h2200-keyboard.svg"><img src="h2200/preview-keyboard.png" width="119" alt="h2200 with thumb keyboard"></a></td><td><a href="hp-photosmart-camera/on-h2200.svg"><img src="hp-photosmart-camera/preview-on-h2200.png" width="119" alt="h2200 with Photosmart camera"></a></td></tr>
+<tr valign="top"><td>iPAQ h2200</td><td><a href="h2200/ipaq-h2200.svg"><img src="h2200/preview.png" width="119" alt="h2200"></a></td><td><a href="accesoires/h2200-keyboard/ipaq-h2200-keyboard.svg"><img src="accesoires/h2200-keyboard/preview-keyboard.png" width="119" alt="h2200 with thumb keyboard"></a></td><td><a href="accesoires/hp-photosmart-camera/on-h2200.svg"><img src="accesoires/hp-photosmart-camera/preview-on-h2200.png" width="119" alt="h2200 with Photosmart camera"></a></td></tr>
 <tr valign="top"><td>iPAQ h3900</td><td><a href="h3900/h3900-framed-template.svg"><img src="h3900/preview.png" width="136" alt="h3900"></a></td><td></td><td></td></tr>
 <tr valign="top"><td>iPAQ h5550</td><td><a href="h5550/h5550-framed-template.svg"><img src="h5550/preview.png" width="136" alt="h5550"></a></td><td></td><td></td></tr>
 <tr valign="top"><td>iPAQ hx2700</td><td><a href="hx2700/hx2700-framed-template.svg"><img src="hx2700/preview.png" width="124" alt="hx2700"></a></td><td></td><td></td></tr>
@@ -144,7 +144,7 @@ Fonts are needed only for device and keyboard regeneration; their lettering rema
 
 `--output-dir` preserves the repository's model subdirectories; without it, outputs go beside this script in their usual model directories. `--output` selects one exact `.svg` path and requires a single view. `--check` regenerates and compares exact bytes without writing. Every CLI invocation ends with exactly one `SUCCESS` or `FAILURE` line; failures exit nonzero. All selected drawings are built and checked before writing, staged files are read back, and each destination is replaced atomically and verified. A filesystem failure during final replacement can leave a partially updated batch; a failed run must not be treated as complete. Checks include XML, unique IDs, screen geometry and sliding-frame fragment controls.
 
-`--camera front|away|swivel` writes a `-camera-VIEW.svg` variant rather than overwriting the base frame. For h2200 without the keyboard, the front and swivel views retain `hp-photosmart-camera/on-h2200.svg` and `on-h2200-swivel.svg`. With `--camera`, `all` also includes the manual h2200.
+`--camera front|away|swivel` writes a `-camera-VIEW.svg` variant rather than overwriting the base frame. For h2200 without the keyboard, the front and swivel views retain `accesoires/hp-photosmart-camera/on-h2200.svg` and `on-h2200-swivel.svg`. With `--camera`, `all` also includes the manual h2200.
 
 `--keyboard` opens the SL-5500/5600/6000 sliders, selects laptop mode for either C700 view or the `sl-c700` alias, and attaches the h2200 thumb keyboard. It writes `-keyboard.svg` variants; combining flags writes `-keyboard-camera-VIEW.svg`. Open slider variants work in static renderers and retain interactive open/closed fragments. `all --keyboard` selects these five keyboard-capable configurations, skipping iPAQs with no supported keyboard drawing; explicitly selecting an unsupported model is an error.
 
@@ -166,9 +166,23 @@ These are measured front-view approximations, not CAD or traced photographs. Ref
 
 The face has `button-power`, `button-calendar`, `button-contacts`, `button-mail`, `button-itask`, the 5-way `button-up`, `button-down`, `button-left`, `button-right` and `button-select`, and `fingerprint-sensor`. Calendar and iTask are named in HP's guide; contacts and mail are read from the key icons. Not drawn, because they are off the front face: the SD and Type II CF slots stacked on the top edge, the 3.5 mm headphone jack and IR port on top, the record button on the left side, and the recessed reset and sync connector on the bottom.
 
+## Accessories and compatibility
+
+`accesoires/` contains the CF Wi-Fi cards, GPS and keyboard sleeves, Photosmart camera and h2200 thumb keyboard. The sleeves use the older iPAQ expansion interface (h36xx, h39xx and sleeve-capable h5xxx), not the h2200 accessory connector.
+
+[compatibility.json](accesoires/compatibility.json) tags physical fit independently of drivers or operating systems. Each device supplies capability tags; an accessory's `requires` must all be present, `provides` adds capabilities and `occupies` prevents two accessories sharing one connector. The h2200 keyboard requires `device:h2200`; sleeves require `interface:ipaq-expansion-sleeve`; CF cards require `slot:cf`. The Navman GPS sleeve provides a side CF slot. `cf-sleeve` represents a generic CF sleeve without claiming a separate drawing. A bare sleeve-capable iPAQ does not acquire CF compatibility until such a sleeve is attached. The camera's `slot:sd` tag describes its physical plug, not SDIO driver support.
+
+```sh
+python3 generate.py --compatible h2200
+python3 generate.py --compatible h3900 --with-accessory navman-gps-sleeve
+python3 generate.py --compatible h5550 --with-accessory cf-sleeve
+```
+
+`--with-accessory` may be repeated; sleeve/card order does not matter. Unknown devices, incompatible attachments and occupied connectors are errors. These queries do not generate or compose artwork.
+
 ## The camera
 
-`hp-photosmart-camera/` contains front, away-facing, elevated and animated swivel views of the 1.3 MP HP Photosmart Mobile Camera, plus `on-h2200.svg` and `on-h2200-swivel.svg`. The composites extend the viewBox upwards without moving the screen. The SD plug is scaled to 24 mm against the h2200's 71 mm body width.
+`accesoires/hp-photosmart-camera/` contains front, away-facing, elevated and animated swivel views of the 1.3 MP HP Photosmart Mobile Camera, plus `on-h2200.svg` and `on-h2200-swivel.svg`. The composites extend the viewBox upwards without moving the screen. The SD plug is scaled to 24 mm against the h2200's 71 mm body width.
 
 The head, lens barrel and focus marks rotate together around the horizontal body-to-head axis; the body and plug stay fixed. The 10-second SMIL loop needs no script. Rounded shell corners, inset bevels, the swivel seam and barrel seating replace the sharp box-like transitions. Surfaces, logos and lettering remain simplified; compare the front and elevated views rather than treating them as a CAD reconstruction. Regenerate with `python3 generate.py camera`, then `python3 generate.py h2200 --camera front` or `--camera swivel` for the legacy composites.
 

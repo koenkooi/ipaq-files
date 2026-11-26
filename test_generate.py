@@ -265,6 +265,44 @@ class GeneratorTests(unittest.TestCase):
         use = root.find(f"{{{generator.SVG_NS}}}use")
         self.assertEqual(set(use.attrib.values()), {"#photosmart-head"})
 
+    def test_physical_compatibility_resolves_sleeve_slots(self):
+        card = "buffalo-wli-cf-s11g"
+        devices = generator.json.loads(
+            (generator.REPOSITORY / "accesoires/compatibility.json").read_text())["devices"]
+        self.assertNotIn("h3100", devices)
+        self.assertNotIn("h3700", devices)
+        self.assertNotIn("h3800", devices)
+        for device in ("h2200", "hx2700", "hx4700", "sl-5500", "sl-6000", "sl-c700-pda"):
+            self.assertIn(card, generator.compatible_accessories(device))
+            self.assertNotIn("navman-gps-sleeve", generator.compatible_accessories(device))
+        for device in ("h36xx", "h39xx", "h5xxx", "h3600", "h3900", "h5550"):
+            self.assertNotIn(card, generator.compatible_accessories(device))
+            for sleeve in ("cf-sleeve", "navman-gps-sleeve"):
+                self.assertIn(card, generator.compatible_accessories(device, [sleeve]))
+        self.assertIn("h2200-keyboard", generator.compatible_accessories("h2200"))
+        self.assertNotIn("h2200-keyboard", generator.compatible_accessories("h3900"))
+        first = generator.compatible_accessories("h3900", [card, "cf-sleeve"])
+        second = generator.compatible_accessories("h3900", ["cf-sleeve", card])
+        self.assertEqual(first, second)
+        self.assertNotIn("asus-wl110", first)
+
+    def test_physical_compatibility_rejects_impossible_attachments(self):
+        for device, attached in (
+            ("missing", []),
+            ("h3900", ["missing"]),
+            ("h3900", ["h2200-keyboard"]),
+            ("h3900", ["buffalo-wli-cf-s11g"]),
+            ("h3900", ["cf-sleeve", "navman-gps-sleeve"]),
+            ("h2200", ["buffalo-wli-cf-s11g", "asus-wl110"]),
+            ("h2200", ["h2200-keyboard", "h2200-keyboard"]),
+        ):
+            with self.subTest(device=device, attached=attached):
+                with self.assertRaises(ValueError):
+                    generator.compatible_accessories(device, attached)
+        self.cli("--compatible", "h3900", "--with-accessory", "cf-sleeve", success=True)
+        self.cli("--with-accessory", "cf-sleeve", success=False)
+        self.cli("--compatible", "h2200", "--keyboard", success=False)
+
     def test_composition_preserves_all_screens_and_expands_slider_fragments(self):
         # Synthetic side pose exercises composition, not an assertion about device slots.
         pose = generator.CameraPose(-100, 80, 1.08, rotation=90)

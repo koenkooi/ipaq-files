@@ -8,6 +8,7 @@ from contextlib import nullcontext
 from dataclasses import dataclass, replace
 from functools import partial
 from html import escape
+import json
 import math
 import os
 from pathlib import Path
@@ -3636,7 +3637,7 @@ MODELS = {
 }
 CAMERA_MODELS = {
     "camera-" + view: Model(
-        "hp-photosmart-camera/hp-photosmart-camera" + ("" if view == "front" else "-" + view) + ".svg",
+        "accesoires/hp-photosmart-camera/hp-photosmart-camera" + ("" if view == "front" else "-" + view) + ".svg",
         partial(build_camera, view=view), None, ())
     for view in ("front", "away", "swivel", "above")
 }
@@ -3914,6 +3915,8 @@ def select_models(names, camera=None, keyboard=False):
                 if not (model.slider or key in ("h2200", "sl-c700-laptop")):
                     raise ValueError(f"{key}: no supported keyboard mode")
                 base = Path(model.path)
+                if model.source:
+                    base = Path("accesoires/h2200-keyboard") / base.name
                 model = replace(model, keyboard=True,
                                 path=str(base.with_name(f"{base.stem}-keyboard.svg")),
                                 fonts=("OpenSans_Regular.ttf", "OpenSans_Bold.ttf") if model.source else model.fonts)
@@ -3926,7 +3929,7 @@ def select_models(names, camera=None, keyboard=False):
                     raise ValueError(f"{key}: no researched SD-slot camera pose; composition is unavailable")
                 if key == "h2200" and not keyboard:
                     suffix = "" if camera == "front" else "-" + camera
-                    path = f"hp-photosmart-camera/on-h2200{suffix}.svg"
+                    path = f"accesoires/hp-photosmart-camera/on-h2200{suffix}.svg"
                 else:
                     base = Path(model.path)
                     path = str(base.with_name(f"{base.stem}-camera-{camera}.svg"))
@@ -3989,6 +3992,39 @@ def write_outputs(selected, drawings, paths):
             stage.unlink(missing_ok=True)
 
 
+def compatible_accessories(device, attached=()):
+    """Resolve physical capability tags, including slots supplied by sleeves."""
+    catalog = json.loads((REPOSITORY / "accesoires/compatibility.json").read_text())
+    if device not in catalog["devices"]:
+        raise ValueError(f"unknown compatibility device: {device}")
+    accessories = catalog["accessories"]
+    if len(set(attached)) != len(attached):
+        raise ValueError("an accessory cannot be attached twice")
+    unknown = set(attached) - accessories.keys()
+    if unknown:
+        raise ValueError("unknown accessory: " + ", ".join(sorted(unknown)))
+    capabilities = set(catalog["devices"][device])
+    occupied = set()
+    pending = list(attached)
+    while pending:
+        ready = next((name for name in pending
+                      if set(accessories[name]["requires"]) <= capabilities), None)
+        if ready is None:
+            raise ValueError("incompatible attachments: " + ", ".join(pending))
+        item = accessories[ready]
+        if occupied.intersection(item["occupies"]):
+            raise ValueError(f"{ready}: connector already occupied")
+        occupied.update(item["occupies"])
+        capabilities.update(item["provides"])
+        pending.remove(ready)
+    return {
+        name: item for name, item in accessories.items()
+        if name not in attached
+        and set(item["requires"]) <= capabilities
+        and not occupied.intersection(item["occupies"])
+    }
+
+
 def main(argv=None):
     status = 1
     try:
@@ -3996,6 +4032,10 @@ def main(argv=None):
         parser.add_argument("models", nargs="*", metavar="MODEL",
                             help="model names, sl-c700 (both views), or all")
         parser.add_argument("--list", action="store_true", help="list supported models and paths")
+        parser.add_argument("--compatible", metavar="DEVICE",
+                            help="list physically compatible accessories (not driver support)")
+        parser.add_argument("--with-accessory", action="append", default=[], metavar="ACCESSORY",
+                            help="include an attached accessory's capabilities; requires --compatible")
         output = parser.add_mutually_exclusive_group()
         output.add_argument("--output-dir", type=Path,
                             help="output tree root (default: directory containing this script)")
@@ -4010,7 +4050,14 @@ def main(argv=None):
         parser.add_argument("--keyboard", action="store_true",
                             help="open a Zaurus slider, select C700 laptop mode or attach the h2200 keyboard; combines with --camera")
         args = parser.parse_args(argv)
-        if args.list:
+        if args.compatible:
+            if args.models or args.output or args.output_dir or args.check or args.camera or args.keyboard or args.list:
+                raise ValueError("--compatible cannot be combined with generation options")
+            for name, item in compatible_accessories(args.compatible, args.with_accessory).items():
+                print(f"{name:24} {item['name']}")
+        elif args.with_accessory:
+            raise ValueError("--with-accessory requires --compatible")
+        elif args.list:
             if args.models or args.output or args.output_dir or args.check or args.camera or args.keyboard:
                 raise ValueError("--list cannot be combined with generation options")
             for name, model in {**MODELS, **CAMERA_MODELS}.items():

@@ -1,0 +1,80 @@
+{
+  "description": "Physical connector compatibility only; no driver or operating-system support is implied. requires lists all needed tags; occupies prevents sharing a connector; provides adds capabilities while attached.",
+  "devices": {
+    "h36xx": ["interface:ipaq-expansion-sleeve"],
+    "h39xx": ["interface:ipaq-expansion-sleeve"],
+    "h5xxx": ["interface:ipaq-expansion-sleeve"],
+    "h3600": ["interface:ipaq-expansion-sleeve"],
+    "h3900": ["interface:ipaq-expansion-sleeve", "slot:sd"],
+    "h5100": ["interface:ipaq-expansion-sleeve", "slot:sd"],
+    "h5400": ["interface:ipaq-expansion-sleeve", "slot:sd"],
+    "h5500": ["interface:ipaq-expansion-sleeve", "slot:sd"],
+    "h5550": ["interface:ipaq-expansion-sleeve", "slot:sd"],
+    "h2200": ["device:h2200", "slot:cf", "slot:sd"],
+    "hx2700": ["slot:cf", "slot:sd"],
+    "hx4700": ["slot:cf", "slot:sd"],
+    "sl-5500": ["slot:cf", "slot:sd"],
+    "sl-5600": ["slot:cf", "slot:sd"],
+    "sl-6000": ["slot:cf", "slot:sd"],
+    "sl-c700-laptop": ["slot:cf", "slot:sd"],
+    "sl-c700-pda": ["slot:cf", "slot:sd"]
+  },
+  "accessories": {
+    "h2200-keyboard": {
+      "name": "h2200 clip-on thumb keyboard",
+      "drawing": "accesoires/h2200-keyboard/ipaq-h2200-keyboard.svg",
+      "requires": ["device:h2200"],
+      "occupies": ["mount:h2200-keyboard"],
+      "provides": []
+    },
+    "photosmart-camera": {
+      "name": "HP Photosmart Mobile Camera",
+      "drawing": "accesoires/hp-photosmart-camera/hp-photosmart-camera.svg",
+      "requires": ["slot:sd"],
+      "occupies": ["slot:sd"],
+      "provides": []
+    },
+    "cf-sleeve": {
+      "name": "Generic iPAQ CompactFlash expansion sleeve (capability only; no drawing)",
+      "drawing": null,
+      "requires": ["interface:ipaq-expansion-sleeve"],
+      "occupies": ["interface:ipaq-expansion-sleeve"],
+      "provides": ["slot:cf"]
+    },
+    "navman-gps-sleeve": {
+      "name": "Navman GPS sleeve with side CompactFlash slot",
+      "drawing": "accesoires/navman-gps-sleeve/navman-gps-sleeve.svg",
+      "requires": ["interface:ipaq-expansion-sleeve"],
+      "occupies": ["interface:ipaq-expansion-sleeve"],
+      "provides": ["slot:cf"]
+    },
+    "ipaq-keyboard-sleeve": {
+      "name": "iPAQ keyboard expansion sleeve",
+      "drawing": "accesoires/ipaq-keyboard-sleeve/ipaq-keyboard-sleeve.svg",
+      "requires": ["interface:ipaq-expansion-sleeve"],
+      "occupies": ["interface:ipaq-expansion-sleeve"],
+      "provides": []
+    },
+    "buffalo-wli-cf-s11g": {
+      "name": "Buffalo AirStation WLI-CF-S11G",
+      "drawing": "accesoires/buffalo-wli-cf-s11g/buffalo-wli-cf-s11g.svg",
+      "requires": ["slot:cf"],
+      "occupies": ["slot:cf"],
+      "provides": []
+    },
+    "asus-wl110": {
+      "name": "ASUS SpaceLink CF Wi-Fi card",
+      "drawing": "accesoires/asus-wl110/asus-wl110.svg",
+      "requires": ["slot:cf"],
+      "occupies": ["slot:cf"],
+      "provides": []
+    },
+    "sandisk-connectplus": {
+      "name": "SanDisk ConnectPlus 128 MB Wi-Fi / storage card",
+      "drawing": "accesoires/sandisk-connectplus/sandisk-connectplus.svg",
+      "requires": ["slot:cf"],
+      "occupies": ["slot:cf"],
+      "provides": []
+    }
+  }
+}
