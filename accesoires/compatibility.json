@@ -22,7 +22,7 @@
   "accessories": {
     "h2200-keyboard": {
       "name": "h2200 clip-on thumb keyboard",
-      "drawing": "accesoires/h2200-keyboard/ipaq-h2200-keyboard.svg",
+      "drawing": "accesoires/h2200-keyboard/h2200-keyboard.svg",
       "requires": ["device:h2200"],
       "occupies": ["mount:h2200-keyboard"],
       "provides": []

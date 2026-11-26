@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 
 import argparse
+from collections import namedtuple
 from contextlib import nullcontext
 from dataclasses import dataclass, replace
 from functools import partial
@@ -4085,6 +4086,7 @@ class Model:
     camera: str = ""
     camera_pose: Optional[CameraPose] = None
     keyboard: bool = False
+    sleeve: str = ""
 
 
 MODELS = {
@@ -4133,6 +4135,8 @@ ACCESSORY_MODELS = {
           "OpenSans_Italic.ttf", "NotoSerif_Regular.ttf", "Courgette_Regular.ttf")),
         ("navman-gps-sleeve", build_navman_gps_sleeve, ("OpenSans_Regular.ttf",)),
         ("ipaq-keyboard-sleeve", build_ipaq_keyboard_sleeve,
+         ("OpenSans_Regular.ttf", "OpenSans_Bold.ttf")),
+        ("h2200-keyboard", lambda fonts: build_h2200_keyboard_accessory(fonts),
          ("OpenSans_Regular.ttf", "OpenSans_Bold.ttf")),
     )
 }
@@ -4207,6 +4211,24 @@ def compose_keyboard(drawing, fonts):
     return ET.tostring(root, encoding="unicode") + "\n"
 
 
+def build_h2200_keyboard_accessory(fonts):
+    """The clip-on keyboard alone, in h2200 frame coordinates: overlay it on
+    h2200/ipaq-h2200.svg without a transform; compose_keyboard does exactly that."""
+    return (
+        '<?xml version="1.0" encoding="UTF-8"?>\n'
+        '<!-- SPDX-FileCopyrightText: 2026 Koen Kooi -->\n'
+        '<!-- SPDX-License-Identifier: CC-BY-SA-4.0 -->\n'
+        f'<svg xmlns="{SVG_NS}" width="400" height="250" viewBox="0 860 800 500" '
+        'id="h2200-keyboard" data-accessory="h2200-keyboard" data-requires="device:h2200" '
+        'data-provides="" data-units-per-mm="10.87" data-frame="h2200/ipaq-h2200.svg" '
+        'role="img" aria-labelledby="title description">\n'
+        '<title id="title">iPAQ h2200 clip-on thumb keyboard</title>\n'
+        '<desc id="description">Front view in the coordinates of h2200/ipaq-h2200.svg '
+        '(800 units wide, 71 mm body): place it over that frame with no transform. '
+        'Drawn from the owner’s attached and detached photographs; legends are outlines.</desc>\n'
+        + build_h2200_keyboard(fonts) + '\n</svg>\n')
+
+
 def open_keyboard(drawing, slider):
     """Default a sliding frame to open, including in static SVG renderers."""
     root = ET.fromstring(drawing, parser=ET.XMLParser(target=ET.TreeBuilder(insert_comments=True)))
@@ -4279,6 +4301,137 @@ def compose_camera(drawing, view, pose):
     ET.register_namespace("", SVG_NS)
     ET.register_namespace("xlink", "http://www.w3.org/1999/xlink")
     return ET.tostring(root, encoding="unicode") + "\n"
+
+
+# Seating measured from the owner's photographs of each sleeve on one handheld:
+# the uniform scale maps sleeve units (10/mm) onto that device's frame so the
+# attached glass matches its 525 x 700 screen. Other handhelds reuse the fit,
+# scaled by their own units per millimetre.
+SleeveFit = namedtuple("SleeveFit", "reference scale y rail_top top viewbox keyboard evidence")
+SLEEVE_FITS = {
+    "navman-gps-sleeve": SleeveFit(
+        "h3900", .762, -208, 391, 90, (-265, 1340), False,
+        "Owner's photograph of the sleeve on an h3900; other pairings transfer that seating."),
+    "ipaq-keyboard-sleeve": SleeveFit(
+        "h5550", .76, 118, 17.28, 120, (-.25, 1510), True,
+        "Owner's photograph of the sleeve on an h5550; other pairings transfer that seating."),
+}
+
+
+# Top edge of each sleeve-capable body where the right rail holds it (x=680;
+# the h5550 stylus interrupts the left), in frame units. A transferred fit
+# keeps the reference photograph's rail-top-to-body-top offset.
+SLEEVE_BODY_TOPS = {"h3900": 84, "h5550": 109}
+
+
+def sleeve_devices():
+    catalog = json.loads((REPOSITORY / "accesoires/compatibility.json").read_text())
+    return tuple(key for key in MODELS
+                 if "interface:ipaq-expansion-sleeve" in catalog["devices"].get(key, ()))
+
+
+def compose_sleeve(drawing, device, sleeve, fonts):
+    """Put a sleeve around an iPAQ: carrier behind, rails and keyboard in front."""
+    def parse(text):
+        return ET.fromstring(text, parser=ET.XMLParser(target=ET.TreeBuilder(insert_comments=True)))
+
+    def q(tag):
+        return f"{{{SVG_NS}}}{tag}"
+
+    fit = SLEEVE_FITS[sleeve]
+    root = parse(drawing)
+    accessory = namespace_ids(parse(ACCESSORY_MODELS[sleeve].build(fonts)), "sleeve-")
+    accessory_ids = {node.get("id") for node in accessory.iter() if node.get("id")}
+    device_ids = {node.get("id") for node in root.iter() if node.get("id")}
+    if (accessory_ids | {"sleeve-back", "sleeve-front", "sleeve-chassis-occlusion"}) & device_ids:
+        raise ValueError("device IDs collide with the sleeve namespace")
+    back, front = [], []
+    if fit.keyboard:
+        # The keyboard covers the handheld's lower controls.
+        for node in root.iter():
+            if node.get("id") in ("navigation", "navpad", "app-buttons"):
+                node.set("display", "none")
+                node.set("data-occluded-by", sleeve)
+        art = accessory.find(f"{q('g')}[@id='sleeve-sleeve-art']")
+        carrier = art.find(f"{q('g')}[@id='sleeve-carrier']")
+        for node in carrier:
+            (front if node.get("id", "").startswith("sleeve-rail-") else back).append(node)
+        panel = ET.Element(q("g"), {"transform": "translate(0 32)",
+                                    "data-seating": "below the lower printed bezel"})
+        for node in art:
+            if node is carrier:
+                continue
+            (back if node.get("id") == "sleeve-connector" else panel).append(node)
+        front.append(panel)
+        for nodes in (back, front):
+            group = ET.Element(q("g"), {"transform": art.get("transform")})
+            group.extend(nodes)
+            nodes[:] = [group]
+    else:
+        for node in accessory:
+            if not isinstance(node.tag, str) or node.tag in (q("defs"), q("title"), q("desc")):
+                continue
+            identity = node.get("id", "")
+            is_front = (identity.startswith("sleeve-rail-")
+                        or identity in ("sleeve-cf-slot", "sleeve-cf-eject")
+                        or "rotate(-90)" in node.get("transform", ""))
+            (front if is_front else back).append(node)
+    defs = root.find(q("defs"))
+    if defs is None:
+        defs = ET.Element(q("defs"))
+        root.insert(0, defs)
+    defs.extend(list(accessory.find(q("defs"))))
+    scale = fit.scale * CAMERA_POSES[device].scale / CAMERA_POSES[fit.reference].scale
+    reference_scale = fit.scale
+    offset = (fit.y + fit.rail_top * reference_scale) - SLEEVE_BODY_TOPS[fit.reference]
+    y = SLEEVE_BODY_TOPS[device] + offset - fit.rail_top * scale
+    shift = y - fit.y
+    transform = f"translate({fmt3(400 - 520 * scale)} {fmt3(y)}) scale({scale:.6f})"
+    for layer, nodes in (("back", back), ("front", front)):
+        group = ET.Element(q("g"), {"id": f"sleeve-{layer}", "transform": transform,
+                                    "data-accessory": sleeve, "data-layer": layer})
+        group.extend(nodes)
+        if layer == "back":
+            position = next((i for i, child in enumerate(root) if isinstance(child.tag, str)
+                             and child.tag not in (q("title"), q("desc"), q("defs"), q("style"), q("metadata"))),
+                            len(root))
+            root.insert(position, group)
+        else:
+            root.append(group)
+    # The carrier hides the handheld's side edges below its top.
+    clip = ET.SubElement(defs, q("clipPath"), {
+        "id": "sleeve-chassis-occlusion", "clipPathUnits": "userSpaceOnUse"})
+    ET.SubElement(clip, q("path"), {
+        "d": f"M-1000 -1000 H2000 V{fmt3(fit.top + shift)} H{fmt3(400 + 480 * scale)} "
+             f"V2000 H{fmt3(400 - 480 * scale)} V{fmt3(fit.top + shift)} H-1000 Z"})
+    for index, node in enumerate(list(root)):
+        if node.tag == q("g") and not node.get("id", "").startswith("sleeve-"):
+            group = ET.Element(q("g"), {"clip-path": "url(#sleeve-chassis-occlusion)"})
+            root.remove(node)
+            group.append(node)
+            root.insert(index, group)
+    title = root.find(q("title"))
+    name = accessory.find(q("title")).text
+    if title is None:
+        title = ET.Element(q("title"), {"id": "sleeve-title"})
+        root.insert(0, title)
+        root.set("role", "img")
+        root.set("aria-labelledby", "sleeve-title")
+    title.text = f"HP iPAQ {device} in the {name}"
+    description = ET.Element(q("desc"), {"id": "sleeve-description"})
+    description.text = ("Front-view physical attachment study, not driver compatibility. "
+                        "Carrier back and connector sit behind the handheld; rails and keyboard "
+                        "sit in front. Screen coordinates are unchanged. " + fit.evidence)
+    root.insert(list(root).index(title) + 1, description)
+    top, bottom = (value + shift for value in fit.viewbox)
+    root.set("viewBox", f"-0.3125 {fmt3(top)} 800.625 {fmt3(bottom - top)}")
+    if "width" in root.attrib:
+        root.set("height", fmt3(float(root.get("width")) * (bottom - top) / 800.625))
+    root.set("data-sleeve", sleeve)
+    ET.register_namespace("", SVG_NS)
+    text = ET.tostring(root, encoding="unicode") + "\n"
+    return text.replace("SPDX-License-Identifier: GPL-2.0-or-later",
+                        "SPDX-License-Identifier: CC-BY-SA-4.0")
 
 
 def validate_svg(drawing, model):
@@ -4379,6 +4532,11 @@ def validate_svg(drawing, model):
                 or root.get("data-keyboard-accessory") != "attached" or viewbox != expected
                 or sum(identity.startswith("key-") for identity in ids) != 37):
             raise ValueError("invalid h2200 clip-on keyboard composition")
+    if model.sleeve:
+        back, front = ids.get("sleeve-back"), ids.get("sleeve-front")
+        if (root.get("data-sleeve") != model.sleeve or back not in list(root)
+                or front is not list(root)[-1]):
+            raise ValueError("missing or incorrect sleeve composition")
     if model.keyboard and not (model.source or model.slider) and root.get("id") != "c700-laptop":
         raise ValueError("keyboard mode requires an open slider, C700 laptop or h2200 add-on")
     for name in ("led-mail", "led-charge"):
@@ -4387,13 +4545,15 @@ def validate_svg(drawing, model):
     return root
 
 
-def select_models(names, camera=None, keyboard=False):
+def select_models(names, camera=None, keyboard=False, sleeve=None):
     selected = {}
     available = {**MODELS, **CAMERA_MODELS, **MANUAL_MODELS, **ACCESSORY_MODELS}
     for name in names:
         keys = ALIASES.get(name, (name,))
         if name == "all":
-            if keyboard:
+            if sleeve:
+                keys = sleeve_devices()
+            elif keyboard:
                 keys = tuple(key for key, model in MODELS.items()
                              if model.slider or key == "sl-c700-laptop") + ("h2200",)
             elif camera:
@@ -4410,8 +4570,6 @@ def select_models(names, camera=None, keyboard=False):
                 if not (model.slider or key in ("h2200", "sl-c700-laptop")):
                     raise ValueError(f"{key}: no supported keyboard mode")
                 base = Path(model.path)
-                if model.source:
-                    base = Path("accesoires/h2200-keyboard") / base.name
                 model = replace(model, keyboard=True,
                                 path=str(base.with_name(f"{base.stem}-keyboard.svg")),
                                 fonts=("OpenSans_Regular.ttf", "OpenSans_Bold.ttf") if model.source else model.fonts)
@@ -4422,13 +4580,20 @@ def select_models(names, camera=None, keyboard=False):
                     raise ValueError("cannot attach a camera to a standalone accessory")
                 if key not in CAMERA_POSES:
                     raise ValueError(f"{key}: no researched SD-slot camera pose; composition is unavailable")
-                if key == "h2200" and not keyboard:
-                    suffix = "" if camera == "front" else "-" + camera
-                    path = f"accesoires/hp-photosmart-camera/on-h2200{suffix}.svg"
-                else:
-                    base = Path(model.path)
-                    path = str(base.with_name(f"{base.stem}-camera-{camera}.svg"))
+                base = Path(model.path)
+                path = str(base.with_name(f"{base.stem}-camera-{camera}.svg"))
                 model = replace(model, path=path, camera=camera, camera_pose=CAMERA_POSES[key])
+            if sleeve:
+                if camera or keyboard:
+                    raise ValueError("--sleeve cannot be combined with --camera or --keyboard")
+                if sleeve not in SLEEVE_FITS:
+                    raise ValueError(f"unknown sleeve: {sleeve}")
+                if key not in sleeve_devices():
+                    raise ValueError(f"{key}: no iPAQ expansion-sleeve interface")
+                base = Path(model.path)
+                model = replace(model, path=str(base.with_name(f"{base.stem}-{sleeve}.svg")),
+                                sleeve=sleeve,
+                                fonts=tuple(dict.fromkeys(model.fonts + ACCESSORY_MODELS[sleeve].fonts)))
             selected[key] = model
     if not selected:
         raise ValueError("select a model or 'all'; use --list")
@@ -4445,7 +4610,7 @@ def generate(selected, font_directory):
         for name, model in selected.items():
             drawing = ((REPOSITORY / model.source).read_text(encoding="utf-8")
                        if model.source else model.build(fonts))
-            validate_svg(drawing, replace(model, camera="", camera_pose=None, keyboard=False))
+            validate_svg(drawing, replace(model, camera="", camera_pose=None, keyboard=False, sleeve=""))
             if model.keyboard:
                 if model.source:
                     drawing = compose_keyboard(drawing, fonts)
@@ -4453,6 +4618,8 @@ def generate(selected, font_directory):
                     drawing = open_keyboard(drawing, model.slider)
             if model.camera:
                 drawing = compose_camera(drawing, model.camera, model.camera_pose)
+            if model.sleeve:
+                drawing = compose_sleeve(drawing, name, model.sleeve, fonts)
             validate_svg(drawing, model)
             drawings[name] = drawing.encode("utf-8")
     return drawings
@@ -4544,16 +4711,18 @@ def main(argv=None):
                             help="compose a camera using a researched SD-slot pose; variant paths only")
         parser.add_argument("--keyboard", action="store_true",
                             help="open a Zaurus slider, select C700 laptop mode or attach the h2200 keyboard; combines with --camera")
+        parser.add_argument("--sleeve", choices=tuple(SLEEVE_FITS),
+                            help="put a sleeve-capable iPAQ in an expansion sleeve; variant paths only")
         args = parser.parse_args(argv)
         if args.compatible:
-            if args.models or args.output or args.output_dir or args.check or args.camera or args.keyboard or args.list:
+            if args.models or args.output or args.output_dir or args.check or args.camera or args.keyboard or args.sleeve or args.list:
                 raise ValueError("--compatible cannot be combined with generation options")
             for name, item in compatible_accessories(args.compatible, args.with_accessory).items():
                 print(f"{name:24} {item['name']}")
         elif args.with_accessory:
             raise ValueError("--with-accessory requires --compatible")
         elif args.list:
-            if args.models or args.output or args.output_dir or args.check or args.camera or args.keyboard:
+            if args.models or args.output or args.output_dir or args.check or args.camera or args.keyboard or args.sleeve:
                 raise ValueError("--list cannot be combined with generation options")
             for name, model in {**MODELS, **CAMERA_MODELS, **ACCESSORY_MODELS}.items():
                 print(f"{name:16} {model.path}")
@@ -4562,8 +4731,9 @@ def main(argv=None):
             print("accessories      three CF cards and two iPAQ expansion sleeves")
             print("h2200            manual source; compose with --camera and/or --keyboard")
             print("Camera poses: " + ", ".join(CAMERA_POSES))
+            print("Sleeve devices: " + ", ".join(sleeve_devices()))
         else:
-            selected = select_models(args.models, args.camera, args.keyboard)
+            selected = select_models(args.models, args.camera, args.keyboard, args.sleeve)
             if args.output and (len(selected) != 1 or args.output.suffix.lower() != ".svg"):
                 raise ValueError("--output requires exactly one view and a .svg filename")
             if args.output:
@@ -4576,8 +4746,10 @@ def main(argv=None):
                     for view in ("front", "away", "swivel"):
                         reserved.add(f"{stem}-camera-{view}.svg")
                         reserved.add(f"{stem}-keyboard-camera-{view}.svg")
-                reserved.update(f"on-h2200{suffix}.svg" for suffix in ("", "-away", "-swivel"))
+                    for fit in SLEEVE_FITS:
+                        reserved.add(f"{stem}-{fit}.svg")
                 own_stem = Path(available[name].path).stem + ("-keyboard" if args.keyboard else "")
+                own_stem += f"-{args.sleeve}" if args.sleeve else ""
                 own_name = own_stem + (f"-camera-{args.camera}" if args.camera else "") + ".svg"
                 if args.output.name in reserved and args.output.name not in (Path(model.path).name, own_name):
                     raise ValueError(f"{args.output.name} is reserved for another model or variant")

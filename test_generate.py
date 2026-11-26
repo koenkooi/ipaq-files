@@ -180,10 +180,14 @@ class GeneratorTests(unittest.TestCase):
             self.cli("h2200", "--camera", view, "--check", "--output-dir", self.directory,
                      success=True, no_site=True)
             model = generator.select_models(["h2200"], view)["h2200"]
+            self.assertEqual(model.path, f"h2200/ipaq-h2200-camera-{view}.svg")
             root = generator.validate_svg((self.directory / model.path).read_bytes(), model)
             self.assertIsNone(root.get("width"))
             self.assertIsNone(root.get("height"))
         self.assertEqual(source.read_bytes(), original)
+        camera_dir = generator.REPOSITORY / "accesoires/hp-photosmart-camera"
+        for filename in ("on-h2200.svg", "on-h2200-away.svg", "on-h2200-swivel.svg"):
+            self.assertFalse((camera_dir / filename).exists())
         self.assertFalse((self.directory / generator.MANUAL_MODELS["h2200"].source).exists())
 
     def test_c700_shortcuts_share_glyphs_and_lid_rotation(self):
@@ -394,7 +398,13 @@ class GeneratorTests(unittest.TestCase):
                 self.assertIn(f"-keyboard-camera-{camera}.svg", model.path)
             else:
                 self.assertEqual(root.get("viewBox"), "0 0 800 1400")
-                self.assertEqual(result, (generator.REPOSITORY / model.path).read_bytes())
+                standalone = generator.ET.parse(
+                    generator.REPOSITORY / generator.ACCESSORY_MODELS["h2200-keyboard"].path).getroot()
+                self.assertEqual(standalone.get("data-frame"), "h2200/ipaq-h2200.svg")
+                for element in (standalone.find(f"{{{generator.SVG_NS}}}g"), ids["addon-keyboard"]):
+                    element.tail = None
+                self.assertEqual(generator.ET.tostring(standalone.find(f"{{{generator.SVG_NS}}}g")),
+                                 generator.ET.tostring(ids["addon-keyboard"]))
         self.assertEqual(source.read_bytes(), original)
 
     def test_keyboard_rejects_other_models_and_nonvariant_outputs(self):
@@ -410,6 +420,37 @@ class GeneratorTests(unittest.TestCase):
             self.cli(*arguments, success=False)
         self.assertEqual(list(self.directory.iterdir()), [protected])
         self.assertEqual(protected.read_bytes(), b"manual original")
+
+    def test_sleeves_seat_each_ipaq_at_the_photographed_rail_offset(self):
+        fonts = Path(os.environ.get("IPAQ_FONTS", "/Library/Fonts"))
+        selected = {(device, sleeve): model for sleeve in generator.SLEEVE_FITS
+                    for device, model in generator.select_models(["all"], sleeve=sleeve).items()}
+        required = {filename for model in selected.values() for filename in model.fonts}
+        missing = sorted(filename for filename in required if not (fonts / filename).is_file())
+        if importlib.util.find_spec("fontTools") is None or missing:
+            self.skipTest(f"sleeve composition needs fontTools and fonts in {fonts}; missing: {missing}")
+        self.assertEqual({device for device, _ in selected}, {"h3900", "h5550"})
+        offsets = {}
+        for (device, sleeve), model in selected.items():
+            drawing = generator.generate({device: model}, fonts)[device]
+            root = generator.validate_svg(drawing, model)
+            ids = {node.get("id"): node for node in root.iter() if node.get("id")}
+            values = ids["sleeve-front"].get("transform").replace("(", " ").replace(")", " ").split()
+            y, scale = float(values[2]), float(values[4])
+            fit = generator.SLEEVE_FITS[sleeve]
+            rail_top = y + fit.rail_top * scale
+            offsets.setdefault(sleeve, []).append(rail_top - generator.SLEEVE_BODY_TOPS[device])
+            if device == fit.reference:
+                self.assertAlmostEqual(y, fit.y, places=2)
+            front = list(ids["sleeve-front"].iter())
+            self.assertEqual(sum((node.get("id") or "").startswith("sleeve-key-") for node in front),
+                             41 if fit.keyboard else 0)
+        for sleeve, values in offsets.items():
+            self.assertAlmostEqual(values[0], values[1], places=2, msg=sleeve)
+        for arguments in (("h3900", "--sleeve", "navman-gps-sleeve", "--camera", "front"),
+                          ("hx4700", "--sleeve", "ipaq-keyboard-sleeve")):
+            self.cli(*arguments, "--output-dir", self.directory, success=False, no_site=True)
+        self.assertEqual(list(self.directory.iterdir()), [])
 
     def test_keyboard_selection_uses_each_devices_available_configuration(self):
         keyboards = {"sl-5500", "sl-5600", "sl-6000", "sl-c700-laptop", "h2200"}

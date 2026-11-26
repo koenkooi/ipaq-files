@@ -7,7 +7,7 @@ Previews share an approximate physical scale of 1.5 CSS pixels per millimetre, b
 <table>
 <thead><tr><th>Device</th><th nowrap>Regular (closed or folded)</th><th nowrap>Keyboard (opened or attached)</th><th nowrap>Camera attached</th></tr></thead>
 <tbody>
-<tr valign="top"><td>iPAQ h2200</td><td><a href="h2200/ipaq-h2200.svg"><img src="h2200/preview.png" width="119" alt="h2200"></a></td><td><a href="accesoires/h2200-keyboard/ipaq-h2200-keyboard.svg"><img src="accesoires/h2200-keyboard/preview-keyboard.png" width="119" alt="h2200 with thumb keyboard"></a></td><td><a href="accesoires/hp-photosmart-camera/on-h2200.svg"><img src="accesoires/hp-photosmart-camera/preview-on-h2200.png" width="119" alt="h2200 with Photosmart camera"></a></td></tr>
+<tr valign="top"><td>iPAQ h2200</td><td><a href="h2200/ipaq-h2200.svg"><img src="h2200/preview.png" width="119" alt="h2200"></a></td><td><a href="accesoires/h2200-keyboard/h2200-keyboard.svg"><img src="accesoires/h2200-keyboard/preview-keyboard.png" width="119" alt="h2200 with thumb keyboard"></a></td><td><a href="accesoires/hp-photosmart-camera/hp-photosmart-camera.svg"><img src="accesoires/hp-photosmart-camera/preview-on-h2200.png" width="119" alt="h2200 with Photosmart camera"></a></td></tr>
 <tr valign="top"><td>iPAQ h3900</td><td><a href="h3900/h3900-framed-template.svg"><img src="h3900/preview.png" width="136" alt="h3900"></a></td><td></td><td></td></tr>
 <tr valign="top"><td>iPAQ h5550</td><td><a href="h5550/h5550-framed-template.svg"><img src="h5550/preview.png" width="136" alt="h5550"></a></td><td></td><td></td></tr>
 <tr valign="top"><td>iPAQ hx2700</td><td><a href="hx2700/hx2700-framed-template.svg"><img src="hx2700/preview.png" width="124" alt="hx2700"></a></td><td></td><td></td></tr>
@@ -93,7 +93,7 @@ The SL-5500 US QWERTY layout follows Sharp's [Start-up Guide](https://archive.or
 
 The black SL-6000 follows Sharp's [product photographs and specifications](https://jp.sharp/products/sl6000/) and [operation manual](https://www.manualslib.com/manual/807955/Sharp-Sl-6000l.html?page=27). Its protective flip cover is omitted. The small left dot-marked button is a second OK control, not a printed Ctrl key. Wireless indicators vary between N/L/W models; the drawing exposes both wireless lights for simulation.
 
-The optional h2200 keyboard follows the owner's attached and detached photographs: 37 domed keys in bowed rows, orange alternate legends and blue casing legends. It covers the lower controls, as the real accessory does, without moving or covering the screen. `addon-keyboard` contains independent `key-*` targets. The original h2200 SVG remains unchanged.
+The optional h2200 keyboard follows the owner's attached and detached photographs: 37 domed keys in bowed rows, orange alternate legends and blue casing legends. It covers the lower controls without moving or covering the screen. `addon-keyboard` contains independent `key-*` targets. [h2200-keyboard.svg](accesoires/h2200-keyboard/h2200-keyboard.svg) uses h2200 frame coordinates and can be overlaid without a transform. Generate the attached view with `python3 generate.py h2200 --keyboard`.
 
 ## SL-C700 views and controls
 
@@ -144,9 +144,11 @@ Fonts are needed only for device and keyboard regeneration; their lettering rema
 
 `--output-dir` preserves the repository's model subdirectories; without it, outputs go beside this script in their usual model directories. `--output` selects one exact `.svg` path and requires a single view. `--check` regenerates and compares exact bytes without writing. Every CLI invocation ends with exactly one `SUCCESS` or `FAILURE` line; failures exit nonzero. All selected drawings are built and checked before writing, staged files are read back, and each destination is replaced atomically and verified. A filesystem failure during final replacement can leave a partially updated batch; a failed run must not be treated as complete. Checks include XML, unique IDs, screen geometry and sliding-frame fragment controls.
 
-`--camera front|away|swivel` writes a `-camera-VIEW.svg` variant rather than overwriting the base frame. For h2200 without the keyboard, the front and swivel views retain `accesoires/hp-photosmart-camera/on-h2200.svg` and `on-h2200-swivel.svg`. With `--camera`, `all` also includes the manual h2200.
+`--camera front|away|swivel` writes a `-camera-VIEW.svg` variant rather than overwriting the base frame. The h2200 variants are generated as `h2200/ipaq-h2200-camera-VIEW.svg`, or `h2200/ipaq-h2200-keyboard-camera-VIEW.svg` with `--keyboard`. With `--camera`, `all` also includes the manual h2200.
 
 `--keyboard` opens the SL-5500/5600/6000 sliders, selects laptop mode for either C700 view or the `sl-c700` alias, and attaches the h2200 thumb keyboard. It writes `-keyboard.svg` variants; combining flags writes `-keyboard-camera-VIEW.svg`. Open slider variants work in static renderers and retain interactive open/closed fragments. `all --keyboard` selects these five keyboard-capable configurations, skipping iPAQs with no supported keyboard drawing; explicitly selecting an unsupported model is an error.
+
+`--sleeve navman-gps-sleeve|ipaq-keyboard-sleeve` writes a `<frame>-<sleeve>.svg` variant for the h3900 or h5550; `all` selects both. It cannot be combined with `--camera` or `--keyboard`.
 
 Custom `--output` paths must not use a protected base or other variant's filename. Accessory canvases expand without changing screen coordinates; use their own `#open` and `#closed` viewBoxes when changing slider state.
 
@@ -182,9 +184,9 @@ python3 generate.py --compatible h5550 --with-accessory cf-sleeve
 
 ## The camera
 
-`accesoires/hp-photosmart-camera/` contains front, away-facing, elevated and animated swivel views of the 1.3 MP HP Photosmart Mobile Camera, plus `on-h2200.svg` and `on-h2200-swivel.svg`. The composites extend the viewBox upwards without moving the screen. The SD plug is scaled to 24 mm against the h2200's 71 mm body width.
+`accesoires/hp-photosmart-camera/` contains front, away-facing, elevated and animated swivel views of the 1.3 MP HP Photosmart Mobile Camera. Attached variants extend the viewBox without moving the screen.
 
-The head, lens barrel and focus marks rotate together around the horizontal body-to-head axis; the body and plug stay fixed. The 10-second SMIL loop needs no script. Rounded shell corners, inset bevels, the swivel seam and barrel seating replace the sharp box-like transitions. Surfaces, logos and lettering remain simplified; compare the front and elevated views rather than treating them as a CAD reconstruction. Regenerate with `python3 generate.py camera`, then `python3 generate.py h2200 --camera front` or `--camera swivel` for the legacy composites.
+The head, lens barrel and focus marks rotate together around the horizontal body-to-head axis; the body and plug stay fixed. The 10-second SMIL loop needs no script. Generate the camera drawings with `python3 generate.py camera` and an attached view with `python3 generate.py h2200 --camera front` or `--camera swivel`.
 
 Camera placement follows each device's SD slot, not its CompactFlash slot. Slot edges are verified; exact seating coordinates and swivel clearances are estimated from photographs and diagrams.
 
