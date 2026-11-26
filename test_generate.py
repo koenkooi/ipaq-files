@@ -210,6 +210,7 @@ class GeneratorTests(unittest.TestCase):
             "h2200": ("bluetooth", "power"),
             "h3900": ("bluetooth", "power"),
             "h5550": ("bluetooth", "power", "wlan"),
+            "hx2700": ("radio", "charge"),
             "hx4700": ("wireless", "notification", "power"),
         }
         for model, leds in expected.items():

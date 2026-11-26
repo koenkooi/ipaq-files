@@ -8,6 +8,7 @@ Vector front views of HP and Compaq iPAQ and Sharp Zaurus handhelds, used as fra
 | iPAQ h2200 with thumb keyboard | [h2200/ipaq-h2200-keyboard.svg](h2200/ipaq-h2200-keyboard.svg) | <img src="h2200/preview-keyboard.png" width="183" alt="h2200 with keyboard"> | x=137.5 y=168 525 x 700 | 240x320 |
 | iPAQ h3900 | [h3900/h3900-framed-template.svg](h3900/h3900-framed-template.svg) | ![h3900](h3900/preview.png) | x=137.5 y=244.75 525 x 700 | 240x320 |
 | iPAQ h5550 | [h5550/h5550-framed-template.svg](h5550/h5550-framed-template.svg) | ![h5550](h5550/preview.png) | x=137.5 y=244.75 525 x 700 | 240x320 |
+| iPAQ hx2700 | [hx2700/hx2700-framed-template.svg](hx2700/hx2700-framed-template.svg) | ![hx2700](hx2700/preview.png) | x=137.5 y=244.75 525 x 700 | 240x320 |
 | iPAQ hx4700 | [hx4700/hx4700-framed-template.svg](hx4700/hx4700-framed-template.svg) | ![hx4700](hx4700/preview.png) | x=137.5 y=244.75 525 x 700 | 480x640 |
 | Zaurus SL-5500 (Collie) | [sl-5500/sl-5500-framed-template.svg](sl-5500/sl-5500-framed-template.svg) | <img src="sl-5500/preview.png" width="183" alt="Collie closed"> <img src="sl-5500/preview-open.png" width="183" alt="Collie open"> | x=137.5 y=168 525 x 700 | 240x320 |
 | Zaurus SL-5600 (Poodle) | [sl-5600/sl-5600-framed-template.svg](sl-5600/sl-5600-framed-template.svg) | <img src="sl-5600/preview.png" width="183" alt="SL-5600 closed"> <img src="sl-5600/preview-open.png" width="183" alt="SL-5600 open"> | x=137.5 y=168 525 x 700 | 240x320 |
@@ -18,7 +19,7 @@ Vector front views of HP and Compaq iPAQ and Sharp Zaurus handhelds, used as fra
 
 The h3900 and h5550 share a body outline (same width, same expansion sleeves). The 240x320 screens use 2.1875 units per pixel; the VGA screens use 1.09375.
 
-The h2200 and Zaurus frames have no fixed display dimensions and scale to the browser window. Set an explicit width when embedding them if needed; the viewBox preserves their proportions.
+The h2200, hx2700 and Zaurus frames have no fixed display dimensions and scale to the browser window. Set an explicit width when embedding them if needed; the viewBox preserves their proportions.
 
 ## Using a frame
 
@@ -66,9 +67,10 @@ The iPAQ frames expose their status lights the same way, all unlit initially. To
 | h2200 | `led-bluetooth` (left), `led-power` (right) | `#b8b2a5` | [HP QuickSpecs, items 8 and 9](https://www.manualslib.com/manual/661575/Hp-Ipaq-H2200-Series.html) and the owner's photograph |
 | h3900 | `led-bluetooth` (left light pipe, h3970 only), `led-power` (right, beside the power button) | `#8e9195` | [HP Getting Started, page 8](https://www.manualslib.com/manual/359385/Hp-Ipaq-H3900.html?page=8) |
 | h5550 | `led-power` (beside the power button); `led-bluetooth` and `led-wlan` (left column, below `light-sensor`) | `#121315`, `#2a2b2d` | [HP Getting Started](https://www.manualslib.com/manual/277300/Hp-Ipaq-H5100.html) and ["HP Ipaq 5550.jpg"](https://commons.wikimedia.org/wiki/File:HP_Ipaq_5550.jpg) |
+| hx2700 | `led-radio` (left), `led-charge` (right) | `#2a2a2f` | [HP hx2000 User's Guide, specifications table](https://archive.org/details/central-manuals-_hp_IPAQ_HX2000_SERIES_EN.pdf) |
 | hx4700 | `led-wireless` (top), `led-notification`, `led-power` | `#a1a2a4` | [HP User's Guide, printed 8-2](https://www.manualslib.com/manual/72007/Hp-Ipaq-Hx4700.html?page=100) |
 
-HP documents amber flashing for charging, solid amber for charged and green flashing for alarms on the power lights. Bluetooth is blue on all four; the h5550 WLAN light flashes green with a link and amber without; the hx4700 wireless light is solid blue for Wi-Fi or Bluetooth. The order of the h5550 left column and of the two lower hx4700 lights follows HP's callout sequence and is unverified, because no photograph found shows them lit.
+HP documents amber flashing for charging, solid amber for charged and green flashing for alarms on the power lights. Bluetooth is blue on all four; the h5550 WLAN light flashes green with a link and amber without; the hx4700 wireless light is solid blue for Wi-Fi or Bluetooth. The hx2700 radio light blinks blue while any radio is on, and its charge light also flashes green for notifications. The order of the h5550 left column and of the two lower hx4700 lights follows HP's callout sequence and is unverified, because no photograph found shows them lit.
 
 Some static SVG renderers ignore fragment views or CSS transforms. To export the open view with those tools, set `viewBox="0 40 800 1670"` on a Collie copy and `transform="translate(0 290)"` on its `<g id="slider">`. For the SL-5600, use `viewBox="0 40 800 1750"` and `transform="translate(0 370)"`; for the SL-6000, use `viewBox="0 40 800 1720"` and `transform="translate(0 340)"`.
 
@@ -90,7 +92,7 @@ The key faces and lower controls share one perspective plane; their legends use 
 
 ## Regenerating
 
-`generate.py` draws the h3900, h5550, hx4700, SL-5500, SL-5600, SL-6000, both C700 views, h2200 keyboard and Photosmart camera from geometry. The h2200 frame is manually maintained: accessory generation reads that SVG without modifying it.
+`generate.py` draws the h3900, h5550, hx2700, hx4700, SL-5500, SL-5600, SL-6000, both C700 views, h2200 keyboard and Photosmart camera from geometry. The h2200 frame is manually maintained: accessory generation reads that SVG without modifying it.
 
 ```sh
 python3 generate.py --list
@@ -119,7 +121,7 @@ Use Python 3.8+ and [fontTools](https://pypi.org/project/fonttools/) (`python3 -
 |---|---|
 | h3900 | `Mukta_Regular.ttf`, `OpenSans_BoldItalic.ttf` |
 | h5550 | `Roboto_Bold.ttf`, `Roboto_Regular.ttf` |
-| hx4700 | `OpenSans_Bold.ttf` |
+| hx2700, hx4700 | `OpenSans_Bold.ttf` |
 | SL-5500, SL-5600, SL-6000, C700 folded, h2200 keyboard | `OpenSans_Regular.ttf`, `OpenSans_Bold.ttf` |
 | C700 laptop | `OpenSans_Regular.ttf`, `OpenSans_Bold.ttf`, `NotoSansCJKjp_Regular.otf` |
 
@@ -143,6 +145,12 @@ These are measured front-view approximations, not CAD or traced photographs. Ref
 - **h5550:** the same expansion-sleeve body envelope is used, despite the photograph suggesting a wider body. The envelope moves down 41 photo pixels; outside the screen band, vertical spacing scales by about 0.948, while round controls retain their size. The body is approximately 1 mm shorter than the h3900 (published 133 versus 134 mm). The photograph's warm lamp cast is neutralised to silver-grey; the power button is a chrome dome with a power symbol, and the smaller adjacent window is the power indicator, lit in a charging photograph. The hp letters cut through the badge disc.
 - **hx4700:** the rectified glass is 1776×2368 photo pixels, mapped at 525/1776 SVG units per pixel. Face-plane features are recentered by 22 photo pixels to remove camera parallax. The body ratio is about 1.71 versus the published 131×77 mm ratio of 1.70. The asymmetric cap, chamfered lower corners and grain are intentional; unreadable small labels are represented by faint marks rather than invented words.
 
+- **hx2700:** measured from the hx2110 front photograph, which shares the chassis. The mapping is 525/923 SVG units per photo pixel horizontally and 4% more vertically, which corrects the photograph's vertical compression to the published 119×76.6 mm. The hx2750/hx2790/hx2795 fingerprint reader is a recessed, beveled channel directly below the screen; the hx2110, hx2410 and hx2490 have no reader and a centred wordmark.
+
+### hx2700 controls
+
+The face has `button-power`, `button-calendar`, `button-contacts`, `button-mail`, `button-itask`, the 5-way `button-up`, `button-down`, `button-left`, `button-right` and `button-select`, and `fingerprint-sensor`. Calendar and iTask are named in HP's guide; contacts and mail are read from the key icons. Not drawn, because they are off the front face: the SD and Type II CF slots stacked on the top edge, the 3.5 mm headphone jack and IR port on top, the record button on the left side, and the recessed reset and sync connector on the bottom.
+
 ## The camera
 
 `hp-photosmart-camera/` contains front, away-facing, elevated and animated swivel views of the 1.3 MP HP Photosmart Mobile Camera, plus `on-h2200.svg` and `on-h2200-swivel.svg`. The composites extend the viewBox upwards without moving the screen. The SD plug is scaled to 24 mm against the h2200's 71 mm body width.
@@ -156,6 +164,7 @@ Camera placement follows each device's SD slot, not its CompactFlash slot. Slot 
 | h2200 | top | owner's photograph with the camera attached |
 | h3900 | top | [HP QuickSpecs, item 15](https://www.manualslib.com/manual/661584/Hp-Compaq-Ipaq-H3900-Series.html) |
 | h5550 | top, near centre, to the right of the WLAN antenna | [HP QuickSpecs, item 18](https://www.manualslib.com/manual/661587/Hp-Ipaq-H5500-Series.html?page=1) |
+| hx2700 | top, stacked above CompactFlash, about 4 mm left of centre | [hx2110 back photograph](https://commons.wikimedia.org/wiki/Category:HP_iPAQ_hx2110) by Yuri Litvinenko |
 | hx4700 | top | [HP User's Guide, printed 11-2](https://www.manualslib.com/manual/72007/Hp-Ipaq-Hx4700.html?page=144) |
 | SL-5500 | left long edge, around mid-body | [Sharp Start-up Guide, printed 20 and 63](https://archive.org/download/ZaurusSL5500Software/SL5500SUG_Final.pdf) |
 | SL-5600 | left long edge, around mid-screen | [Sharp SL-5600 brochure, expansion-slot callout 1](https://web.archive.org/web/20050128181429/http://www.sharpusa.com/files/hpc_dow_SL_5600BRO.pdf) |
@@ -168,6 +177,7 @@ The laptop C700's display and hinge largely obscure a camera inserted at the rea
 
 | What | Source | Licence |
 |---|---|---|
+| hx2700 reference photographs (geometry measured, nothing traced) | [HP iPAQ hx2110 photographs](https://commons.wikimedia.org/wiki/Category:HP_iPAQ_hx2110) by Yuri Litvinenko, Wikimedia Commons | [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/) |
 | hx4700 reference photograph (geometry measured, nothing traced) | "HP iPAQ hx4700 - Front.jpg" by Beamish4, Wikimedia Commons | CC BY-SA 4.0 |
 | Collie reference photograph (geometry measured, nothing traced) | ["Sharp Zaurus SL-5500G.jpg"](https://commons.wikimedia.org/wiki/File:Sharp_Zaurus_SL-5500G.jpg) by Wusel007, Wikimedia Commons | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/) |
 | SL-5600 reference photographs (geometry measured, nothing traced) | ["Zaurus SL-5600"](https://www.flickr.com/photos/dronecatcher/51187902024/) by Wayne Sadler and ["Sharp Zaurus SL-5600 (poodle)"](https://www.flickr.com/photos/vickyken/3484833409/) by VickyKenKiyomi | reference only, not distributed |

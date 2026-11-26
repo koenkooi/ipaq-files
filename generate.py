@@ -1265,6 +1265,41 @@ def build_h5550(fonts):
     return build()
 
 
+def rounded(pts, radii):
+    """Closed polygon with each corner rounded by a quadratic of the given cut-back."""
+    n = len(pts)
+    d = ''
+    for i in range(n):
+        prv, cur, nxt = pts[i - 1], pts[i], pts[(i + 1) % n]
+        r = radii[i]
+        def toward(a, b, dist):
+            dx, dy = b[0] - a[0], b[1] - a[1]
+            ln = math.hypot(dx, dy)
+            k = min(dist / ln, 0.5) if ln else 0
+            return (a[0] + dx * k, a[1] + dy * k)
+        a = toward(cur, prv, r)
+        b = toward(cur, nxt, r)
+        d += ('M' if i == 0 else ' L') + f'{f(a[0])},{f(a[1])} Q{f(cur[0])},{f(cur[1])} {f(b[0])},{f(b[1])}'
+    return d + ' Z'
+
+
+def hp_monogram(R):
+    """The slanted hp letters on a badge disc of radius R, as one path."""
+    # hp letters on a unit grid (disc radius 1), slanted strokes
+    sl = 0.32   # horizontal shift per unit of height (italic slant)
+    def bar(xc, y0, y1, w=0.21):
+        # parallelogram bar from y0 to y1 (unit coords), centred on xc at y=0
+        return (f'M{f((xc - w/2 - sl*y0) * R)},{f(y0 * R)} L{f((xc + w/2 - sl*y0) * R)},{f(y0 * R)} '
+            f'L{f((xc + w/2 - sl*y1) * R)},{f(y1 * R)} L{f((xc - w/2 - sl*y1) * R)},{f(y1 * R)} Z')
+    return (bar(-0.40, -1.02, 0.42) + bar(-0.02, -0.20, 0.42) + bar(0.20, -0.20, 1.12) + bar(0.58, -0.20, 0.42)
+                  + f' M{f((-0.40 + 0.085 - sl*-0.1)*R)},{f(-0.1*R)} Q{f((-0.05 - sl*-0.3)*R)},{f(-0.32*R)} {f((-0.02 + 0.085 - sl*-0.16)*R)},{f(-0.16*R)}'
+              f' L{f((-0.02 - 0.085 - sl*-0.03)*R)},{f(-0.03*R)} Q{f((-0.14 - sl*-0.12)*R)},{f(-0.14*R)} {f((-0.40 + 0.085 - sl*0.06)*R)},{f(0.06*R)} Z'
+                  + f' M{f((0.20 + 0.085 - sl*-0.1)*R)},{f(-0.1*R)} Q{f((0.55 - sl*-0.3)*R)},{f(-0.32*R)} {f((0.58 + 0.085 - sl*-0.16)*R)},{f(-0.16*R)}'
+              f' L{f((0.58 - 0.085 - sl*-0.03)*R)},{f(-0.03*R)} Q{f((0.42 - sl*-0.12)*R)},{f(-0.14*R)} {f((0.20 + 0.085 - sl*0.06)*R)},{f(0.06*R)} Z'
+                  + f' M{f((0.20 + 0.085 - sl*0.36)*R)},{f(0.36*R)} Q{f((0.45 - sl*0.5)*R)},{f(0.48*R)} {f((0.58 - 0.085 - sl*0.3)*R)},{f(0.3*R)}'
+              f' L{f((0.58 + 0.085 - sl*0.36)*R)},{f(0.36*R)} Q{f((0.5 - sl*0.62)*R)},{f(0.62*R)} {f((0.20 + 0.085 - sl*0.5)*R)},{f(0.5*R)} Z')
+
+
 def build_hx4700(fonts):
     """Draw the hx4700 from measured photo coordinates."""
     GX, GY, GW, GH = 1100, 1650, 1776, 2368     # glass in photo px
@@ -1340,28 +1375,6 @@ def build_hx4700(fonts):
 
 
 
-
-
-    def rounded(pts, radii):
-        """Closed polygon with each corner rounded by a quadratic of the given cut-back."""
-        n = len(pts)
-        segs = []
-        for i in range(n):
-            p, q = pts[i], pts[(i + 1) % n]
-            segs.append((p, q))
-        d = ''
-        for i in range(n):
-            prv, cur, nxt = pts[i - 1], pts[i], pts[(i + 1) % n]
-            r = radii[i]
-            def toward(a, b, dist):
-                dx, dy = b[0] - a[0], b[1] - a[1]
-                ln = math.hypot(dx, dy)
-                k = min(dist / ln, 0.5) if ln else 0
-                return (a[0] + dx * k, a[1] + dy * k)
-            a = toward(cur, prv, r)
-            b = toward(cur, nxt, r)
-            d += ('M' if i == 0 else ' L') + f'{f(a[0])},{f(a[1])} Q{f(cur[0])},{f(cur[1])} {f(b[0])},{f(b[1])}'
-        return d + ' Z'
 
 
     def cap_h(y):
@@ -1473,19 +1486,7 @@ def build_hx4700(fonts):
         b = BADGE
         bx, by = CX + b['x'], b['y']
         R = b['R']
-        # hp letters on a unit grid (disc radius 1), slanted strokes
-        sl = 0.32   # horizontal shift per unit of height (italic slant)
-        def bar(xc, y0, y1, w=0.21):
-            # parallelogram bar from y0 to y1 (unit coords), centred on xc at y=0
-            return (f'M{f((xc - w/2 - sl*y0) * R)},{f(y0 * R)} L{f((xc + w/2 - sl*y0) * R)},{f(y0 * R)} '
-                f'L{f((xc + w/2 - sl*y1) * R)},{f(y1 * R)} L{f((xc - w/2 - sl*y1) * R)},{f(y1 * R)} Z')
-        hp_letters = (bar(-0.40, -1.02, 0.42) + bar(-0.02, -0.20, 0.42) + bar(0.20, -0.20, 1.12) + bar(0.58, -0.20, 0.42)
-                      + f' M{f((-0.40 + 0.085 - sl*-0.1)*R)},{f(-0.1*R)} Q{f((-0.05 - sl*-0.3)*R)},{f(-0.32*R)} {f((-0.02 + 0.085 - sl*-0.16)*R)},{f(-0.16*R)}'
-                  f' L{f((-0.02 - 0.085 - sl*-0.03)*R)},{f(-0.03*R)} Q{f((-0.14 - sl*-0.12)*R)},{f(-0.14*R)} {f((-0.40 + 0.085 - sl*0.06)*R)},{f(0.06*R)} Z'
-                      + f' M{f((0.20 + 0.085 - sl*-0.1)*R)},{f(-0.1*R)} Q{f((0.55 - sl*-0.3)*R)},{f(-0.32*R)} {f((0.58 + 0.085 - sl*-0.16)*R)},{f(-0.16*R)}'
-                  f' L{f((0.58 - 0.085 - sl*-0.03)*R)},{f(-0.03*R)} Q{f((0.42 - sl*-0.12)*R)},{f(-0.14*R)} {f((0.20 + 0.085 - sl*0.06)*R)},{f(0.06*R)} Z'
-                      + f' M{f((0.20 + 0.085 - sl*0.36)*R)},{f(0.36*R)} Q{f((0.45 - sl*0.5)*R)},{f(0.48*R)} {f((0.58 - 0.085 - sl*0.3)*R)},{f(0.3*R)}'
-                  f' L{f((0.58 + 0.085 - sl*0.36)*R)},{f(0.36*R)} Q{f((0.5 - sl*0.62)*R)},{f(0.62*R)} {f((0.20 + 0.085 - sl*0.5)*R)},{f(0.5*R)} Z')
+        hp_letters = hp_monogram(R)
         badge = (f'<g id="badge" transform="translate({f(bx)},{by})">'
              f'<rect x="{f(-b["w"]/2 - 4)}" y="{f(-b["h"]/2 - 4)}" width="{b["w"] + 8}" height="{b["h"] + 8}" rx="{b["r"] + 4}" fill="#050506"/>'
              f'<rect x="{f(-b["w"]/2)}" y="{f(-b["h"]/2)}" width="{b["w"]}" height="{b["h"]}" rx="{b["r"]}" fill="url(#hx-plate)"/>'
@@ -1694,6 +1695,396 @@ def build_hx4700(fonts):
 '''
 
     return build()
+
+
+def build_hx2700(fonts):
+    """Draw the hx2750/hx2790 from the hx2110 photograph and HP's hx2700 artwork."""
+    # The hx2110 photograph shares the chassis; its vertical scale is 4% short
+    # (camera tilt), which also brings the body to the published 76.6 x 119 mm.
+    SX = 525 / 923
+    SY = SX * 1.04
+    GX, GY = 1018, 342.9                       # active glass, photo px
+    CX = 1479.5                                # centre line, photo px
+
+    def X(x):
+        return 137.5 + (x - GX) * SX
+
+    def Y(y):
+        return 244.75 + (y - GY) * SY
+
+    def pts(points):
+        return [(X(x), Y(y)) for x, y in points]
+
+    def sym(half):
+        """Right-half (offset, y) list, top to bottom, as a closed photo-px outline."""
+        return pts(mirror(half, CX))
+
+    def ptxt(x, y):
+        return f'{f(X(x))},{f(Y(y))}'
+
+    BODY_HALF = [(0, 111), (280, 116), (380, 120), (480, 128), (540, 136), (575, 148), (600, 162),
+                 (620, 190), (635, 240), (644, 300), (649, 420), (651, 1000), (651, 1700), (646, 1860),
+                 (634, 1930), (616, 1975), (592, 2012), (556, 2045), (500, 2075), (420, 2093),
+                 (250, 2101), (0, 2104)]
+    FACE_HALF = [(0, 157), (440, 158), (500, 161), (535, 168), (560, 182), (577, 205), (588, 240),
+                 (592, 300), (593, 600), (592, 1400), (588, 1650), (578, 1800), (570, 1880),
+                 (558, 1930), (535, 1975), (505, 2015), (455, 2050), (380, 2075), (250, 2090), (0, 2095)]
+    # Silver key bar: a smile-shaped top edge under the face plate, a deeper curve below.
+    BAR_TOP = [(566, 1813), (500, 1822), (400, 1834), (300, 1840), (150, 1843), (0, 1844)]
+    BAR_END = [(567, 1880), (556, 1922), (527, 1955)]
+    BAR_BOT = [(480, 1972), (380, 1993), (280, 2007), (150, 2020), (0, 2025)]
+    # Contacts/mail keys (mirrored): curved outer edge, sloping lower edge, d-pad side.
+    KEY = [(402.5, 1841), (395, 1870), (380, 1898), (355, 1915), (325, 1922), (150, 1944), (150, 1843)]
+    DPAD = dict(top=1840, bot=2048, ht=150, hb=128, rt=24, rb=40)
+    ROCKER = dict(top=1862, bot=1990, ht=106, hb=88, rt=26, rb=30)
+    SELECT = dict(top=1898, bot=1965, h=58, r=18, slot=(38, 1912, 1952, 10))
+    WINDOW = (1003, 328, 1955, 1537)
+    LEDS = (1140, 1192)                        # slit centres; the slits run 157-231
+    BADGE = dict(x0=1400, x1=1556, y0=166, y1=262, r=12, disc=(1480, 216, 43))
+    POWER = [(1752, 148), (1892, 148), (1880, 228), (1764, 228)]
+    MIC = [(1744, 44), (1760, 58), (1776, 40)]
+    SPEAKER = [(1722, 1820, 1986), (1750, 1818, 1990), (1778, 1828, 1984)]
+    # hx2750/hx2790 only: recessed swipe channel, flush to the lower screen edge.
+    RAMP = dict(top=1537, bot=1840, h=130)
+    SENSOR = dict(y=1744, h=18, half=100)
+    IPAQ = dict(x0=981, x1=1110, base=1612, cap=38)
+    ICONS = [('calendar', 989, 1870, 58, 46), ('contacts', 1212, 1886, 56, 46),
+             ('mail', 1750, 1882, 60, 42), ('itask', 1945, 1870, 40, 52)]
+
+    body = spline(sym(BODY_HALF))
+    face = spline(sym(FACE_HALF))
+    left_side = lambda half: [(CX - h, y) for h, y in half]
+    right_side = lambda half: [(CX + h, y) for h, y in half]
+    bar_pts = (left_side(BAR_TOP) + right_side(BAR_TOP[::-1][1:]) + right_side(BAR_END)
+               + right_side(BAR_BOT) + left_side(BAR_BOT[::-1][1:]) + left_side(BAR_END[::-1]))
+    bar = spline(pts(bar_pts), tension=8)
+    bar_top_edge = spline(pts(left_side(BAR_TOP) + right_side(BAR_TOP[::-1][1:])), closed=False, tension=8)
+    bottom = [BAR_END[-1]] + BAR_BOT
+    bar_bot_edge = spline(pts(left_side(bottom) + right_side(bottom[::-1][1:])), closed=False, tension=8)
+
+    def key(side):
+        outer = [(CX + side * h, y) for h, y in KEY[:5]]
+        return (spline(pts(outer), closed=False, tension=8)
+                + f' L{ptxt(CX + side * KEY[5][0], KEY[5][1])} L{ptxt(CX + side * KEY[6][0], KEY[6][1])} Z')
+
+    def trapezoid(d, x_half_top, x_half_bot):
+        return rounded(pts([(CX - x_half_top, d['top']), (CX + x_half_top, d['top']),
+                            (CX + x_half_bot, d['bot']), (CX - x_half_bot, d['bot'])]),
+                       [d['rt'] * SX, d['rt'] * SX, d['rb'] * SX, d['rb'] * SX])
+
+    dpad = trapezoid(DPAD, DPAD['ht'], DPAD['hb'])
+    rocker = trapezoid(ROCKER, ROCKER['ht'], ROCKER['hb'])
+    s = SELECT
+    select = (X(CX - s['h']), Y(s['top']), 2 * s['h'] * SX, (s['bot'] - s['top']) * SY, s['r'] * SX)
+    sh, sy0, sy1, sr = s['slot']
+    slot = (X(CX - sh), Y(sy0), 2 * sh * SX, (sy1 - sy0) * SY, sr * SX)
+
+    # d-pad hit areas: the rocker split along the diagonals through the select key's corners
+    rk = ROCKER
+    r_tl, r_tr = (CX - rk['ht'], rk['top']), (CX + rk['ht'], rk['top'])
+    r_bl, r_br = (CX - rk['hb'], rk['bot']), (CX + rk['hb'], rk['bot'])
+    s_tl, s_tr = (CX - s['h'], s['top']), (CX + s['h'], s['top'])
+    s_bl, s_br = (CX - s['h'], s['bot']), (CX + s['h'], s['bot'])
+    def poly(*corners):
+        return 'M' + ' L'.join(ptxt(*c) for c in corners) + ' Z'
+    directions = (('up', 'Up', poly(r_tl, r_tr, s_tr, s_tl)), ('down', 'Down', poly(s_bl, s_br, r_br, r_bl)),
+                  ('left', 'Left', poly(r_tl, s_tl, s_bl, r_bl)), ('right', 'Right', poly(s_tr, r_tr, r_br, s_br)))
+    hits = ''.join(f'<path id="button-{n}" aria-label="{label}" d="{d}" fill="transparent" pointer-events="all"/>'
+                   for n, label, d in directions)
+    # Calendar and iTask are the bar's ends, beyond the outlined contacts and mail keys.
+    def bar_end(side):
+        edge = [(CX + side * h, y) for h, y in KEY[:5]]
+        top = [(CX + side * h, y) for h, y in BAR_TOP[:2]]
+        end = [(CX + side * h, y) for h, y in BAR_END + BAR_BOT[:2]]
+        return poly(*top, *edge, (CX + side * 300, 2004), *end[::-1])
+    ends = (f'<path id="button-calendar" aria-label="Calendar button" d="{bar_end(-1)}" fill="transparent" pointer-events="all"/>'
+            f'<path id="button-itask" aria-label="iTask button" d="{bar_end(1)}" fill="transparent" pointer-events="all"/>')
+
+    w0, w1 = (X(WINDOW[0]), Y(WINDOW[1])), (X(WINDOW[2]), Y(WINDOW[3]))
+    g0, g1 = (137.5, 244.75), (662.5, 944.75)
+    walls = (
+        f'<polygon points="{f(w0[0])},{f(w0[1])} {f(w1[0])},{f(w0[1])} {f(g1[0])},{f(g0[1])} {f(g0[0])},{f(g0[1])}" fill="#2a2c30"/>'
+        f'<polygon points="{f(w0[0])},{f(w1[1])} {f(w1[0])},{f(w1[1])} {f(g1[0])},{f(g1[1])} {f(g0[0])},{f(g1[1])}" fill="#3a3c41"/>'
+        f'<polygon points="{f(w0[0])},{f(w0[1])} {f(g0[0])},{f(g0[1])} {f(g0[0])},{f(g1[1])} {f(w0[0])},{f(w1[1])}" fill="#1d1e21"/>'
+        f'<polygon points="{f(w1[0])},{f(w0[1])} {f(g1[0])},{f(g0[1])} {f(g1[0])},{f(g1[1])} {f(w1[0])},{f(w1[1])}" fill="#26282b"/>')
+
+    leds = ''
+    for x, (n, label) in zip(LEDS, (('radio', 'Radio (Wi-Fi and Bluetooth)'),
+                                    ('charge', 'Charge and notification'))):
+        lx, ly, lw, lh = X(x - 7.5), Y(150), 15 * SX, (231 - 150) * SY
+        leds += (f'<rect x="{f(lx - 1.2)}" y="{f(ly)}" width="{f(lw + 2.4)}" height="{f(lh + 1.2)}" rx="{f(lw / 2 + 1.2)}" fill="#08080a"/>'
+                 f'<rect id="led-{n}" aria-label="{label} indicator" x="{f(lx)}" y="{f(ly)}" width="{f(lw)}" height="{f(lh)}" rx="{f(lw / 2)}" fill="#2a2a2f"/>'
+                 f'<g pointer-events="none"><rect x="{f(lx)}" y="{f(ly)}" width="{f(lw)}" height="{f(lh)}" rx="{f(lw / 2)}" fill="url(#hx2-led)"/>'
+                 f'<path d="M{f(lx + lw * 0.3)},{f(ly + lh * 0.5)} V{f(ly + lh - lw * 0.6)}" stroke="#fff" stroke-opacity="0.35" stroke-width="1.2" stroke-linecap="round"/></g>')
+
+    b = BADGE
+    bx0, by0, bx1, by1 = X(b['x0']), Y(b['y0']), X(b['x1']), Y(b['y1'])
+    dcx, dcy, dr = b['disc']
+    R = dr * SX
+    badge = (f'<g id="badge">'
+             f'<rect x="{f(bx0 - 1.5)}" y="{f(by0 - 1.5)}" width="{f(bx1 - bx0 + 3)}" height="{f(by1 - by0 + 3)}" rx="{f(b["r"] * SX + 1.5)}" fill="#0b0b0d"/>'
+             f'<rect x="{f(bx0)}" y="{f(by0)}" width="{f(bx1 - bx0)}" height="{f(by1 - by0)}" rx="{f(b["r"] * SX)}" fill="url(#hx2-plate)"/>'
+             f'<rect x="{f(bx0 + 1.2)}" y="{f(by0 + 1.2)}" width="{f(bx1 - bx0 - 2.4)}" height="{f(by1 - by0 - 2.4)}" rx="{f(b["r"] * SX - 1)}" fill="none" stroke="#fff" stroke-opacity="0.7" stroke-width="1.4"/>'
+             f'<g transform="translate({f(X(dcx))},{f(Y(dcy))})"><circle r="{f(R)}" fill="url(#hx2-disc)"/>'
+             f'<path d="{hp_monogram(R)}" fill="url(#hx2-letters)"/></g></g>')
+
+    power = rounded(pts(POWER), [0, 0, 22 * SX, 22 * SX])
+    pcx, pcy, pr = X(1822), Y(190), 7.5
+    power_icon = (f'<path d="M{f(pcx - pr * 0.64)},{f(pcy - pr * 0.77)} A{f(pr)},{f(pr)} 0 1 0 {f(pcx + pr * 0.64)},{f(pcy - pr * 0.77)}'
+                  f' M{f(pcx)},{f(pcy - pr * 1.15)} V{f(pcy - pr * 0.1)}" fill="none" stroke="#6b6866" stroke-width="1.6" stroke-linecap="round"/>')
+
+    mic = ''.join(f'<rect x="{f(X(1092 - w / 2))}" y="{f(Y(y - 4.5))}" width="{f(w * SX)}" height="{f(9 * SY)}" rx="{f(4.5 * SY)}" fill="#101113"/>'
+                  for y, w in MIC)
+    speaker = ''.join(
+        f'<path d="M{ptxt(x0, y)} Q{ptxt((x0 + x1) / 2, y - 8)} {ptxt(x1, y)} Q{ptxt((x0 + x1) / 2, y + 8)} {ptxt(x0, y)} Z" fill="#101113"/>'
+        f'<path d="M{ptxt(x0 + 20, y + 5)} Q{ptxt((x0 + x1) / 2, y + 9)} {ptxt(x1 - 20, y + 5)}" fill="none" stroke="#c4cad2" stroke-opacity="0.45" stroke-width="1"/>'
+        for y, x0, x1 in SPEAKER)
+
+    rp = RAMP
+    ramp = (
+        f"M{ptxt(CX - rp['h'], rp['top'])} L{ptxt(CX + rp['h'], rp['top'])} "
+        f"C{ptxt(CX + 126, 1560)} {ptxt(CX + 122, 1580)} {ptxt(CX + 120, 1610)} "
+        f"L{ptxt(CX + 108, 1786)} Q{ptxt(CX + 106, 1832)} {ptxt(CX + 92, rp['bot'])} "
+        f"L{ptxt(CX - 92, rp['bot'])} Q{ptxt(CX - 106, 1832)} {ptxt(CX - 108, 1786)} "
+        f"L{ptxt(CX - 120, 1610)} C{ptxt(CX - 122, 1580)} {ptxt(CX - 126, 1560)} "
+        f"{ptxt(CX - rp['h'], rp['top'])} Z"
+    )
+    inset = (
+        f"M{ptxt(CX - 93, 1557)} Q{ptxt(CX - 99, 1560)} {ptxt(CX - 99, 1575)} "
+        f"L{ptxt(CX - 87, 1775)} Q{ptxt(CX - 85, 1802)} {ptxt(CX - 72, 1812)} "
+        f"L{ptxt(CX + 72, 1812)} Q{ptxt(CX + 85, 1802)} {ptxt(CX + 87, 1775)} "
+        f"L{ptxt(CX + 99, 1575)} Q{ptxt(CX + 99, 1560)} {ptxt(CX + 93, 1557)} Z"
+    )
+    se = SENSOR
+    sx0, sy0 = X(CX - se['half']), Y(se['y'] - se['h'] / 2)
+    sw, sh2 = 2 * se['half'] * SX, se['h'] * SY
+    sensor = (f'<g id="fingerprint-reader" aria-label="Fingerprint reader">'
+              f'<rect x="{f(sx0)}" y="{f(sy0)}" width="{f(sw)}" height="{f(sh2)}" rx="{f(sh2 / 2)}" fill="#121315"/>'
+              f'<rect id="fingerprint-sensor" x="{f(sx0 + 4)}" y="{f(sy0 + sh2 * 0.32)}" width="{f(sw - 8)}" height="{f(sh2 * 0.36)}" rx="{f(sh2 * 0.18)}" fill="#292b2d"/>'
+              f'<path d="M{f(sx0 + 4)},{f(sy0 + sh2 - 0.5)} H{f(sx0 + sw - 4)}" stroke="#9a9da0" stroke-opacity="0.65" stroke-width="0.8"/></g>')
+
+    def icon(kind, x, y, w, h):
+        w, h = w * SX, h * SY
+        if kind == 'calendar':
+            cells = ''.join(f'<rect x="{f(-w / 2 + i * w / 4)}" y="{f(-h / 2 + j * h / 3)}" width="{f(w / 4)}" height="{f(h / 3)}"/>'
+                            for i in range(4) for j in range(3))
+            fills = ''.join(f'<rect x="{f(-w / 2 + i * w / 4)}" y="{f(-h / 2)}" width="{f(w / 4)}" height="{f(h / 3)}" stroke="none" fill="#33343b"/>'
+                            for i in (1, 3))
+            return cells + fills
+        if kind == 'contacts':
+            return (f'<rect x="{f(-w / 2)}" y="{f(-h / 2)}" width="{f(w)}" height="{f(h)}"/>'
+                    f'<path d="M{f(-w * 0.06)},{f(-h / 2)} V{f(h / 2)}"/>'
+                    f'<rect x="{f(-w * 0.4)}" y="{f(-h * 0.32)}" width="{f(w * 0.22)}" height="{f(h * 0.26)}" fill="#33343b" stroke="none"/>'
+                    + ''.join(f'<path d="M{f(w * 0.08)},{f(-h * 0.28 + i * h * 0.19)} H{f(w * 0.4)}"/>' for i in range(4)))
+        if kind == 'mail':
+            return (f'<rect x="{f(-w / 2)}" y="{f(-h / 2)}" width="{f(w)}" height="{f(h)}"/>'
+                    f'<path d="M{f(-w / 2)},{f(-h / 2)} L0,{f(h * 0.12)} L{f(w / 2)},{f(-h / 2)}'
+                    f' M{f(-w / 2)},{f(h / 2)} L{f(-w * 0.12)},{f(-h * 0.04)} M{f(w / 2)},{f(h / 2)} L{f(w * 0.12)},{f(-h * 0.04)}" stroke-linejoin="round"/>')
+        # iTask: a C-shaped arrow ending in a head pointing up and right
+        return (f'<path d="M{f(w * 0.05)},{f(h * 0.42)} C{f(-w * 0.55)},{f(h * 0.45)} {f(-w * 0.5)},{f(-h * 0.2)} {f(w * 0.05)},{f(-h * 0.3)}" stroke-width="2.4" stroke-linecap="round"/>'
+                f'<path d="M{f(-w * 0.05)},{f(-h * 0.42)} L{f(w * 0.5)},{f(-h * 0.5)} L{f(w * 0.18)},{f(-h * 0.08)} Z" fill="#33343b" stroke="none"/>')
+    icons = ''.join(f'<g transform="translate({f(X(x))},{f(Y(y))})" fill="none" stroke="#33343b" stroke-width="1.5">{icon(k, x, y, w, h)}</g>'
+                    for k, x, y, w, h in ICONS)
+
+    ipaq = fonts.word_path('iPAQ', 'OpenSans_Bold.ttf', IPAQ['cap'] * SY, X(IPAQ['x0']), Y(IPAQ['base']), 'start',
+                           (IPAQ['x1'] - IPAQ['x0']) * SX)
+    left, right = X(CX - 660), X(CX + 660)
+
+    return f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 72 800 1250">
+<!--
+  HP iPAQ hx2750/hx2790/hx2795, front view. Glass: <rect id="screen"> x=137.5 y=244.75 width=525 height=700 (3:4, 240x320 px at 2.1875 units per pixel).
+
+  SPDX-FileCopyrightText: 2026 Koen Kooi
+  SPDX-License-Identifier: CC-BY-SA-4.0
+
+  Provenance: an original vector drawing, written as SVG geometry and
+  gradients and drawn with the assistance of Claude from reference
+  photographs: "HP iPAQ hx2110, front view.jpg" by Yuri Litvinenko
+  (CC BY 2.0, Wikimedia Commons), which shares the hx2700 chassis, and the
+  hx2700 illustrations in the HP iPAQ hx2000 Series User's Guide for the
+  fingerprint reader. No third-party artwork was traced or embedded. The
+  printed "iPAQ" is glyph outlines from the Open Sans font (SIL Open Font
+  License); the hp badge is drawn from simple shapes. "HP", "hp" and "iPAQ"
+  are trademarks of their owners and appear only to identify the device.
+-->
+<defs>
+  <linearGradient id="hx2-rim" gradientUnits="userSpaceOnUse" x1="{f(left)}" y1="0" x2="{f(right)}" y2="0">
+    <stop offset="0" stop-color="#55565b"/><stop offset="0.02" stop-color="#2a2a2e"/><stop offset="0.06" stop-color="#151518"/>
+    <stop offset="0.94" stop-color="#141417"/><stop offset="0.975" stop-color="#2e2f33"/><stop offset="1" stop-color="#4a4b50"/>
+  </linearGradient>
+  <linearGradient id="hx2-rim-v" gradientUnits="userSpaceOnUse" x1="0" y1="{f(Y(111))}" x2="0" y2="{f(Y(2104))}">
+    <stop offset="0" stop-color="#fff" stop-opacity="0.16"/><stop offset="0.03" stop-color="#fff" stop-opacity="0"/>
+    <stop offset="0.97" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity="0.3"/>
+  </linearGradient>
+  <linearGradient id="hx2-face" gradientUnits="userSpaceOnUse" x1="0" y1="{f(Y(157))}" x2="0" y2="{f(Y(1840))}">
+    <stop offset="0" stop-color="#6f747b"/><stop offset="0.3" stop-color="#757a81"/><stop offset="1" stop-color="#787d85"/>
+  </linearGradient>
+  <linearGradient id="hx2-face-h" gradientUnits="userSpaceOnUse" x1="{f(X(CX - 593))}" y1="0" x2="{f(X(CX + 593))}" y2="0">
+    <stop offset="0" stop-color="#fff" stop-opacity="0.1"/><stop offset="0.06" stop-color="#fff" stop-opacity="0"/>
+    <stop offset="0.94" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity="0.12"/>
+  </linearGradient>
+  <linearGradient id="hx2-bar" gradientUnits="userSpaceOnUse" x1="0" y1="{f(Y(1813))}" x2="0" y2="{f(Y(2025))}">
+    <stop offset="0" stop-color="#d7dae1"/><stop offset="0.35" stop-color="#e3e5eb"/><stop offset="1" stop-color="#c9ccd3"/>
+  </linearGradient>
+  <linearGradient id="hx2-key" gradientUnits="userSpaceOnUse" x1="0" y1="{f(Y(1841))}" x2="0" y2="{f(Y(1944))}">
+    <stop offset="0" stop-color="#c6cad1"/><stop offset="1" stop-color="#d9dce2"/>
+  </linearGradient>
+  <linearGradient id="hx2-bumper" gradientUnits="userSpaceOnUse" x1="0" y1="{f(Y(1960))}" x2="0" y2="{f(Y(2100))}">
+    <stop offset="0" stop-color="#46484c"/><stop offset="0.5" stop-color="#36383b"/><stop offset="1" stop-color="#232427"/>
+  </linearGradient>
+  <linearGradient id="hx2-chrome" gradientUnits="userSpaceOnUse" x1="{f(X(CX - 150))}" y1="0" x2="{f(X(CX + 150))}" y2="0">
+    <stop offset="0" stop-color="#e9eaee"/><stop offset="0.08" stop-color="#4a474f"/><stop offset="0.16" stop-color="#2c2a31"/>
+    <stop offset="0.5" stop-color="#5f5d64"/><stop offset="0.84" stop-color="#2c2a31"/><stop offset="0.92" stop-color="#55525a"/><stop offset="1" stop-color="#e4e5e9"/>
+  </linearGradient>
+  <linearGradient id="hx2-chrome-v" gradientUnits="userSpaceOnUse" x1="0" y1="{f(Y(DPAD['top']))}" x2="0" y2="{f(Y(DPAD['bot']))}">
+    <stop offset="0" stop-color="#fff" stop-opacity="0.55"/><stop offset="0.06" stop-color="#fff" stop-opacity="0"/>
+    <stop offset="0.7" stop-color="#fff" stop-opacity="0.1"/><stop offset="0.78" stop-color="#fff" stop-opacity="0.6"/>
+    <stop offset="0.87" stop-color="#fff" stop-opacity="0.45"/><stop offset="0.91" stop-color="#000" stop-opacity="0.45"/>
+    <stop offset="0.96" stop-color="#fff" stop-opacity="0.7"/><stop offset="1" stop-color="#000" stop-opacity="0.2"/>
+  </linearGradient>
+  <linearGradient id="hx2-rocker" gradientUnits="userSpaceOnUse" x1="0" y1="{f(Y(ROCKER['top']))}" x2="0" y2="{f(Y(ROCKER['bot']))}">
+    <stop offset="0" stop-color="#9da1a8"/><stop offset="0.12" stop-color="#c6c8d0"/><stop offset="0.8" stop-color="#bfc2ca"/><stop offset="1" stop-color="#dfe1e6"/>
+  </linearGradient>
+  <linearGradient id="hx2-select" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#f2f3f5"/><stop offset="0.45" stop-color="#8b8990"/><stop offset="0.55" stop-color="#57555c"/><stop offset="1" stop-color="#e6e7ea"/>
+  </linearGradient>
+  <linearGradient id="hx2-slot" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#2a2830"/><stop offset="0.6" stop-color="#4a4756"/><stop offset="1" stop-color="#8e8c98"/>
+  </linearGradient>
+  <linearGradient id="hx2-power" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#1c1a1a"/><stop offset="0.7" stop-color="#2f2c2b"/><stop offset="0.86" stop-color="#5d5a58"/><stop offset="0.93" stop-color="#e9e9ef"/><stop offset="1" stop-color="#6b6a70"/>
+  </linearGradient>
+  <linearGradient id="hx2-ramp" gradientUnits="userSpaceOnUse" x1="{f(X(CX - RAMP['h']))}" y1="0" x2="{f(X(CX + RAMP['h']))}" y2="0">
+    <stop offset="0" stop-color="#858788"/><stop offset="0.08" stop-color="#5a5d5f"/><stop offset="0.5" stop-color="#56595b"/>
+    <stop offset="0.92" stop-color="#5e6163"/><stop offset="1" stop-color="#858788"/>
+  </linearGradient>
+  <linearGradient id="hx2-ramp-v" gradientUnits="userSpaceOnUse" x1="0" y1="{f(Y(RAMP['top']))}" x2="0" y2="{f(Y(RAMP['bot']))}">
+    <stop offset="0" stop-color="#17191b" stop-opacity="0.46"/><stop offset="0.18" stop-color="#000" stop-opacity="0.04"/>
+    <stop offset="0.7" stop-color="#fff" stop-opacity="0.1"/><stop offset="0.96" stop-color="#fff" stop-opacity="0.4"/>
+    <stop offset="1" stop-color="#17191b" stop-opacity="0.5"/>
+  </linearGradient>
+  <linearGradient id="hx2-ramp-inset" gradientUnits="userSpaceOnUse" x1="0" y1="{f(Y(1557))}" x2="0" y2="{f(Y(1812))}">
+    <stop offset="0" stop-color="#292c2e" stop-opacity="0.34"/><stop offset="0.56" stop-color="#626567" stop-opacity="0.38"/>
+    <stop offset="1" stop-color="#c1c3c4" stop-opacity="0.38"/>
+  </linearGradient>
+  <linearGradient id="hx2-led" x1="0" y1="0" x2="1" y2="0">
+    <stop offset="0" stop-color="#000" stop-opacity="0.35"/><stop offset="0.45" stop-color="#fff" stop-opacity="0.12"/><stop offset="1" stop-color="#000" stop-opacity="0.4"/>
+  </linearGradient>
+  <linearGradient id="hx2-plate" x1="0" y1="0" x2="0.35" y2="1">
+    <stop offset="0" stop-color="#e9eaea"/><stop offset="0.35" stop-color="#bfc0c0"/>
+    <stop offset="0.7" stop-color="#a9aaab"/><stop offset="1" stop-color="#d6d7d7"/>
+  </linearGradient>
+  <radialGradient id="hx2-disc" cx="0.5" cy="0.5" r="0.5" fx="0.42" fy="0.38">
+    <stop offset="0" stop-color="#3a3540"/><stop offset="0.8" stop-color="#1b181d"/><stop offset="1" stop-color="#110f12"/>
+  </radialGradient>
+  <linearGradient id="hx2-letters" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#fafafa"/><stop offset="1" stop-color="#c4c6c8"/>
+  </linearGradient>
+  <linearGradient id="hx2-glass" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#fff" stop-opacity="0.06"/><stop offset="0.45" stop-color="#fff" stop-opacity="0.012"/><stop offset="1" stop-color="#fff" stop-opacity="0"/>
+  </linearGradient>
+  <filter id="hx2-shadow" x="-15%" y="-10%" width="130%" height="125%">
+    <feGaussianBlur in="SourceAlpha" stdDeviation="7"/><feOffset dy="6" result="b"/>
+    <feFlood flood-color="#000" flood-opacity="0.35"/><feComposite in2="b" operator="in"/>
+  </filter>
+  <filter id="hx2-grain" x="0" y="0" width="1" height="1">
+    <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="27" result="n"/>
+    <feColorMatrix in="n" type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  4.2 0 0 0 -2.05" result="light"/>
+    <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -3.4 0 0 0 1.5" result="dark"/>
+    <feMerge><feMergeNode in="dark"/><feMergeNode in="light"/></feMerge>
+  </filter>
+  <filter id="hx2-soft" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="2.5"/></filter>
+  <clipPath id="hx2-body-clip"><path d="{body}"/></clipPath>
+  <clipPath id="hx2-face-clip"><path d="{face}"/></clipPath>
+  <clipPath id="hx2-bar-clip"><path d="{bar}"/></clipPath>
+  <clipPath id="hx2-dpad-clip"><path d="{dpad}"/></clipPath>
+  <clipPath id="hx2-rocker-clip"><path d="{rocker}"/></clipPath>
+</defs>
+
+<g id="shadow" fill="#000" filter="url(#hx2-shadow)"><path d="{body}"/></g>
+<g id="device">
+  <!-- black rubber rim around the charcoal face plate -->
+  <path id="body-edge" d="{body}" fill="url(#hx2-rim)"/>
+  <path d="{body}" fill="url(#hx2-rim-v)"/>
+  <path d="{body}" fill="none" stroke="#000" stroke-opacity="0.6" stroke-width="1"/>
+  <g id="face">
+    <path id="face-base" d="{face}" fill="url(#hx2-face)"/>
+    <g clip-path="url(#hx2-face-clip)">
+      <path d="{face}" fill="url(#hx2-face-h)"/>
+      <rect x="{f(X(CX - 600))}" y="{f(Y(150))}" width="{f(1200 * SX)}" height="{f(1960 * SY)}" filter="url(#hx2-grain)" opacity="0.22"/>
+      <!-- lower bumper below the key bar -->
+      <rect x="{f(X(CX - 600))}" y="{f(Y(1900))}" width="{f(1200 * SX)}" height="{f(220 * SY)}" fill="url(#hx2-bumper)"/>
+    </g>
+    <path d="{face}" fill="none" stroke="#000" stroke-opacity="0.55" stroke-width="1.2"/>
+    <path d="M{ptxt(CX - 440, 158.5)} H{f(X(CX + 440))}" stroke="#fff" stroke-opacity="0.22" stroke-width="1"/>
+  </g>
+
+  <g id="leds">{leds}</g>
+  {badge}
+  <g id="button-power" aria-label="Power button">
+    <path d="{power}" fill="#121214"/>
+    <path d="{rounded(pts([(1758, 148), (1886, 148), (1875, 225), (1769, 225)]), [0, 0, 19 * SX, 19 * SX])}" fill="url(#hx2-power)"/>
+    {power_icon}
+  </g>
+
+  <!-- recessed screen: lit top wall, black border, glass -->
+  <g id="frame">
+    <path d="M{ptxt(WINDOW[0] - 4, WINDOW[1] - 22)} H{f(X(WINDOW[2] + 4))} L{ptxt(WINDOW[2], WINDOW[1])} H{f(w0[0])} Z" fill="#8d9197"/>
+    <path d="M{ptxt(WINDOW[0] - 4, WINDOW[1] - 22)} H{f(X(WINDOW[2] + 4))}" stroke="#d4d7dc" stroke-opacity="0.7" stroke-width="1.2"/>
+    <rect x="{f(w0[0])}" y="{f(w0[1])}" width="{f(w1[0] - w0[0])}" height="{f(w1[1] - w0[1])}" fill="#0e0f11"/>
+    {walls}
+    <path d="M{f(w0[0])},{f(w1[1] + 0.8)} H{f(w1[0])}" stroke="#a4a8ae" stroke-opacity="0.6" stroke-width="1.2"/>
+  </g>
+
+  <!-- hx2750/hx2790 recessed swipe channel with the fingerprint sensor -->
+  <g id="ramp">
+    <path d="{ramp}" fill="#000" fill-opacity="0.35" filter="url(#hx2-soft)" transform="translate(1.5 2)"/>
+    <path d="{ramp}" fill="url(#hx2-ramp)"/>
+    <path d="{ramp}" fill="url(#hx2-ramp-v)"/>
+    <path d="{ramp}" fill="none" stroke="#25282a" stroke-opacity="0.78" stroke-width="1.1"/>
+    <path d="{inset}" fill="url(#hx2-ramp-inset)" stroke="#85888a" stroke-opacity="0.48" stroke-width="0.8"/>
+    <path d="M{ptxt(CX - 116, 1570)} C{ptxt(CX - 111, 1650)} {ptxt(CX - 108, 1730)} {ptxt(CX - 103, 1790)}"
+          fill="none" stroke="#d0d1d2" stroke-opacity="0.62" stroke-width="2"/>
+    <path d="M{ptxt(CX + 116, 1570)} C{ptxt(CX + 111, 1650)} {ptxt(CX + 108, 1730)} {ptxt(CX + 103, 1790)}"
+          fill="none" stroke="#202325" stroke-opacity="0.68" stroke-width="1.6"/>
+    <path d="M{ptxt(CX - 72, 1808)} Q{ptxt(CX, 1830)} {ptxt(CX + 72, 1808)}"
+          fill="none" stroke="#d1d2d3" stroke-opacity="0.55" stroke-width="1.8"/>
+    {sensor}
+  </g>
+
+  <!-- silver key bar, lower bumper and d-pad -->
+  <g id="keys">
+    <path d="{bar}" fill="url(#hx2-bar)"/>
+    <rect clip-path="url(#hx2-bar-clip)" x="{f(X(CX - 600))}" y="{f(Y(1800))}" width="{f(1200 * SX)}" height="{f(240 * SY)}" filter="url(#hx2-grain)" opacity="0.3"/>
+    <path d="{bar_top_edge}" fill="none" stroke="#2f323a" stroke-width="1.6"/>
+    <path d="{bar_bot_edge}" fill="none" stroke="#2a2c33" stroke-width="1.4"/>
+    <path id="button-contacts" aria-label="Contacts button" d="{key(-1)}" fill="url(#hx2-key)" stroke="#4d505b" stroke-width="1.1"/>
+    <path id="button-mail" aria-label="Messaging button" d="{key(1)}" fill="url(#hx2-key)" stroke="#4d505b" stroke-width="1.1"/>
+    <g id="app-glyphs">{icons}</g>
+    {ends}
+    <path d="{dpad}" fill="url(#hx2-chrome)"/>
+    <path d="{dpad}" fill="url(#hx2-chrome-v)"/>
+    <path d="{dpad}" fill="none" stroke="#0d0d10" stroke-width="1.2"/>
+    <path id="rocker" d="{rocker}" fill="url(#hx2-rocker)"/>
+    <rect clip-path="url(#hx2-rocker-clip)" x="{f(X(CX - 120))}" y="{f(Y(ROCKER['top']))}" width="{f(240 * SX)}" height="{f(140 * SY)}" filter="url(#hx2-grain)" opacity="0.3"/>
+    <g clip-path="url(#hx2-dpad-clip)"><path d="{rocker}" fill="none" stroke="#000" stroke-opacity="0.4" stroke-width="3" filter="url(#hx2-soft)"/></g>
+    <path d="{rocker}" fill="none" stroke="#f6f7f8" stroke-opacity="0.8" stroke-width="1"/>
+    <rect id="button-select" aria-label="Select button" x="{f(select[0])}" y="{f(select[1])}" width="{f(select[2])}" height="{f(select[3])}" rx="{f(select[4])}" fill="url(#hx2-select)" stroke="#3a383f" stroke-width="0.8"/>
+    <rect x="{f(slot[0])}" y="{f(slot[1])}" width="{f(slot[2])}" height="{f(slot[3])}" rx="{f(slot[4])}" fill="url(#hx2-slot)" pointer-events="none"/>
+    <path d="M{f(slot[0] + 3)},{f(slot[1] + 2)} H{f(slot[0] + slot[2] - 3)}" stroke="#fff" stroke-opacity="0.7" stroke-width="1" pointer-events="none"/>
+    {hits}
+  </g>
+
+  <g id="mic">{mic}</g>
+  <g id="speaker">{speaker}</g>
+  <g id="wordmarks"><path fill="#a6adb4" d="{ipaq}"/></g>
+</g>
+
+<!-- glass slot in SVG units: a neutral placeholder until a screenshot is composited -->
+<rect id="screen" x="137.5" y="244.75" width="525" height="700" fill="#c3c6c9"/>
+<rect id="glass" x="137.5" y="244.75" width="525" height="700" fill="url(#hx2-glass)" pointer-events="none"/>
+</svg>
+'''
 
 
 def sliding_parts(fonts):
@@ -3185,6 +3576,8 @@ CAMERA_POSES = {
                        evidence="HP h5550 QuickSpecs p1 item18: slot spans x416-522 on a body spanning x294-650; centre about 49% across."),
     "hx4700": CameraPose(368, 29, sd_scale(2176 * 525 / 1776, 77),
                         evidence="HP hx4700 user guide p144 (11-2): top slot, about 45% across front."),
+    "hx2700": CameraPose(361, 108, sd_scale(1304 * 525 / 923, 76.6),
+                        evidence="hx2110 back photo (Wikimedia, Litvinenko): SD above CF on top, about 4 mm left of centre from the front."),
     "sl-5500": CameraPose(56, 730, sd_scale(704, 74), rotation=-90,
                          evidence="Sharp SL-5500 Start-up Guide printed pp20,63: front-left long edge."),
     "sl-5600": CameraPose(56, 530, sd_scale(704, 74), rotation=-90,
@@ -3223,6 +3616,8 @@ MODELS = {
     "h5550": Model("h5550/h5550-framed-template.svg", build_h5550,
                   (137.5, 244.75, 525, 700), ("Roboto_Bold.ttf", "Roboto_Regular.ttf")),
     "hx4700": Model("hx4700/hx4700-framed-template.svg", build_hx4700,
+                   (137.5, 244.75, 525, 700), ("OpenSans_Bold.ttf",)),
+    "hx2700": Model("hx2700/hx2700-framed-template.svg", build_hx2700,
                    (137.5, 244.75, 525, 700), ("OpenSans_Bold.ttf",)),
     "sl-5500": Model("sl-5500/sl-5500-framed-template.svg", build_sl5500,
                     (137.5, 168, 525, 700), ("OpenSans_Regular.ttf", "OpenSans_Bold.ttf"),
