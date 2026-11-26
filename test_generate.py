@@ -227,7 +227,8 @@ class GeneratorTests(unittest.TestCase):
                     self.assertRegex(led.get("fill"), r"^#[0-9a-f]{6}$")
 
     def test_beagleboards_are_screenless_boards_with_editable_leds(self):
-        leds = {"beagleboard": ("power", "usr0", "usr1", "pmu-stat")}
+        leds = {"beagleboard": ("power", "usr0", "usr1", "pmu-stat"),
+                "beagleboard-xm": ("power", "usr0", "usr1", "pmu-stat", "overvoltage", "hub-power")}
         for board, names in leds.items():
             self.assertNotIn(board, generator.MODELS)
             self.assertNotIn(board, generator.ALIASES["all"])
@@ -238,7 +239,8 @@ class GeneratorTests(unittest.TestCase):
             for name in names:
                 with self.subTest(board=board, led=name):
                     self.assertRegex(root.find(f".//*[@id='led-{name}']").get("fill"), r"^#[0-9a-f]{6}$")
-            for name in ("button-user", "button-reset", "connector-dvi", "connector-usb-host", "connector-sd"):
+            for name in ("button-user", "button-reset", "connector-dvi", "connector-usb-host",
+                         "connector-ethernet" if board == "beagleboard-xm" else "connector-sd"):
                 self.assertIsNotNone(root.find(f".//*[@id='{name}']"), (board, name))
             for args in ((board, "--camera", "front"), (board, "--keyboard"),
                          (board, "--sleeve", next(iter(generator.SLEEVE_FITS)))):

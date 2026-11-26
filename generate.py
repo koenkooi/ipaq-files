@@ -4785,6 +4785,486 @@ def build_beagleboard(fonts):
     return "\n".join(out) + "\n"
 
 
+BEAGLEBOARD_XM_PCB = "beagleboard/beagleboard-xm-pcb.json"
+XM_MASK, XM_COPPER, XM_VIA, XM_CHIP = "#6c1b22", "#b8212f", "#4e1016", "#2b2d2a"
+
+
+def xm_grain():
+    rnd = random.Random(9)
+    dots = "".join(f'<rect x="{rnd.uniform(0, 16):.1f}" y="{rnd.uniform(0, 16):.1f}" width="1.2" '
+                   f'height="1.2" fill="{rnd.choice(("#2c2e2b", "#7b7e79"))}"/>' for _ in range(40))
+    return f'<pattern id="xm-grain" width="16" height="16" patternUnits="userSpaceOnUse">{dots}</pattern>'
+
+
+def build_beagleboard_xm(fonts):
+    """BeagleBoard-xM, component side; board layers from the rev C1 design files."""
+    pcb = json.loads((REPOSITORY / BEAGLEBOARD_XM_PCB).read_text(encoding="utf-8"))
+    width, height = pcb["board"]
+    parts = pcb["parts"]
+    left, top, right, bottom = -10, -40, 920, 910
+    out = [
+        '<?xml version="1.0" encoding="UTF-8"?>',
+        '<!-- SPDX-FileCopyrightText: 2026 Koen Kooi -->',
+        '<!-- SPDX-FileCopyrightText: 2010-2012 Gerald Coley, BeagleBoard.org -->',
+        '<!-- SPDX-License-Identifier: CC-BY-SA-4.0 -->',
+        f'<svg xmlns="{SVG_NS}" width="414" height="{f(414 * (bottom - top) / (right - left))}" '
+        f'viewBox="{left} {top} {right - left} {bottom - top}" id="beagleboard-xm" '
+        'data-units-per-mm="10" role="img" aria-labelledby="title description">',
+        '<title id="title">BeagleBoard-xM (TI DM3730), component side</title>',
+        '<desc id="description">Orthographic top view of the 85.1 × 85.6 mm BeagleBoard-xM. '
+        'Copper, solder mask, silkscreen, drills and part positions are converted from the rev C1 '
+        'design files by Gerald Coley of BeagleBoard.org (CC BY-SA 3.0); the parts, colours and '
+        'finish are redrawn from photographs of production boards. '
+        'Legends are outlines; LEDs are drawn unlit.</desc>',
+        '''<defs>
+<linearGradient id="xm-shell" x1="0" y1="0" x2="1" y2=".25">
+ <stop stop-color="#8e928d"/><stop offset=".08" stop-color="#d9dbd6"/>
+ <stop offset=".3" stop-color="#b4b8b2"/><stop offset=".6" stop-color="#c9ccc6"/>
+ <stop offset=".92" stop-color="#e1e3de"/><stop offset="1" stop-color="#8a8e89"/>
+</linearGradient>
+<linearGradient id="xm-dark-shell" x1="0" y1="0" x2="1" y2=".3">
+ <stop stop-color="#7d817c"/><stop offset=".1" stop-color="#5d615e"/>
+ <stop offset=".5" stop-color="#4a4e4c"/><stop offset=".9" stop-color="#5a5e5b"/>
+ <stop offset="1" stop-color="#8d918c"/>
+</linearGradient>
+<linearGradient id="xm-hdmi" x1="0" y1="0" x2="1" y2=".2">
+ <stop stop-color="#8a8c87"/><stop offset=".06" stop-color="#b9bbb6"/>
+ <stop offset=".4" stop-color="#a2a49f"/><stop offset=".7" stop-color="#adafaa"/>
+ <stop offset=".94" stop-color="#bbbdb8"/><stop offset="1" stop-color="#868883"/>
+</linearGradient>
+<linearGradient id="xm-db9-body" x1="0" y1="0" x2="1" y2="0">
+ <stop stop-color="#262827"/><stop offset=".5" stop-color="#363937"/>
+ <stop offset="1" stop-color="#2a2c2b"/>
+</linearGradient>''',
+        xm_grain(),
+        '''<linearGradient id="xm-brushed" x1="0" y1="0" x2="1" y2="0">
+ <stop stop-color="#9ea29d"/><stop offset=".12" stop-color="#c8cbc6"/>
+ <stop offset=".3" stop-color="#b2b6b1"/><stop offset=".5" stop-color="#c2c5c0"/>
+ <stop offset=".7" stop-color="#aeb2ad"/><stop offset=".88" stop-color="#c6c9c4"/>
+ <stop offset="1" stop-color="#959994"/>
+</linearGradient>
+<linearGradient id="xm-barrel">
+ <stop stop-color="#1e2020"/><stop offset=".3" stop-color="#4d5150"/>
+ <stop offset=".55" stop-color="#363938"/><stop offset="1" stop-color="#1a1c1c"/>
+</linearGradient>
+<linearGradient id="xm-gold" x1="0" y1="0" x2="1" y2="1">
+ <stop stop-color="#8c6a22"/><stop offset=".35" stop-color="#f2d27a"/>
+ <stop offset=".7" stop-color="#c79a3c"/><stop offset="1" stop-color="#f5df9a"/>
+</linearGradient>
+<radialGradient id="xm-cap" cx=".4" cy=".35" r=".7">
+ <stop stop-color="#f6f1e2"/><stop offset=".75" stop-color="#e2d9c2"/>
+ <stop offset="1" stop-color="#b0a790"/>
+</radialGradient>
+<radialGradient id="xm-polyfuse" cx=".4" cy=".35" r=".7">
+ <stop stop-color="#f4c56a"/><stop offset=".7" stop-color="#e0a23e"/>
+ <stop offset="1" stop-color="#a8721c"/>
+</radialGradient>
+</defs>''',
+    ]
+    add = out.append
+
+    def rect(x, y, w, h, fill, rx=0, extra=""):
+        add(f'<rect x="{f(x)}" y="{f(y)}" width="{f(w)}" height="{f(h)}"'
+            + (f' rx="{f(rx)}"' if rx else "") + f' fill="{fill}"{" " + extra if extra else ""}/>')
+
+    def circle(x, y, r, fill, extra=""):
+        add(f'<circle cx="{f(x)}" cy="{f(y)}" r="{f(r)}" fill="{fill}"{" " + extra if extra else ""}/>')
+
+    def text(value, font, cap, x, baseline, fill, angle=0, width=None, anchor="middle", extra=""):
+        path = fonts.word_path(value, font, cap, 0, 0, anchor, width)
+        add(f'<path transform="translate({f(x)} {f(baseline)})' + (f' rotate({angle})' if angle else '')
+            + f'" d="{path}" fill="{fill}"{" " + extra if extra else ""}/>')
+
+    def body(name):
+        x0, y0, x1, y1 = parts[name][4]
+        return x0, y0, x1 - x0, y1 - y0
+
+    def leads(x, y, w, h, count, side, length, lead=2.4, fill=BB_METAL):
+        """Gull-wing or flat leads along one side of a body box."""
+        pitch = (w if side in "tb" else h) / count
+        for i in range(count):
+            if side in "tb":
+                lx = x + (i + .5) * pitch - lead / 2
+                rect(lx, y - length if side == "t" else y + h, lead, length, fill)
+            else:
+                ly = y + (i + .5) * pitch - lead / 2
+                rect(x - length if side == "l" else x + w, ly, length, lead, fill)
+
+    # Board outline with the notch beside the microSD slot on the underside.
+    inset = min(x for segment in pcb["outline"] for x in segment[::2] if x > 0)
+    notch = sorted({y for segment in pcb["outline"] for x, y in (segment[:2], segment[2:]) if x == inset})
+    chamfer = width - inset
+    outline = (f"M0 0H{f(width)}V{f(notch[0] - chamfer)}L{f(inset)} {f(notch[0])}V{f(notch[1])}"
+               f"L{f(width)} {f(notch[1] + chamfer)}V{f(height)}H0Z")
+    holes = [hole for hole in pcb["holes"] if hole[2] >= 5]
+    cut = pcb_shapes([("c", x, y, d) for x, y, d, _ in holes])
+    pads = pcb_shapes(pcb["copper"]["pads"])
+    openings = pcb_shapes(pcb["mask"]["openings"]) + "".join(
+        pcb_lines([p]) + "Z" for p in pcb["mask"]["regions"])
+    add(f'<defs><mask id="xm-holes" maskUnits="userSpaceOnUse" x="-1" y="-1" '
+        f'width="{f(width + 2)}" height="{f(height + 2)}">'
+        f'<path d="{outline}" fill="#fff"/><path d="{cut}"/></mask>'
+        f'<clipPath id="xm-openings"><path d="{openings}"/></clipPath></defs>')
+    add('<g id="pcb" mask="url(#xm-holes)">')
+    add(f'<path d="{outline}" fill="{XM_MASK}" stroke="#4f1016" stroke-width="2"/>')
+    add(f'<g id="copper" fill="{XM_COPPER}">')
+    for stroke, lines in sorted(pcb["copper"]["traces"].items(), key=lambda item: float(item[0])):
+        add(f'<path d="{pcb_lines(lines)}" fill="none" stroke="{XM_COPPER}" '
+            f'stroke-width="{stroke}" stroke-linecap="round" stroke-linejoin="round"/>')
+    add(f'<path d="{"".join(pcb_lines([p]) + "Z" for p in pcb["copper"]["pours"])}"/>')
+    add(f'<path d="{pads}"/>')
+    add("</g>")
+    vias = [("c", x, y, d * .6) for x, y, d, _ in pcb["holes"] if d < 5]
+    add(f'<path id="vias" d="{pcb_shapes(vias)}" fill="{XM_VIA}"/>')
+    add('<g id="mask-openings" clip-path="url(#xm-openings)">')
+    rect(-5, -5, width + 10, height + 10, BB_FR4)
+    add(f'<path d="{pads}" fill="{BB_HASL}"/>')
+    add("</g>")
+    add(f'<g id="silkscreen" fill="none" stroke="{BB_SILK}" stroke-linecap="round" '
+        'stroke-linejoin="round">')
+    for stroke, lines in sorted(pcb["silk"]["strokes"].items(), key=lambda item: float(item[0])):
+        add(f'<path d="{pcb_lines(lines)}" stroke-width="{stroke}"/>')
+    add(f'<path d="{"".join(pcb_lines([p]) + "Z" for p in pcb["silk"]["regions"])}" '
+        f'fill="{BB_SILK}" stroke="none"/>')
+    add(f'<path d="{"".join(pcb_lines([p]) + "Z" for p in pcb["silk"]["clear"])}" '
+        f'fill="{XM_MASK}" stroke="none"/>')
+    add("</g></g>")
+    def smd_pads(x0, y0, x1, y1):
+        return [p for p in pcb["copper"]["pads"] if p[0] in "ro" and x0 < p[1] < x1 and y0 < p[2] < y1]
+
+    def tails(x0, y0, x1, y1, cx, cy, fill=BB_METAL, scale=.62):
+        """Leads from each SMT pad in a box running in towards the part centre (cx, cy)."""
+        for kind, x, y, w, h in smd_pads(x0, y0, x1, y1):
+            if w >= h:
+                outer = x + w * .45 if x > cx else x - w * .45
+                rect(min(outer, cx), y - h * scale / 2, abs(cx - outer), h * scale, fill, .5)
+            else:
+                outer = y + h * .45 if y > cy else y - h * .45
+                rect(x - w * scale / 2, min(outer, cy), w * scale, abs(cy - outer), fill, .5)
+
+    def solder(x, y, r):
+        circle(x, y, r, "#c3c5bf", 'stroke="#8d908b" stroke-width="1"')
+        circle(x - r * .3, y - r * .3, r * .35, "#eceee9")
+
+    # Silkscreen artwork that is not part of the released Gerbers, redrawn from the photographs.
+    add(f'<g id="logo" fill="none" stroke="{BB_SILK}" stroke-linecap="round" stroke-linejoin="round">')
+    logo = fonts.word_path("beagleboard.org", "Comfortaa_Bold.ttf", 28, 327, 262, "start", 254)
+    add(f'<path d="{logo}" stroke-width="5.4"/>')
+    add(f'<path d="{logo}" fill="{XM_MASK}" stroke="{XM_MASK}" stroke-width="2"/>')
+    add('<path d="M296 238C290 240 288 252 291 259C293 264 298 263 299 258C300 250 299 242 296 238Z'
+        'M296 238C302 233 314 233 320 238C324 242 326 248 326 254C326 260 320 263 314 262H300'
+        'M304 258C308 260 313 260 317 258" stroke-width="2.4"/>')
+    add(f'<path d="M303 241C306 236 316 236 321 241C321 245 316 247 312 246C308 245 305 245 303 241Z" '
+        f'fill="{BB_SILK}" stroke="none"/>')
+    circle(309, 242.5, 1.6, XM_MASK, 'stroke="none"')
+    circle(319, 253, 4, BB_SILK, 'stroke="none"')
+    add("</g>")
+    text("xM", "OpenSans_Bold.ttf", 25, 518, 222, BB_SILK, 0, 50, "start", 'id="logo-xm"')
+
+    # Two-terminal passives: (body length, width, body colour, terminal length).
+    styles = {
+        "C402-25": (10, 5, "#b9a06c", 2.5), "R402-25RD": (10, 5, BB_BLACK, 2.5),
+        "C0805": (20, 12.5, "#b8a06b", 4.5), "C1206": (32, 16, "#b49c68", 6),
+        "R603-35X45": (16, 8, BB_BLACK, 3.5), "R805-35X60": (20, 12.5, BB_BLACK, 4.5),
+        "R1210-70X102": (32, 25, BB_BLACK, 6), "F603-41X39": (16, 8, "#2c8a6c", 3.5),
+        "IND603-24X32": (16, 8, "#3a3935", 3.5),
+    }
+    # Do-not-install parts from the rev C BOM.
+    unpopulated = {"C9", "C51", "C209", "R11", "R22", "R36", "R44", "R45", "R46", "R68", "R69", "R70",
+                   "R71", "R79", "R80", "R95", "R96", "R97", "R99", "R122", "R126", "R127", "R139", "R142",
+                   "R143", "R144", "R145", "R147", "R148", "R154", "R155", "R156", "R158", "R160"}
+    for name, (footprint, x, y, angle, *box) in sorted(parts.items()):
+        if footprint not in styles or name in unpopulated:
+            continue
+        length, across, colour, terminal = styles[footprint]
+        if box and angle % 90 == 0 and box[0][2] > box[0][0]:
+            x0, y0, x1, y1 = box[0]
+            x, y = (x0 + x1) / 2, (y0 + y1) / 2
+            angle = 0 if x1 - x0 >= y1 - y0 else 90
+        add(f'<g id="part-{name.lower()}" transform="translate({f(x)} {f(y)}) rotate({-angle})">')
+        rect(-length / 2, -across / 2, length, across, BB_METAL, .8)
+        rect(-length / 2 + terminal, -across / 2, length - 2 * terminal, across, colour)
+        if footprint.startswith("C") and across > 6:
+            rect(-length / 2 + terminal, -across / 2 + 1, length - 2 * terminal, across * .3,
+                 "#fff", 0, 'opacity=".18"')
+        add("</g>")
+
+    def chip(name, box=None, fill=XM_CHIP, lead=True):
+        x0, y0, x1, y1 = box or parts[name][4]
+        if lead:
+            tails(x0 - 16, y0 - 16, x1 + 16, y1 + 16, (x0 + x1) / 2, (y0 + y1) / 2)
+        add(f'<g id="part-{name.lower()}">')
+        rect(x0, y0, x1 - x0, y1 - y0, fill, 1)
+        rect(x0 + 1, y0 + 1, x1 - x0 - 2, y1 - y0 - 2, "#fff", 1, 'opacity=".05"')
+        add("</g>")
+        return x0, y0, x1 - x0, y1 - y0
+
+    def marking(lines, x, y, cap, angle, fill="#8d8f86", font="RobotoCondensed_Regular.ttf"):
+        add(f'<g transform="translate({f(x)} {f(y)}) rotate({angle})" fill="{fill}">')
+        for value, base, width in lines:
+            add(f'<path d="{fonts.word_path(value, font, cap, 0, base, "middle", width)}"/>')
+        add("</g>")
+
+    # DM3730 with the Micron memory stacked on top (package on package).
+    x, y, w, h = chip("U4", lead=False)
+    rect(x + 3, y + 3, w - 6, h - 6, "#34372f", 1)
+    circle(x + 12, y + 12, 3.5, "#26281f")
+    marking((("0FA18", 9, 50), ("D9LCH", 30, 50)), x + w / 2 + 12, y + h / 2 - 8, 15, 90)
+    marking((("KCCB", 0, 14),), x + w - 12, y + 16, 5, 0)
+    add(f'<path transform="translate({f(x + 82)} {f(y + 96)})" d="M-14 6C-14 -4 -6 -12 2 -12'
+        'C9 -12 14 -6 14 1C14 7 10 11 5 11C1 11 -2 8 -2 4C-2 0 1 -3 4 -3M-6 10C-9 4 -8 -3 -4 -6'
+        'M3 -12C6 -6 6 0 4 4" fill="none" stroke="#8d8f86" stroke-width="2.6" stroke-linecap="round"/>')
+    x, y, w, h = chip("U7", lead=False)
+    marking((("TPS65950B", -6, 48), ("AB8W GI", 6, 30)), x + w / 2, y + h / 2 - 4, 6, 180)
+    add(f'<path transform="translate({f(x + 22)} {f(y + 18)}) rotate(180)" d="M-5 -6H5V-2H2V7H-1V-2H-5Z" fill="#8d8f86"/>')
+    x, y, w, h = chip("U11")
+    circle(x + w - 12, y + 12, 4, "#2c2f2b")
+    marking((("01C129 54", -2, 56), ("TFP410PAP", 12, 60)), x + w / 2, y + h / 2, 9, 180)
+    x, y, w, h = parts["U15"][4]
+    chip("U15", (x + 2, y + 2, w - 2, h - 2))
+    marking((("LAN9514-JZX", -6, 52), ("SMSC", 8, 26)), (x + w) / 2, (y + h) / 2 - 4, 7, 90, "#55574f")
+    chip("U14", (190.9, 559.2, 240.9, 609.2))
+    chip("U13")
+    marking((("2054B", -2, 30), ("HIZ1AL", 10, 40)), 660.4, 548, 8, 180, "#55574f")
+    chip("U9")
+    marking((("MU221E", -8, 28), ("9CK04", 3, 24), ("EKNF", 14, 20)), 752, 650, 7, 0, "#8d8f86")
+    chip("U2")
+    chip("U10", (758.5, 557.8, 778.3, 572.6))
+    chip("U12", (62.4, 138.2, 77.4, 154))
+    chip("U5", (481, 470.5, 497, 482))
+    chip("Q1", (234, 368.5, 248.6, 380.9))
+    chip("Q2", (657.2, 226.2, 669, 238.6))
+    for name, region in (("U3", (625, 140, 718, 212)), ("U16", (530, 540, 600, 635))):
+        x0, y0, x1, y1 = parts[name][4]
+        tails(*region, (x0 + x1) / 2, (y0 + y1) / 2, scale=.8)
+        add(f'<g id="part-{name.lower()}">')
+        rect(x0, y0, x1 - x0, y1 - y0, XM_CHIP, 1)
+        add("</g>")
+    for name in ("RP4", "RP7"):
+        x0, y0, x1, y1 = parts[name][4]
+        add(f'<g id="part-{name.lower()}">')
+        tails(x0 - 2, y0 - 2, x1 + 2, y1 + 2, (x0 + x1) / 2, (y0 + y1) / 2)
+        rect(x0 + 2, y0 + 4, x1 - x0 - 4, y1 - y0 - 8, BB_BLACK, .8)
+        add("</g>")
+    x0, y0, x1, y1 = parts["Y1"][4]
+    add('<g id="part-y1">')
+    rect(x0, y0 + 2, x1 - x0, y1 - y0 - 4, "#d9d6c8", 1.5)
+    rect(x0 + 2.5, y0 + 5, x1 - x0 - 5, y1 - y0 - 10, "#b9bbb3", 1)
+    add("</g>")
+    add('<g id="part-y3">')
+    rect(525, 421, 15, 27, "#d9d6c8", 1)
+    rect(526.5, 423, 12, 23, "url(#xm-brushed)", 1)
+    add("</g>")
+    add('<g id="part-y4">')
+    tails(290, 535, 440, 565, 369.6, 549.9)
+    rect(310, 531, 119, 39, BB_BLACK, 3)
+    add('<path d="M333 535H406A15 15 0 0 1 406 565H333A15 15 0 0 1 333 535Z" fill="url(#xm-shell)" '
+        'stroke="#81857f" stroke-width="1.5"/>')
+    add('<path d="M335 539H404A11 11 0 0 1 404 561H335A11 11 0 0 1 335 539Z" fill="none" '
+        'stroke="#eff0ec" stroke-width="1.5" opacity=".7"/>')
+    text("ECS250XM", "RobotoCondensed_Regular.ttf", 8, 369.6, 554, "#4f524e", 0, 46)
+    add("</g>")
+
+    # Status LEDs: green except the red over-voltage LED D13; the #led-* fills are the lit area.
+    for name, identity in (("D5", "led-power"), ("D6", "led-usr0"), ("D7", "led-usr1"),
+                           ("D12", "led-pmu-stat"), ("D13", "led-overvoltage"), ("D14", "led-hub-power")):
+        x0, y0, x1, y1 = parts[name][4]
+        found = smd_pads(x0 - 4, y0 - 4, x1 + 4, y1 + 4)
+        cx = sum(p[1] for p in found) / len(found)
+        cy = sum(p[2] for p in found) / len(found)
+        vertical = max(p[2] for p in found) - min(p[2] for p in found) > 5
+        add(f'<g id="part-{name.lower()}" transform="translate({f(cx)} {f(cy)})'
+            + (' rotate(90)' if vertical else '') + '">')
+        rect(-9, -4.5, 18, 9, BB_METAL, .8)
+        rect(-6, -4.5, 12, 9, "#ece9dc", .5)
+        add(f'<rect id="{identity}" x="-5" y="-3.6" width="10" height="7.2" rx="1.5" fill="{BB_LED_OFF}"/>')
+        rect(-1.4, -1.2, 2.8, 2.4, "#9a7a4a", .4)
+        add("</g>")
+
+    # Connectors, redrawn from the photographs onto the design-file footprints.
+    add('<g id="connector-dvi">')
+    for hx, hy in ((82.8, 29.9), (239.8, 29.9), (88.9, 78.9), (233.7, 78.9)):
+        solder(hx, hy, 9)
+    rect(104, 86, 110, 14, "#2a2c2b", 1)
+    tails(105, 80, 210, 100, 161.3, 60, scale=.7)
+    rect(88, -2, 152, 102, "url(#xm-hdmi)", 3, 'stroke="#6a6d69" stroke-width="1.5"')
+    rect(90, -2, 148, 13, "#cdcfca", 2)
+    rect(102, 2, 26, 5, "#7a3a32", 1)
+    rect(196, 2, 26, 5, "#7a3a32", 1)
+    for sx in (106, 197):
+        add(f'<path d="M{sx} 84V28Q{sx} 22 {sx + 6} 22H{sx + 20}Q{sx + 26} 22 {sx + 26} 28V84" '
+            'fill="#8f918c" stroke="#5c5f5b" stroke-width="1.5"/>')
+        add(f'<path d="M{sx + 2.5} 84V29Q{sx + 2.5} 24.5 {sx + 7} 24.5H{sx + 19}Q{sx + 23.5} 24.5 {sx + 23.5} 29V84" '
+            'fill="none" stroke="#d6d8d3" stroke-width="1.2"/>')
+        add(f'<path d="M{sx + 8} 80V33Q{sx + 8} 29 {sx + 12} 29H{sx + 14}Q{sx + 18} 29 {sx + 18} 33V80Z" '
+            'fill="#c2c4bf" stroke="#626561" stroke-width="1.2"/>')
+    for tx in (108, 206):
+        rect(tx, 88, 16, 15, "#6d716d", 1.5, 'stroke="#c9ccc6" stroke-width="1.2"')
+    add("</g>")
+    add('<g id="part-rt1">')
+    add(f'<path d="M280 12L282 24L276 34" fill="none" stroke="{BB_METAL}" stroke-width="3"/>')
+    solder(279.4, 12.7, 6)
+    add('<path d="M277 30C282 34 285 46 283 58C281 74 271 85 262 84C254 83 252 75 255 66'
+        'C258 56 268 46 272 36C273 32 275 29 277 30Z" fill="url(#xm-polyfuse)" stroke="#b07b28" stroke-width="1"/>')
+    add("</g>")
+    add('<g id="connector-svideo">')
+    for hx, hy in ((294.5, 55.1), (429.4, 55.1)):
+        rect(hx - 6, hy - 14, 12, 28, "#c3c5bf", 2, 'stroke="#8d908b" stroke-width="1"')
+    rect(298, 60, 128, 66, "#1c1e1d", 3)
+    rect(306, 66, 112, 52, "#0f1110", 2)
+    for px in (327.9, 396):
+        rect(px - 3, 70, 6, 44, "#8f9189", 1)
+        circle(px, 85.1, 4, "#a9aba4")
+        circle(px, 110, 4, "#a9aba4")
+    add('<path d="M296 -6H428V66H404L396 58H328L320 66H296Z" fill="url(#xm-shell)" '
+        'stroke="#80857f" stroke-width="1.5" stroke-linejoin="round"/>')
+    rect(298, -6, 128, 7, "#e3e5e0", 2)
+    add('<path d="M304 12H420M304 54H420" stroke="#9a9e98" stroke-width="1.2"/>')
+    add("</g>")
+    for identity, x0 in (("connector-audio-out", 463), ("connector-audio-in", 602.7)):
+        add(f'<g id="{identity}">')
+        rect(x0 - 12, 82, 22, 26, "#c3c5bf", 2, 'stroke="#8d908b" stroke-width="1"')
+        rect(x0 + 95, 31, 18, 20, "#c3c5bf", 2, 'stroke="#8d908b" stroke-width="1"')
+        rect(x0 + 96, 84, 16, 16, "#c3c5bf", 2, 'stroke="#8d908b" stroke-width="1"')
+        rect(x0 - 12, 50, 16, 11, "url(#xm-gold)", 1)
+        rect(x0 + 28, -24, 50, 31, "url(#xm-barrel)", 3)
+        rect(x0 + 30, -26, 46, 4, "#555958", 2)
+        rect(x0 + 3, 3, 92, 119, "#3a3d3d", 3)
+        rect(x0 + 6, 6, 86, 113, "#4a4d4d", 2)
+        rect(x0 + 6, 6, 86, 8, "#353838", 1)
+        add(f'<path d="M{f(x0 + 47)} 23L{f(x0 + 93)} 27L{f(x0 + 95)} 70L{f(x0 + 88)} 73L{f(x0 + 79)} 42'
+            f'L{f(x0 + 50)} 39Z" fill="url(#xm-gold)" stroke="#8c6a22" stroke-width=".8"/>')
+        rect(x0 + 93, 27, 18, 14, "url(#xm-gold)", 1)
+        add("</g>")
+    add('<g id="part-j2">')
+    rect(788, 70, 50, 25, BB_BLACK, 2)
+    for px in (800.1, 825.5):
+        rect(px - 10, 72, 20, 21, "#2d302e", 1.5)
+        rect(px - 3.2, 79.4, 6.4, 6.4, "#9fa198", .8)
+    add("</g>")
+    add('<g id="connector-usb-otg">')
+    tails(765, 300, 800, 350, 800, 323.9, "#c9cbc4", .7)
+    for tx, ty in ((781.1, 274.6), (823.5, 274.6), (781.1, 373.1), (823.5, 373.1)):
+        rect(tx - 11, ty - 8, 22, 16, "#c3c5bf", 1.5, 'stroke="#8d908b" stroke-width="1"')
+    rect(784, 285, 80, 78, "url(#xm-brushed)", 2, 'stroke="#7c807b" stroke-width="1.5"')
+    rect(792, 294, 66, 61, "#d8871e", 1)
+    rect(792, 294, 66, 6, "#a85f12", 1)
+    rect(812, 311, 40, 34, "#e99a2c", 1)
+    rect(812, 318, 40, 9, "#f2b44a", 1)
+    add("</g>")
+    add('<g id="connector-power">')
+    tails(720, 390, 812, 470, 766.6, 452.1, "#c3c5bf", .8)
+    rect(744, 402, 40, 14, "#c9cbc5", 2, 'stroke="#8d908b" stroke-width="1"')
+    rect(726, 410, 124, 90, "#1a1c1b", 4)
+    rect(730, 418, 10, 74, "#bfc1bb", 2)
+    rect(742, 414, 104, 82, "url(#xm-barrel)", 3)
+    rect(772, 416, 66, 78, "#f2f1ec", 2)
+    rect(772, 416, 66, 5, "#d6d5cf", 1)
+    text("5V", "OpenSans_Bold.ttf", 26, 802, 468, "#202221", 90, None, "middle")
+    rect(846, 404, 28, 100, "#141615", 3)
+    rect(850, 412, 18, 84, "#262928", 2)
+    add("</g>")
+
+    def header(identity, x, y, columns, rows, angle=0, pitch=25.4, populated=True):
+        add(f'<g id="{identity}" transform="translate({f(x)} {f(y)}) rotate({angle})">')
+        w, h = columns * pitch, rows * pitch
+        rect(-w / 2, -h / 2, w, h, BB_BLACK, 2)
+        for column in range(columns):
+            for row in range(rows):
+                px, py = -w / 2 + pitch / 2 + column * pitch, -h / 2 + pitch / 2 + row * pitch
+                rect(px - pitch * .45, py - pitch * .45, pitch * .9, pitch * .9, "#2d302e", 1.5)
+                if populated:
+                    rect(px - 3.2, py - 3.2, 6.4, 6.4, "#a9aba2", .8)
+                    rect(px - 1.8, py - 1.8, 3.6, 3.6, "#d9dad3", .5)
+        add("</g>")
+
+    header("connector-jtag", 248.3, 456.75, 7, 2, 45)
+    add('<g id="connector-camera">')
+    tails(85, 335, 160, 565, 120.7, 450.9)
+    circle(120.7, 334, 8.5, BB_BLACK)
+    rect(107, 334, 28, 238, BB_BLACK, 2)
+    for i in range(17):
+        py = 349.1 + i * 12.7
+        for px in (114.5, 127.5):
+            rect(px - 4, py - 4, 8, 8, "#060707", 1)
+    add("</g>")
+    add('<g id="part-tp1">')
+    add(f'<path d="M152.1 327.7V346" stroke="{BB_METAL}" stroke-width="3"/>')
+    circle(152.1, 327.7, 8, "none", f'stroke="#c3c5bf" stroke-width="3.5"')
+    add("</g>")
+    add('<g id="connector-usb-host">')
+    for x0 in (89.9, 312.1):
+        for hy in (739.3, 796.2):
+            solder(x0, hy, 13)
+            solder(x0 + 131.5, hy, 13)
+        for ex in (x0 - 5, x0 + 130):
+            rect(ex, 880, 7, 19, "url(#xm-brushed)", 1, 'stroke="#7c807b" stroke-width="1"')
+        rect(x0 + 2, 729, 128, 170, "url(#xm-brushed)", 2, 'stroke="#7c807b" stroke-width="1.5"')
+        rect(x0 + 2, 729, 128, 9, "#d9dcd6", 2)
+        rect(x0 + 2, 737, 128, 2, "#8d918c")
+        rect(x0 + 2, 729, 6, 170, "#8d918c", 1, 'opacity=".6"')
+        rect(x0 + 124, 729, 6, 170, "#8d918c", 1, 'opacity=".6"')
+        rect(x0 + 2, 892, 128, 7, "#eef0ec", 1, 'stroke="#9a9e99" stroke-width=".8"')
+        for tx in (x0 + 40, x0 + 92):
+            rect(tx - 5.5, 808, 11, 72, "#4a4d4b", 3)
+            rect(tx - 3.5, 810, 7, 68, "#c9ccc6", 2)
+            rect(tx - 3.5, 858, 7, 20, "#8f938e", 2)
+            rect(tx - 3, 872, 6, 4, "#f6f7f3", 1)
+    add("</g>")
+    add('<g id="connector-ethernet">')
+    for hx, hy in ((544.8, 763.3), (699.8, 763.3)):
+        solder(hx, hy, 13)
+    add('<path d="M543 648H702V902H543Z" fill="url(#xm-brushed)" stroke="#7c807b" stroke-width="1.5"/>')
+    add('<path d="M543 648H702V662H543Z" fill="#c9ccc6"/>')
+    text("MagJack", "OpenSans_Bold.ttf", 14, 622.3, 744, "none", 0, 70, "middle",
+         'stroke="#80847f" stroke-width="1.3"')
+    text("Bel Fuse", "OpenSans_Regular.ttf", 9, 622.3, 764, "none", 0, 46, "middle",
+         'stroke="#8c908b" stroke-width="1"')
+    for tx in (577, 667):
+        add(f'<path d="M{tx - 8} 902V840Q{tx} 828 {tx + 8} 840V902Z" fill="#a7aba5" '
+            'stroke="#e9ebe7" stroke-width="1.6"/>')
+    add("</g>")
+    add('<g id="connector-serial">')
+    tails(795, 630, 840, 770, 840, 699.8, "#c9cbc4", .7)
+    for hy in (574.8, 824.7):
+        circle(808, hy, 12, "url(#xm-brushed)", 'stroke="#7c807b" stroke-width="1.5"')
+        circle(805, hy - 3, 4, "#f3f4f0", 'opacity=".8"')
+    rect(810, 550, 44, 300, "url(#xm-db9-body)", 2, 'stroke="#141615" stroke-width="1.5"')
+    rect(811, 551, 42, 10, "#424543", 2)
+    rect(820, 622, 8, 156, "#0c0d0d", 2)
+    rect(828, 622, 2, 156, "#4a4d4b")
+    add('<path d="M813 728L819 733L813 738Z" fill="#0c0d0d"/>')
+    rect(853, 614, 5, 172, "#c3c6c0", 1)
+    add('<path d="M858 620H890Q900 620 900 632V768Q900 780 890 780H858Z" fill="url(#xm-brushed)" '
+        'stroke="#8a8e89" stroke-width="1.5"/>')
+    add('<path d="M862 630H888Q894 630 894 638V762Q894 770 888 770H862Z" fill="#545653"/>')
+    add('<path d="M862 630H888Q894 630 894 638V762Q894 770 888 770H862Z" fill="url(#xm-grain)" opacity=".5"/>')
+    add("</g>")
+    add('<g id="connector-expansion"><rect x="31.8" y="342.9" width="50.8" height="355.6" '
+        'fill="#fff" fill-opacity="0"/></g>')
+    add('<g id="connector-lcd"><rect x="19.1" y="186.7" width="83.8" height="130.8" '
+        'fill="#fff" fill-opacity="0"/></g>')
+    # The microSD slot is on the underside; the card enters at the notch in the right edge.
+    add(f'<g id="connector-sd"><rect x="{f(inset - 60)}" y="{f(notch[0])}" width="{f(chamfer + 60)}" '
+        f'height="{f(notch[1] - notch[0])}" fill="#fff" fill-opacity="0"/></g>')
+    for identity, cx in (("button-reset", 145.3), ("button-user", 246.9)):
+        cy = 682.75
+        add(f'<g id="{identity}">')
+        for dx in (-32.5, 32.5):
+            for dy in (-22.35, 22.35):
+                solder(cx + dx, cy + dy, 7)
+        rect(cx - 30, cy - 33, 60, 66, "#6b6e6b", 4)
+        rect(cx - 27, cy - 30, 54, 60, "#5d605d", 3)
+        rect(cx - 28, cy - 33, 56, 9, "#b4b7b2", 2)
+        for dx in (-21, 21):
+            for dy in (-20, 22):
+                circle(cx + dx, cy + dy, 4.5, "#202221")
+        circle(cx, cy + 2, 18, "url(#xm-cap)", 'stroke="#9d977f" stroke-width="1.2"')
+        add("</g>")
+    add("</svg>")
+    return "\n".join(out) + "\n"
+
+
 @dataclass(frozen=True)
 class Model:
     """Builder: Fonts -> SVG text; path: repository-relative.
@@ -4865,6 +5345,9 @@ BOARD_MODELS = {
     "beagleboard": Model("beagleboard/beagleboard.svg", build_beagleboard, None,
                          ("Comfortaa_Bold.ttf", "RobotoCondensed_Bold.ttf",
                           "RobotoCondensed_Regular.ttf", "OpenSans_Regular.ttf")),
+    "beagleboard-xm": Model("beagleboard/beagleboard-xm.svg", build_beagleboard_xm, None,
+                            ("Comfortaa_Bold.ttf", "RobotoCondensed_Regular.ttf",
+                             "OpenSans_Regular.ttf", "OpenSans_Bold.ttf")),
 }
 ALIASES = {
     "sl-c700": ("sl-c700-laptop", "sl-c700-pda"),
@@ -5198,7 +5681,8 @@ def validate_svg(drawing, model):
                     or not all(math.isfinite(value) and 0 <= value <= 1 for value in times)
                     or any(a > b for a, b in zip(times, times[1:]))):
                 raise ValueError("invalid SVG animation timeline")
-    for name in ("led-mail", "led-charge", *NSLU2_LEDS, "led-usr0", "led-usr1", "led-pmu-stat"):
+    for name in ("led-mail", "led-charge", *NSLU2_LEDS, "led-usr0", "led-usr1", "led-pmu-stat",
+                 "led-overvoltage", "led-hub-power"):
         if name in ids and (not ids[name].get("fill") or "url(" in ids[name].get("fill")):
             raise ValueError(f"#{name} must have a directly editable fill")
     if model.screen is None:
