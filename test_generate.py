@@ -334,6 +334,24 @@ class GeneratorTests(unittest.TestCase):
                     self.assertIn(identity, elements)
                     self.assertTrue(elements[identity].get("fill"))
 
+    def test_nslu2_exposes_editable_indicators_and_rejects_handheld_variants(self):
+        root = generator.ET.parse(
+            generator.REPOSITORY / generator.APPLIANCE_MODELS["nslu2-front"].path).getroot()
+        elements = {element.get("id"): element for element in root.iter() if element.get("id")}
+        self.assertNotIn("screen", elements)
+        self.assertIn("button-power", elements)
+        for identity in generator.NSLU2_LEDS:
+            with self.subTest(indicator=identity):
+                self.assertNotIn("url(", elements[identity].get("fill"))
+        elements["led-ready"].set("fill", "url(#nslu2-glass)")
+        broken = generator.ET.tostring(root, encoding="unicode")
+        with self.assertRaisesRegex(ValueError, "led-ready"):
+            generator.validate_svg(broken, generator.APPLIANCE_MODELS["nslu2-front"])
+        for option in (("--camera", "front"), ("--keyboard",),
+                       ("--sleeve", "navman-gps-sleeve")):
+            with self.subTest(option=option):
+                self.cli("nslu2-front", *option, "--output-dir", self.directory, success=False)
+
     def test_buffalo_antenna_hole_is_transparent(self):
         if shutil.which("rsvg-convert") is None or importlib.util.find_spec("PIL") is None:
             self.skipTest("transparency check needs rsvg-convert and Pillow")

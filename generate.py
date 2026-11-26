@@ -4069,6 +4069,308 @@ def build_ipaq_keyboard_sleeve(fonts):
     return a.finish()
 
 
+NSLU2_LEDS = ("led-ready", "led-ethernet", "led-disk2", "led-disk1", "led-power")
+# Window-local layout: origin at the window centre, measured on the straight front.
+NSLU2_LABELS = (("led-ready", "Ready/Status", -127, 132),
+                ("led-ethernet", "Ethernet", -55, 85),
+                ("led-disk2", "DISK 2", 18, 65),
+                ("led-disk1", "DISK 1", 88, 65))
+NSLU2_CISCO_BARS = (20, 22, 26, 37, 50, 36, 23, 15, 11, 8, 6, 8, 11, 15, 23, 36, 50, 37, 26, 22, 20)
+
+
+def nslu2_defs():
+    rnd = random.Random(2006)
+    grain = []
+    for _ in range(260):
+        x, y = rnd.uniform(0, 64), rnd.uniform(0, 64)
+        light = rnd.random() < .5
+        grain.append(f'<rect x="{f(x)}" y="{f(y)}" width="{f(rnd.uniform(.8, 1.8))}" height="{f(rnd.uniform(.8, 2.6))}" '
+                     f'fill="{"#fff" if light else "#000"}" opacity="{f(rnd.uniform(.05, .14))}"/>')
+    return f'''<defs>
+<linearGradient id="nslu2-silver-front" x1="0" y1="0" x2="1" y2="0">
+<stop offset="0" stop-color="#3d4043"/><stop offset=".06" stop-color="#5d6165"/>
+<stop offset=".19" stop-color="#7f8489"/><stop offset=".31" stop-color="#9ca2a7"/>
+<stop offset=".42" stop-color="#c7cdd2"/><stop offset=".49" stop-color="#e1e6ea"/>
+<stop offset=".55" stop-color="#ced4d9"/><stop offset=".66" stop-color="#9ea4a9"/>
+<stop offset=".78" stop-color="#6f7479"/><stop offset=".9" stop-color="#4e5256"/>
+<stop offset="1" stop-color="#2f3235"/></linearGradient>
+<linearGradient id="nslu2-silver-34" gradientUnits="userSpaceOnUse" x1="118" y1="0" x2="462" y2="0">
+<stop offset="0" stop-color="#8a8d90"/><stop offset=".1" stop-color="#a9adb0"/>
+<stop offset=".25" stop-color="#cfd3d6"/><stop offset=".35" stop-color="#e2e5e7"/>
+<stop offset=".45" stop-color="#d2d5d8"/><stop offset=".57" stop-color="#abafb2"/>
+<stop offset=".7" stop-color="#9da1a4"/><stop offset=".95" stop-color="#a1a5a8"/>
+<stop offset="1" stop-color="#8a8e91"/></linearGradient>
+<linearGradient id="nslu2-band-front" x1="0" y1="0" x2="1" y2="0">
+<stop offset="0" stop-color="#1b2022"/><stop offset=".25" stop-color="#2f393d"/>
+<stop offset=".45" stop-color="#3d4a50"/><stop offset=".75" stop-color="#2a3236"/>
+<stop offset="1" stop-color="#171b1d"/></linearGradient>
+<linearGradient id="nslu2-band-34" gradientUnits="userSpaceOnUse" x1="122" y1="0" x2="330" y2="0">
+<stop offset="0" stop-color="#55585b"/><stop offset=".12" stop-color="#8a8e91"/>
+<stop offset=".45" stop-color="#7b7f82"/><stop offset="1" stop-color="#55595c"/></linearGradient>
+<linearGradient id="nslu2-stand-front" x1="0" y1="0" x2="1" y2="0">
+<stop offset="0" stop-color="#202628"/><stop offset=".08" stop-color="#3a464b"/>
+<stop offset=".25" stop-color="#2c3539"/><stop offset=".75" stop-color="#262e31"/>
+<stop offset=".92" stop-color="#2b3337"/><stop offset="1" stop-color="#171b1c"/></linearGradient>
+<linearGradient id="nslu2-lip-front" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#3c474c"/><stop offset=".55" stop-color="#323b3f"/>
+<stop offset="1" stop-color="#1c2123"/></linearGradient>
+<linearGradient id="nslu2-dome" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#5a5e61"/><stop offset=".5" stop-color="#4a4e51"/><stop offset="1" stop-color="#3c3f42"/></linearGradient>
+<linearGradient id="nslu2-rim" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#7d8286"/><stop offset=".08" stop-color="#9da2a6"/>
+<stop offset=".5" stop-color="#8e9397"/><stop offset=".86" stop-color="#b4babe"/>
+<stop offset=".95" stop-color="#eef1f3"/><stop offset="1" stop-color="#9ca1a5"/></linearGradient>
+<linearGradient id="nslu2-rim-34" x1="0" y1="0" x2="1" y2=".3">
+<stop offset="0" stop-color="#fbfbfb"/><stop offset=".55" stop-color="#f1f2f3"/>
+<stop offset=".8" stop-color="#c9cdd0"/><stop offset="1" stop-color="#e9ebec"/></linearGradient>
+<radialGradient id="nslu2-glass" cx=".4" cy=".3" r=".8">
+<stop offset="0" stop-color="#1e2123"/><stop offset=".6" stop-color="#0d0f10"/>
+<stop offset="1" stop-color="#050606"/></radialGradient>
+<linearGradient id="nslu2-cisco-blue" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#5b88a8"/><stop offset="1" stop-color="#4a7899"/></linearGradient>
+<radialGradient id="nslu2-button" cx=".42" cy=".38" r=".7">
+<stop offset="0" stop-color="#f2f4f3"/><stop offset=".7" stop-color="#c9cecd"/>
+<stop offset="1" stop-color="#8f9595"/></radialGradient>
+<linearGradient id="nslu2-side" gradientUnits="userSpaceOnUse" x1="460" y1="300" x2="740" y2="1000">
+<stop offset="0" stop-color="#565b5f"/><stop offset=".6" stop-color="#5c6064"/>
+<stop offset="1" stop-color="#62666a"/></linearGradient>
+<linearGradient id="nslu2-top-roll" gradientUnits="userSpaceOnUse" x1="530" y1="140" x2="580" y2="215">
+<stop offset="0" stop-color="#3f4244"/><stop offset="1" stop-color="#5b6064" stop-opacity="0"/></linearGradient>
+<linearGradient id="nslu2-bevel" gradientUnits="userSpaceOnUse" x1="450" y1="1090" x2="340" y2="1400">
+<stop offset="0" stop-color="#7b8084"/><stop offset=".45" stop-color="#d9dcde"/>
+<stop offset=".8" stop-color="#fafafa"/><stop offset="1" stop-color="#c6cacc"/></linearGradient>
+<linearGradient id="nslu2-stand-side" gradientUnits="userSpaceOnUse" x1="450" y1="1100" x2="700" y2="1000">
+<stop offset="0" stop-color="#4c5053"/><stop offset="1" stop-color="#585c5f"/></linearGradient>
+<linearGradient id="nslu2-plinth" gradientUnits="userSpaceOnUse" x1="0" y1="1210" x2="0" y2="1455">
+<stop offset="0" stop-color="#5d6164"/><stop offset=".6" stop-color="#6e7275"/>
+<stop offset="1" stop-color="#3b3e40"/></linearGradient>
+<pattern id="nslu2-grain" width="64" height="64" patternUnits="userSpaceOnUse">{"".join(grain)}</pattern>
+</defs>'''
+
+
+def nslu2_window_content(fonts):
+    """Labels and lenses in window-local coordinates."""
+    out = []
+    for identity, label, baseline, width in NSLU2_LABELS:
+        d = fonts.word_path(label, "OpenSans_Bold.ttf", 15, 53, baseline, "end", width)
+        out.append(f'<path d="{d}" fill="#e6e8e4"/>')
+        out.append(f'<rect id="{identity}" x="71" y="{baseline - 12}" width="18" height="14" rx="1.5" '
+                   f'fill="#262a23" data-label="{label}"/>')
+    return "".join(out)
+
+
+def nslu2_cisco(fonts):
+    """Cisco Systems mark in front-photo coordinates, centred on x = 361."""
+    out = []
+    pieces = (("C", 266, 281, 28), ("ISCO", 283, 330, 22), ("S", 340, 355, 28), ("YSTEMS", 357, 455, 22))
+    for text, x0, x1, cap in pieces:
+        out.append(f'<path d="{fonts.word_path(text, "OpenSans_Bold.ttf", cap, x0, 915, "start", x1 - x0)}" '
+                   'fill="#46708f"/>')
+    holes = []
+    for index, height in enumerate(NSLU2_CISCO_BARS):
+        x = 275 + index * 8.65 - 2.2
+        holes.append(f"M{f(x)} 997 V{f(997 - height)} h4.4 V997 Z")
+    out.append(f'<path fill-rule="evenodd" fill="url(#nslu2-cisco-blue)" '
+               f'd="M270 923 H452 V997 H270 Z {" ".join(holes)}"/>')
+    return "".join(out)
+
+
+def nslu2_header(view, x0, y0, width, height, per_mm, title, desc):
+    return [
+        '<?xml version="1.0" encoding="UTF-8"?>',
+        '<!-- SPDX-FileCopyrightText: 2026 Koen Kooi -->',
+        '<!-- SPDX-License-Identifier: CC-BY-SA-4.0 -->',
+        f'<svg xmlns="{SVG_NS}" width="{f(width / per_mm * 1.61)}" height="{f(height / per_mm * 1.61)}" '
+        f'viewBox="0 0 {width} {height}" id="nslu2-{view}" data-device="nslu2" '
+        f'data-view="{view}" data-units-per-mm="{per_mm}" role="img" '
+        'aria-labelledby="title description">',
+        f'<title id="title">{escape(title)}</title>',
+        f'<desc id="description">{escape(desc)}</desc>',
+        nslu2_defs(),
+        f'<g transform="translate({-x0} {-y0})">',
+    ]
+
+
+def nslu2_power_button(cx, cy, sx=1.0):
+    def e(r):
+        return f'cx="{f(cx)}" cy="{f(cy)}" rx="{f(r * sx)}" ry="{f(r)}"'
+    icon = (f'<g transform="translate({f(cx)} {f(cy)}) scale({f(sx)} 1)" stroke="#6d7474" stroke-width="2.6" '
+            'fill="none" stroke-linecap="round">'
+            '<path d="M-6.5 -9 A12 12 0 1 0 6.5 -9"/><path d="M0 -15 V-1"/></g>')
+    return ('<g id="button-power" data-label="Power">'
+            f'<ellipse {e(49)} fill="#1d2427"/>'
+            f'<ellipse {e(44)} fill="#141819"/>'
+            f'<ellipse id="led-power" {e(41)} fill="#8f9796"/>'
+            f'<ellipse {e(36)} fill="url(#nslu2-button)"/>'
+            f'{icon}</g>')
+
+
+def nslu2_front(fonts):
+    ax = 371  # symmetry axis in photo coordinates
+    x0, y0, width, height = 61, 60, 620, 1832
+    parts = nslu2_header("front", x0, y0, width, height, 13.93,
+                   "Linksys NSLU2 network storage link, front view",
+                   "Front view of the Linksys NSLU2 in its cradle, traced from photographs. Legends are "
+                   "outlines. Indicator lenses and the power-button ring are separate elements with "
+                   "directly editable fills; their initial fills show them unlit.")
+    hw = 170.5
+    left, right = ax - hw, ax + hw
+    # Cradle: flared wings and the front lip.
+    def flare(sign):
+        pts = [(1362, 181), (1450, 200), (1550, 225), (1650, 255), (1750, 290), (1800, 302)]
+        return " ".join(f"{f(ax + sign * w)} {y}" for y, w in pts)
+    parts.append('<g id="cradle">')
+    parts.append(f'<path d="M{f(ax - 168)} 1356 Q{f(ax - 181)} 1356 {f(ax - 181)} 1370 '
+                 f'C{f(ax - 200)} 1450 {f(ax - 240)} 1640 {f(ax - 300)} 1795 '
+                 f'Q{f(ax - 312)} 1832 {f(ax - 280)} 1850 Q{f(ax - 230)} 1878 {ax} 1884 '
+                 f'Q{f(ax + 230)} 1878 {f(ax + 280)} 1850 Q{f(ax + 312)} 1832 {f(ax + 300)} 1795 '
+                 f'C{f(ax + 240)} 1640 {f(ax + 200)} 1450 {f(ax + 181)} 1370 '
+                 f'Q{f(ax + 181)} 1356 {f(ax + 168)} 1356 Z" fill="url(#nslu2-stand-front)"/>')
+    # inner grooves beside the unit
+    for sign in (-1, 1):
+        parts.append(f'<path d="M{f(ax + sign * 178)} 1376 V1790" stroke="#15191a" stroke-width="5" opacity=".8"/>')
+    # lip: lit top surface and front face
+    parts.append(f'<path d="M{f(ax - 296)} 1800 Q{f(ax - 250)} 1806 {f(ax - 172)} 1808 H{f(ax + 172)} '
+                 f'Q{f(ax + 250)} 1806 {f(ax + 296)} 1800 Q{f(ax + 300)} 1830 {f(ax + 262)} 1846 '
+                 f'Q{f(ax + 200)} 1858 {ax} 1860 Q{f(ax - 200)} 1858 {f(ax - 262)} 1846 '
+                 f'Q{f(ax - 300)} 1830 {f(ax - 296)} 1800 Z" fill="url(#nslu2-lip-front)"/>')
+    parts.append(f'<path d="M{f(ax - 290)} 1801 Q{f(ax - 250)} 1806 {f(ax - 172)} 1808 H{f(ax + 172)} '
+                 f'Q{f(ax + 250)} 1806 {f(ax + 290)} 1801" stroke="#56636a" stroke-width="2" fill="none"/>')
+    parts.append('</g>')
+    parts.append('<g id="art">')
+    # dark top of the unit seen behind the rim
+    parts.append(f'<ellipse cx="{ax}" cy="168" rx="124" ry="90" fill="url(#nslu2-dome)"/>')
+    # lower dark band
+    parts.append(f'<path d="M{left} 1430 H{right} V1800 Q{ax} 1814 {left} 1800 Z" fill="url(#nslu2-band-front)"/>')
+    parts.append(f'<path d="M{left + 4} 1803 Q{ax} 1816 {right - 4} 1803" stroke="#0c0e0f" stroke-width="6" fill="none"/>')
+    # silver cap; its outline over the top is the outer edge of the window bezel
+    cap = (f'M{f(left)} 1440 V389 A{hw} 260 0 0 1 {f(right)} 389 V1440 '
+           f'Q{f(right - 40)} 1468 {ax} 1469 Q{f(left + 40)} 1468 {f(left)} 1440 Z')
+    parts.append(f'<path id="front-cap" d="{cap}" fill="url(#nslu2-silver-front)"/>')
+    parts.append(f'<path d="{cap}" fill="url(#nslu2-grain)"/>')
+    parts.append(f'<path d="M{f(left + 2)} 1441 Q{f(left + 40)} 1468 {ax} 1469 Q{f(right - 40)} 1468 {f(right - 2)} 1441" '
+                 'stroke="#d9dee1" stroke-width="2" fill="none" opacity=".5"/>')
+    # bezel: mid grey over the top, a bright lip along the bottom
+    parts.append(f'<ellipse cx="{ax}" cy="389" rx="{hw - 1}" ry="259" fill="url(#nslu2-rim)"/>')
+    parts.append(f'<ellipse cx="{ax}" cy="389" rx="{hw - 1}" ry="259" fill="none" stroke="#2d3033" '
+                 'stroke-width="2" opacity=".6"/>')
+    parts.append(f'<ellipse cx="{ax}" cy="380" rx="155" ry="231" fill="#1a1c1d"/>')
+    parts.append(f'<ellipse id="indicator-window" cx="{ax}" cy="379" rx="151" ry="227" fill="url(#nslu2-glass)"/>')
+    parts.append(f'<g transform="translate({ax} 379)">{nslu2_window_content(fonts)}</g>')
+    parts.append(f'<path d="M{ax - 118} 260 Q{ax - 70} 175 {ax + 30} 162" stroke="#fff" '
+                 'stroke-width="5" fill="none" opacity=".06" stroke-linecap="round"/>')
+    parts.append(f'<g id="cisco-logo" transform="translate({ax - 361} 0)">{nslu2_cisco(fonts)}</g>')
+    parts.append(nslu2_power_button(ax, 1633))
+    parts.append('</g></g></svg>\n')
+    return "\n".join(parts)
+
+
+def nslu2_three_quarter(fonts):
+    """Front-left three-quarter view; photo coordinates of the reference photograph."""
+    x0, y0, width, height = 62, 70, 730, 1392
+    parts = nslu2_header("three-quarter", x0, y0, width, height, 13.6,
+                   "Linksys NSLU2 network storage link, three-quarter view",
+                   "Front-left three-quarter view of the Linksys NSLU2 in its cradle, traced from a "
+                   "photograph; the scale is given at the front edge. Legends are outlines. Indicator "
+                   "lenses and the power-button ring are separate elements with directly editable fills; "
+                   "their initial fills show them unlit.")
+    # cradle: plinth, right face, lit bevel and shadowed inner wing
+    parts.append('<g id="cradle">')
+    parts.append('<path d="M124 1200 L114 1208 Q84 1236 74 1262 Q68 1290 84 1322 Q104 1364 140 1397 '
+                 'Q196 1432 270 1449 Q330 1458 380 1446 Q402 1440 414 1428 L742 988 Q760 966 740 950 '
+                 'L708 925 L452 1082 Z" fill="url(#nslu2-plinth)"/>')
+    parts.append('<path d="M452 1090 L708 926 L740 950 Q758 966 742 988 L414 1428 L404 1396 Z" '
+                 'fill="url(#nslu2-stand-side)"/>')
+    parts.append('<path d="M452 1084 L708 926" stroke="#3a3e41" stroke-width="4" fill="none"/>')
+    parts.append('<path d="M448 1092 L456 1096 Q440 1130 428 1160 Q412 1200 400 1250 Q388 1300 384 1350 L378 1404 '
+                 'L292 1404 Q306 1360 324 1330 Q346 1290 362 1250 Q384 1200 410 1170 Q430 1130 448 1092 Z" '
+                 'fill="url(#nslu2-bevel)"/>')
+    parts.append('<path d="M452 1082 L448 1092 Q430 1130 410 1170 Q384 1200 362 1250 Q346 1290 324 1330 Q306 1360 292 1404 '
+                 'L304 1300 L324 1202 Z" '
+                 'fill="#55595c"/>')
+    # front lip: lit top face in front of the unit
+    parts.append('<path d="M114 1208 Q84 1236 74 1262 Q70 1286 82 1312 Q110 1360 160 1386 Q230 1412 300 1404 '
+                 'L300 1396 Q210 1396 150 1366 Q118 1346 122 1300 Z" fill="#7d8285"/>')
+    parts.append('</g>')
+    parts.append('<g id="art">')
+    # dark shell: top, side and rear edge
+    parts.append('<path id="body" d="M262 330 L356 270 L612 96 Q648 74 690 86 Q742 100 768 150 Q782 180 780 210 '
+                 'L737 663 L725 732 L713 873 L708 926 L452 1084 L462 380 Z" fill="url(#nslu2-side)"/>')
+    parts.append('<path d="M262 330 L356 270 L612 96 Q648 74 690 86 Q742 100 768 150 Q782 180 780 210 '
+                 'L776 250 Q700 150 600 160 L380 300 Z" fill="#62676b" opacity=".55"/>')
+    parts.append('<path d="M262 330 L356 270 L612 96 Q648 74 690 86 Q742 100 768 150 Q782 180 780 210" '
+                 'stroke="#3c3f42" stroke-width="5" fill="none" opacity=".7"/>')
+    parts.append('<path d="M780 210 L737 663 L725 732 L713 873 L708 926" stroke="#3e4245" stroke-width="10" '
+                 'fill="none" opacity=".6"/>')
+    parts.append(nslu2_grille_34())
+    parts.append(nslu2_side_text(fonts))
+    # lower band below the silver cap
+    parts.append('<path d="M124 1190 Q190 1228 252 1222 Q300 1216 326 1200 L300 1404 Q200 1400 126 1372 Z" '
+                 'fill="url(#nslu2-band-34)"/>')
+    parts.append('<path d="M126 1372 Q200 1400 300 1404" stroke="#2c3033" stroke-width="5" fill="none"/>')
+    # silver cap
+    cap = ('M292 308 Q330 298 372 304 Q420 314 446 338 Q460 356 462 380 L458 800 L452 1082 L324 1202 '
+           'Q296 1218 252 1222 Q186 1226 124 1192 L124 925 L119 907 L121 738 L113 624 L121 568 L136 523 '
+           'L187 412 L215 371 L248 338 Z')
+    parts.append(f'<path id="front-cap" d="{cap}" fill="url(#nslu2-silver-34)"/>')
+    parts.append(f'<path d="{cap}" fill="url(#nslu2-grain)"/>')
+    parts.append('<path d="M462 380 L458 800 L452 1082" stroke="#6a6e72" stroke-width="3" fill="none"/>')
+    # bezel and window on the sloping face
+    parts.append('<ellipse cx="263.6" cy="524.4" rx="113" ry="231" transform="rotate(25 263.6 524.4)" '
+                 'fill="url(#nslu2-rim-34)"/>')
+    parts.append('<ellipse cx="261" cy="526.5" rx="103" ry="221" transform="rotate(24.5 261 526.5)" '
+                 'fill="#202224"/>')
+    parts.append('<ellipse id="indicator-window" cx="260.4" cy="527.3" rx="99" ry="217" '
+                 'transform="rotate(24.5 260.4 527.3)" fill="url(#nslu2-glass)"/>')
+    parts.append(f'<g transform="matrix(.583 .265 -.358 .847 258.6 533.6)">{nslu2_window_content(fonts)}</g>')
+    parts.append('<path d="M372 488 Q376 520 362 556" stroke="#fff" stroke-width="5" fill="none" opacity=".75" '
+                 'stroke-linecap="round"/>')
+    # Cisco mark wrapped onto the left of the cylinder
+    parts.append(f'<g id="cisco-logo" opacity=".85" transform="matrix(.54 .23 .02 .68 {f(122 - .54 * 270 - .02 * 923)} '
+                 f'{f(882 - .23 * 270 - .68 * 923)})">{nslu2_cisco(fonts)}</g>')
+    parts.append(nslu2_power_button(164, 1292, .66))
+    parts.append('</g></g></svg>\n')
+    return "\n".join(parts)
+
+
+def nslu2_side_text(fonts):
+    """Side lettering on the slate plane: vertical strokes stay vertical, baselines rise to the rear."""
+    slope = -.85
+    out = []
+    def run(text, font, cap, x, base, width):
+        d = fonts.word_path(text, font, cap, 0, 0, "start", width)
+        out.append(f'<path d="{d}" fill="#e2e4e5" transform="matrix(1 {slope} 0 1 {f(x)} {f(base)})"/>')
+    run("L", "OpenSans_Regular.ttf", 27, 478, 790, 15)
+    run("INKSYS", "OpenSans_Regular.ttf", 21, 496, 790 + slope * 18, 98)
+    run("®", "OpenSans_Regular.ttf", 6, 597, 790 + slope * 119 - 14, 6)
+    run("Network Storage Link", "OpenSans_Bold.ttf", 7.5, 606, 790 + slope * 128 - 9, 112)
+    run("for USB 2.0 Disk Drives", "OpenSans_Regular.ttf", 5.5, 606, 790 + slope * 128 + 3, 76)
+    return '<g id="side-legend">' + "".join(out) + '</g>'
+
+
+def nslu2_grille_34():
+    """Perforated grille on the side, a staggered lattice following the side plane."""
+    dots = []
+    u = (10.4, -8.85)
+    v = (0.0, 10.4)
+    o = (476.0, 838.0)
+    for i in range(-2, 28):
+        for j in range(-2, 40):
+            x = o[0] + i * u[0] + j * v[0]
+            y = o[1] + i * u[1] + (j + (i % 2) * .5) * v[1]
+            dots.append(f"M{f(x - 2.6)} {f(y)}a2.6 2.6 0 1 0 5.2 0a2.6 2.6 0 1 0 -5.2 0Z")
+    return ('<clipPath id="nslu2-grille-clip"><path d="M470 836 L722 622 L716 940 L470 1098 Z"/></clipPath>'
+            f'<path id="grille" clip-path="url(#nslu2-grille-clip)" fill="#9ba3a9" opacity=".9" d="{"".join(dots)}"/>')
+
+
+NSLU2_VIEWS = {"front": nslu2_front, "three-quarter": nslu2_three_quarter}
+
+
+def build_nslu2(fonts, view):
+    """Linksys NSLU2 in its cradle, traced in the reference photograph's pixel coordinates."""
+    return NSLU2_VIEWS[view](fonts)
+
+
 @dataclass(frozen=True)
 class Model:
     """Builder: Fonts -> SVG text; path: repository-relative.
@@ -4140,8 +4442,14 @@ ACCESSORY_MODELS = {
          ("OpenSans_Regular.ttf", "OpenSans_Bold.ttf")),
     )
 }
+APPLIANCE_MODELS = {
+    f"nslu2-{view}": Model(f"nslu2/nslu2-{view}.svg", partial(build_nslu2, view=view), None,
+                           ("OpenSans_Regular.ttf", "OpenSans_Bold.ttf"))
+    for view in NSLU2_VIEWS
+}
 ALIASES = {
     "sl-c700": ("sl-c700-laptop", "sl-c700-pda"),
+    "nslu2": tuple(APPLIANCE_MODELS),
     "all": tuple(MODELS),
     "camera": tuple(CAMERA_MODELS),
     "accessories": tuple(ACCESSORY_MODELS),
@@ -4470,6 +4778,9 @@ def validate_svg(drawing, model):
                     or not all(math.isfinite(value) and 0 <= value <= 1 for value in times)
                     or any(a > b for a, b in zip(times, times[1:]))):
                 raise ValueError("invalid SVG animation timeline")
+    for name in ("led-mail", "led-charge", *NSLU2_LEDS):
+        if name in ids and (not ids[name].get("fill") or "url(" in ids[name].get("fill")):
+            raise ValueError(f"#{name} must have a directly editable fill")
     if model.screen is None:
         if screen is not None:
             raise ValueError("standalone accessory must not contain a screen")
@@ -4539,15 +4850,12 @@ def validate_svg(drawing, model):
             raise ValueError("missing or incorrect sleeve composition")
     if model.keyboard and not (model.source or model.slider) and root.get("id") != "c700-laptop":
         raise ValueError("keyboard mode requires an open slider, C700 laptop or h2200 add-on")
-    for name in ("led-mail", "led-charge"):
-        if name in ids and (not ids[name].get("fill") or "url(" in ids[name].get("fill")):
-            raise ValueError(f"#{name} must have a directly editable fill")
     return root
 
 
 def select_models(names, camera=None, keyboard=False, sleeve=None):
     selected = {}
-    available = {**MODELS, **CAMERA_MODELS, **MANUAL_MODELS, **ACCESSORY_MODELS}
+    available = {**MODELS, **CAMERA_MODELS, **MANUAL_MODELS, **ACCESSORY_MODELS, **APPLIANCE_MODELS}
     for name in names:
         keys = ALIASES.get(name, (name,))
         if name == "all":
@@ -4724,11 +5032,12 @@ def main(argv=None):
         elif args.list:
             if args.models or args.output or args.output_dir or args.check or args.camera or args.keyboard or args.sleeve:
                 raise ValueError("--list cannot be combined with generation options")
-            for name, model in {**MODELS, **CAMERA_MODELS, **ACCESSORY_MODELS}.items():
+            for name, model in {**MODELS, **CAMERA_MODELS, **ACCESSORY_MODELS, **APPLIANCE_MODELS}.items():
                 print(f"{name:16} {model.path}")
             print("sl-c700          both C700 views\nall              all generated handheld views")
             print("camera           all four standalone camera views")
             print("accessories      three CF cards and two iPAQ expansion sleeves")
+            print("nslu2            NSLU2 front and three-quarter views")
             print("h2200            manual source; compose with --camera and/or --keyboard")
             print("Camera poses: " + ", ".join(CAMERA_POSES))
             print("Sleeve devices: " + ", ".join(sleeve_devices()))
@@ -4738,7 +5047,7 @@ def main(argv=None):
                 raise ValueError("--output requires exactly one view and a .svg filename")
             if args.output:
                 name, model = next(iter(selected.items()))
-                available = {**MODELS, **CAMERA_MODELS, **MANUAL_MODELS, **ACCESSORY_MODELS}
+                available = {**MODELS, **CAMERA_MODELS, **MANUAL_MODELS, **ACCESSORY_MODELS, **APPLIANCE_MODELS}
                 reserved = {Path(item.path).name for item in available.values()}
                 for item in (*MODELS.values(), *MANUAL_MODELS.values()):
                     stem = Path(item.path).stem
