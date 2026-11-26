@@ -226,6 +226,26 @@ class GeneratorTests(unittest.TestCase):
                     self.assertIsNotNone(led)
                     self.assertRegex(led.get("fill"), r"^#[0-9a-f]{6}$")
 
+    def test_beagleboards_are_screenless_boards_with_editable_leds(self):
+        leds = {"beagleboard": ("power", "usr0", "usr1", "pmu-stat")}
+        for board, names in leds.items():
+            self.assertNotIn(board, generator.MODELS)
+            self.assertNotIn(board, generator.ALIASES["all"])
+            self.assertIn(board, generator.ALIASES["boards"])
+            model = generator.BOARD_MODELS[board]
+            root = generator.ET.parse(generator.REPOSITORY / model.path).getroot()
+            self.assertIsNone(root.find(".//*[@id='screen']"))
+            for name in names:
+                with self.subTest(board=board, led=name):
+                    self.assertRegex(root.find(f".//*[@id='led-{name}']").get("fill"), r"^#[0-9a-f]{6}$")
+            for name in ("button-user", "button-reset", "connector-dvi", "connector-usb-host", "connector-sd"):
+                self.assertIsNotNone(root.find(f".//*[@id='{name}']"), (board, name))
+            for args in ((board, "--camera", "front"), (board, "--keyboard"),
+                         (board, "--sleeve", next(iter(generator.SLEEVE_FITS)))):
+                with self.subTest(args=args):
+                    self.cli(*args, "--output-dir", self.directory, success=False)
+        self.assertEqual(list(self.directory.iterdir()), [])
+
     def test_camera_failures_do_not_overwrite_base_or_guess_missing_poses(self):
         output = self.directory / "ipaq-h2200.svg"
         output.write_bytes(b"manual original")

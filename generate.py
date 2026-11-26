@@ -4371,6 +4371,420 @@ def build_nslu2(fonts, view):
     return NSLU2_VIEWS[view](fonts)
 
 
+BEAGLEBOARD_PCB = "beagleboard/beagleboard-pcb.json"
+BB_MASK, BB_COPPER, BB_HASL, BB_SILK = "#84191a", "#a5302c", "#dcdcd2", "#f1f0e8"
+BB_CHIP, BB_BLACK, BB_METAL = "#3a3e38", "#1d1f1e", "#c9cbc4"
+BB_LED_OFF, BB_FR4 = "#e3e0cf", "#a88d7a"
+
+
+def pcb_shapes(shapes):
+    """Gerber flashes as one path: c circle, r rectangle, o obround, q rotated rectangle."""
+    d = []
+    for kind, x, y, *size in shapes:
+        if kind == "c":
+            r = size[0] / 2
+            d.append(f"M{f(x - r)} {f(y)}a{f(r)} {f(r)} 0 1 0 {f(2 * r)} 0"
+                     f"a{f(r)} {f(r)} 0 1 0 {f(-2 * r)} 0Z")
+        elif kind == "r":
+            w, h = size
+            d.append(f"M{f(x - w / 2)} {f(y - h / 2)}h{f(w)}v{f(h)}h{f(-w)}Z")
+        elif kind == "o":
+            w, h = size
+            r = min(w, h) / 2
+            if w >= h:
+                d.append(f"M{f(x - w / 2 + r)} {f(y - r)}h{f(w - 2 * r)}a{f(r)} {f(r)} 0 0 1 0 {f(2 * r)}"
+                         f"h{f(2 * r - w)}a{f(r)} {f(r)} 0 0 1 0 {f(-2 * r)}Z")
+            else:
+                d.append(f"M{f(x + r)} {f(y - h / 2 + r)}v{f(h - 2 * r)}a{f(r)} {f(r)} 0 0 1 {f(-2 * r)} 0"
+                         f"v{f(2 * r - h)}a{f(r)} {f(r)} 0 0 1 {f(2 * r)} 0Z")
+        else:
+            w, h, angle = size
+            c, s = math.cos(math.radians(-angle)), math.sin(math.radians(-angle))
+            corners = [(x + u * c - v * s, y + u * s + v * c)
+                       for u, v in ((-w / 2, -h / 2), (w / 2, -h / 2), (w / 2, h / 2), (-w / 2, h / 2))]
+            d.append("M" + "L".join(f"{f(px)} {f(py)}" for px, py in corners) + "Z")
+    return "".join(d)
+
+
+def pcb_lines(lines):
+    return "".join("M" + "L".join(f"{f(x)} {f(y)}" for x, y in zip(line[::2], line[1::2]))
+                   for line in lines)
+
+
+def build_beagleboard(fonts):
+    """BeagleBoard rev C, component side; board layers from the rev C5 design files."""
+    pcb = json.loads((REPOSITORY / BEAGLEBOARD_PCB).read_text(encoding="utf-8"))
+    width, height = pcb["board"]
+    parts = pcb["parts"]
+    left, top, right, bottom = -10, -40, 812, 772
+    out = [
+        '<?xml version="1.0" encoding="UTF-8"?>',
+        '<!-- SPDX-FileCopyrightText: 2026 Koen Kooi -->',
+        '<!-- SPDX-FileCopyrightText: 2008-2009 Gerald Coley, BeagleBoard.org -->',
+        '<!-- SPDX-License-Identifier: CC-BY-SA-4.0 -->',
+        f'<svg xmlns="{SVG_NS}" width="366" height="{f(366 * (bottom - top) / (right - left))}" '
+        f'viewBox="{left} {top} {right - left} {bottom - top}" id="beagleboard" '
+        'data-units-per-mm="10" role="img" aria-labelledby="title description">',
+        '<title id="title">BeagleBoard rev C (TI OMAP3530), component side</title>',
+        '<desc id="description">Orthographic top view of the original 78.7 × 76.2 mm BeagleBoard. '
+        'Copper, solder mask, silkscreen, drills and part positions are converted from the rev C '
+        'design files by Gerald Coley of BeagleBoard.org (CC BY-SA 3.0); the parts, colours and '
+        'finish are redrawn from the author\u2019s photographs of a rev C board. '
+        'Legends are outlines; LEDs are drawn unlit.</desc>',
+        '''<defs>
+<linearGradient id="bb-shell" x1="0" y1="0" x2="1" y2=".35">
+ <stop stop-color="#9da19c"/><stop offset=".18" stop-color="#e4e6e0"/>
+ <stop offset=".55" stop-color="#bfc3bd"/><stop offset=".85" stop-color="#d9dcd6"/>
+ <stop offset="1" stop-color="#8f948f"/>
+</linearGradient>
+<linearGradient id="bb-steel" x1="0" y1="0" x2="1" y2=".4">
+ <stop stop-color="#9a9e99"/><stop offset=".15" stop-color="#d8dad5"/>
+ <stop offset=".3" stop-color="#8b8f8a"/><stop offset=".5" stop-color="#c9ccc6"/>
+ <stop offset=".7" stop-color="#7d817c"/><stop offset=".85" stop-color="#d0d3cd"/>
+ <stop offset="1" stop-color="#8e928d"/>
+</linearGradient>
+<linearGradient id="bb-sd-shell" x1="0" y1="0" x2=".3" y2="1">
+ <stop stop-color="#5f625e"/><stop offset=".5" stop-color="#525551"/>
+ <stop offset="1" stop-color="#676a66"/>
+</linearGradient>
+<linearGradient id="bb-barrel" x1="0" y1="0" x2="0" y2="1">
+ <stop stop-color="#151716"/><stop offset=".3" stop-color="#4b504d"/>
+ <stop offset=".5" stop-color="#2a2d2b"/><stop offset="1" stop-color="#0f1110"/>
+</linearGradient>
+<linearGradient id="bb-jack-barrel">
+ <stop stop-color="#121413"/><stop offset=".35" stop-color="#3c403e"/>
+ <stop offset=".6" stop-color="#262928"/><stop offset="1" stop-color="#101211"/>
+</linearGradient>
+<linearGradient id="bb-gold" x1="0" y1="0" x2="1" y2="1">
+ <stop stop-color="#8c6a22"/><stop offset=".35" stop-color="#f2d27a"/>
+ <stop offset=".7" stop-color="#c79a3c"/><stop offset="1" stop-color="#f5df9a"/>
+</linearGradient>
+<radialGradient id="bb-cap" cx=".4" cy=".35" r=".7">
+ <stop stop-color="#f4f2ea"/><stop offset=".75" stop-color="#dcdbd0"/>
+ <stop offset="1" stop-color="#a9aa9f"/>
+</radialGradient>
+<radialGradient id="bb-polyfuse" cx=".4" cy=".35" r=".7">
+ <stop stop-color="#f0cf63"/><stop offset=".7" stop-color="#d4a62e"/>
+ <stop offset="1" stop-color="#9c7618"/>
+</radialGradient>
+</defs>''',
+    ]
+    add = out.append
+
+    def rect(x, y, w, h, fill, rx=0, extra=""):
+        add(f'<rect x="{f(x)}" y="{f(y)}" width="{f(w)}" height="{f(h)}"'
+            + (f' rx="{f(rx)}"' if rx else "") + f' fill="{fill}"{" " + extra if extra else ""}/>')
+
+    def circle(x, y, r, fill, extra=""):
+        add(f'<circle cx="{f(x)}" cy="{f(y)}" r="{f(r)}" fill="{fill}"{" " + extra if extra else ""}/>')
+
+    def body(name):
+        x0, y0, x1, y1 = parts[name][4]
+        return x0, y0, x1 - x0, y1 - y0
+
+    def pins(x0, y0, x1, y1, start, end, fill=BB_METAL):
+        """Solder tails on the rectangular copper pads inside a box, spanning start..end."""
+        for kind, x, y, w, h in (p for p in pcb["copper"]["pads"]
+                                 if p[0] == "r" and x0 < p[1] < x1 and y0 < p[2] < y1):
+            if h > w:
+                rect(x - w * .35, start, w * .7, end - start, fill)
+            else:
+                rect(start, y - h * .35, end - start, h * .7, fill)
+
+    def leads(x, y, w, h, count, side, length, lead=2.4, fill=BB_METAL):
+        """Gull-wing or flat leads along one side of a body box."""
+        pitch = (w if side in "tb" else h) / count
+        for i in range(count):
+            if side in "tb":
+                lx = x + (i + .5) * pitch - lead / 2
+                rect(lx, y - length if side == "t" else y + h, lead, length, fill)
+            else:
+                ly = y + (i + .5) * pitch - lead / 2
+                rect(x - length if side == "l" else x + w, ly, length, lead, fill)
+
+    # Board: holes of 0.5 mm and larger go through; smaller vias are tented.
+    holes = [hole for hole in pcb["holes"] if hole[2] >= 5]
+    cut = pcb_shapes([("c", x, y, d) for x, y, d, _ in holes])
+    # The photographed board has a thin round mask opening over the square mounting-hole lands.
+    mounting = {(x, y) for x, y, d, _ in holes if d > 30}
+    openings = [p for p in pcb["mask"]["openings"] if (p[1], p[2]) not in mounting]
+    openings += [("c", x, y, 52) for x, y in sorted(mounting)]
+    pads = pcb_shapes(pcb["copper"]["pads"])
+    add(f'<defs><mask id="bb-holes" maskUnits="userSpaceOnUse" x="-1" y="-1" '
+        f'width="{f(width + 2)}" height="{f(height + 2)}">'
+        f'<rect x="-1" y="-1" width="{f(width + 2)}" height="{f(height + 2)}" fill="#fff"/>'
+        f'<path d="{cut}"/></mask>'
+        f'<clipPath id="bb-openings"><path d="{pcb_shapes(openings)}"/></clipPath></defs>')
+    add('<g id="pcb" mask="url(#bb-holes)">')
+    rect(0, 0, width, height, BB_MASK, 0, 'stroke="#5e1114" stroke-width="2"')
+    add(f'<g id="copper" fill="{BB_COPPER}">')
+    for stroke, lines in sorted(pcb["copper"]["traces"].items(), key=lambda item: float(item[0])):
+        add(f'<path d="{pcb_lines(lines)}" fill="none" stroke="{BB_COPPER}" '
+            f'stroke-width="{stroke}" stroke-linecap="round" stroke-linejoin="round"/>')
+    add(f'<path d="{"".join(pcb_lines([p]) + "Z" for p in pcb["copper"]["pours"])}"/>')
+    add(f'<path d="{pads}"/>')
+    add("</g>")
+    vias = [("c", x, y, d * .6) for x, y, d, _ in pcb["holes"] if d < 5]
+    add(f'<path id="vias" d="{pcb_shapes(vias)}" fill="#5c1210"/>')
+    add(f'<g id="mask-openings" clip-path="url(#bb-openings)">')
+    rect(0, 0, width, height, BB_FR4)
+    add(f'<path d="{pads}" fill="{BB_HASL}"/>')
+    add("</g>")
+    add(f'<g id="silkscreen" fill="none" stroke="{BB_SILK}" stroke-linecap="round" '
+        'stroke-linejoin="round">')
+    for stroke, lines in sorted(pcb["silk"]["strokes"].items(), key=lambda item: float(item[0])):
+        add(f'<path d="{pcb_lines(lines)}" stroke-width="{stroke}"/>')
+    add(f'<path d="{"".join(pcb_lines([p]) + "Z" for p in pcb["silk"]["regions"])}" '
+        f'fill="{BB_SILK}" stroke="none"/>')
+    # The beagleboard.org logo is not part of the released artwork; redrawn from the photographs.
+    logo = fonts.word_path("beagleboard.org", "Comfortaa_Bold.ttf", 27, 0, 0, "start", 252)
+    add('<g transform="translate(112 609) rotate(-90)">')
+    add(f'<path d="{logo}" stroke-width="6.4"/>')
+    add(f'<path d="{logo}" fill="{BB_MASK}" stroke="{BB_MASK}" stroke-width="2.4"/>')
+    add('<path d="M-33 -29C-40 -26 -45 -18 -43 -11C-42 -6 -40 -3 -37 -4C-33 -5 -30 -8 -30 -12'
+        'C-30 -20 -30 -26 -33 -29C-28 -31 -18 -31 -13 -25C-9 -21 -6 -17 -5.5 -12C-5 -8 -6 -6 -8 -6'
+        'C-11 -3 -14 -2.6 -17 -2.5C-20 -1.8 -23 -1.4 -26 -2M-24 -19.5C-27 -16 -27 -9 -20.5 -5'
+        'M-13.5 -15.5a3 2.2 0 1 0 6 0a3 2.2 0 1 0 -6 0ZM-14 -7C-12 -6 -10 -6 -8 -7" stroke-width="2"/>')
+    circle(-26.5, -22.5, 1.9, BB_SILK, 'stroke="none"')
+    add("</g></g></g>")
+
+    # Two-terminal passives: (body length, width, body colour, terminal length).
+    styles = {
+        "C402-25": (10, 5, "#b9a06c", 2.5), "C402-25RD": (10, 5, "#b9a06c", 2.5),
+        "R402-25RD": (10, 5, BB_BLACK, 2.5), "C0805": (20, 12.5, "#b8a06b", 4.5),
+        "C1210-70X102": (32, 25, "#b49c68", 6), "R603-35X45": (16, 8, BB_BLACK, 3.5),
+        "R805-35X60": (20, 12.5, "#2c5b45", 4.5), "F603-41X39": (16, 8, "#2c8a6c", 3.5),
+        "IND603-24X32": (16, 8, "#3a3935", 3.5), "C3216-35X55": (32, 16, "#efb650", 6),
+        "C3528-64X112": (35, 28, "#efb650", 7),
+    }
+    unpopulated = {"R31", "R106", "R108"}
+    for name, (footprint, x, y, angle, *box) in sorted(parts.items()):
+        if footprint not in styles or name in unpopulated:
+            continue
+        length, across, colour, terminal = styles[footprint]
+        if box and angle % 90 == 0:
+            x0, y0, x1, y1 = box[0]
+            x, y = (x0 + x1) / 2, (y0 + y1) / 2
+            angle = 0 if x1 - x0 >= y1 - y0 else 90
+        add(f'<g id="part-{name.lower()}" transform="translate({f(x)} {f(y)}) rotate({-angle})">')
+        rect(-length / 2, -across / 2, length, across, BB_METAL, .8)
+        rect(-length / 2 + terminal, -across / 2, length - 2 * terminal, across, colour)
+        if footprint.startswith(("C3216", "C3528")):
+            rect(-length / 2 + terminal, -across / 2, length * .16, across, "#c4862c")
+            rect(-length / 2 + terminal + length * .3, -across * .22, length * .3, across * .14,
+                 "#7a5520", 0, 'opacity=".55"')
+        elif footprint.startswith("C") and across > 6:
+            rect(-length / 2 + terminal, -across / 2 + 1, length - 2 * terminal, across * .3,
+                 "#fff", 0, 'opacity=".18"')
+        add("</g>")
+
+    # Integrated circuits: body boxes from the assembly drawing.
+    def chip(name, lead_sides=(), count=0, length=0, inset=0, fill=BB_CHIP):
+        x, y, w, h = body(name)
+        x, y, w, h = x + inset, y + inset, w - 2 * inset, h - 2 * inset
+        for side in lead_sides:
+            leads(x, y, w, h, count, side, length)
+        add(f'<g id="part-{name.lower()}">')
+        rect(x, y, w, h, fill, 1)
+        rect(x + 1, y + 1, w - 2, h - 2, "#fff", 1, 'opacity=".05"')
+        add("</g>")
+        return x, y, w, h
+
+    x, y, w, h = body("U3")
+    rect(x, y, w, h, "#9b9886", 1.5)
+    rect(x + 1.2, y + 1.2, w - 2.4, h - 2.4, BB_CHIP, 1, 'id="part-u3"')
+    rect(x + 1.2, y + 1.2, w - 2.4, h - 2.4, "#fff", 1, 'opacity=".04"')
+    add(f'<path d="{fonts.word_path("MICRON", "RobotoCondensed_Bold.ttf", 7, x + w / 2, y + 52, "middle", None)}" '
+        'fill="#585a55" opacity=".7"/>')
+    x, y, w, h = chip("U5")
+    add(f'<g transform="translate({f(x + w / 2)} {f(y + h / 2)}) rotate(180)" fill="#a3a597">')
+    for text, base in (("TWL4030BCZXN", -12), ("8TA502W C", 0)):
+        add(f'<path d="{fonts.word_path(text, "RobotoCondensed_Regular.ttf", 5.5, 0, base, "middle", 48)}"/>')
+    add("</g>")
+    x, y, w, h = chip("U8", "tblr", 16, 10)
+    circle(x + w - 11, y + 11, 3.5, "#2c2f2b")
+    add(f'<g transform="translate({f(x + w / 2)} {f(y + h / 2)}) rotate(-90)" fill="#a3a597">')
+    for text, base in (("R5D9ATC1", -4), ("TFP410PAP", 10)):
+        add(f'<path d="{fonts.word_path(text, "RobotoCondensed_Regular.ttf", 7, 0, base, "middle", 52)}"/>')
+    add("</g>")
+    chip("U1", "lr", 7, 9)
+    chip("U10", "lr", 8, 9)
+    chip("U6", "lr", 4, 9)
+    chip("U9", "tb", 4, 4, 2)
+    chip("U11", "tb", 4, 4, 2)
+    chip("U4", "tb", 3, 6, 1)
+    chip("U2", "tb", 4, 2.5, 1)
+    chip("U7", (), 0, 0, 1)
+    x, y = parts["Q1"][1], parts["Q1"][2]
+    leads(x - 10, y - 6.25, 20, 12.5, 3, "t", 4)
+    leads(x - 10, y - 6.25, 20, 12.5, 3, "b", 4)
+    rect(x - 10, y - 6.25, 20, 12.5, BB_CHIP, 1, 'id="part-q1"')
+    for name in ("RP1", "RP3", "RP4"):
+        x, y, w, h = body(name)
+        across = "tb" if w > h else "lr"
+        chip(name, across, 8, 3, 3)
+    x, y, angle = parts["RP2"][1], parts["RP2"][2], parts["RP2"][3]
+    add(f'<g id="part-rp2" transform="translate({f(x)} {f(y)}) rotate({-angle})">')
+    for i in range(8):
+        rect(-16.8 + i * 4.4, -9, 2.4, 18, BB_METAL)
+    rect(-19, -6, 38, 12, BB_CHIP, 1)
+    add("</g>")
+    x, y, w, h = body("Y1")
+    rect(x + 2, y + 2, w - 4, h - 4, "#6f716b", 2)
+    rect(x + 4, y + 4, w - 8, h - 8, BB_METAL, 1.5, 'id="part-y1"')
+    circle(x + 7.5, y + 7.5, 1.3, "#6f716b")
+    x, y, w, h = body("Y2")
+    rect(x + 1, y + 6, w - 2, h - 12, "#b8a984", 1.5, 'id="part-y2"')
+    rect(x + 3, y + 9, w - 6, h - 18, "#cfc3a0", 1)
+
+    # Status LEDs (all green); the #led-* fills are the editable lit area.
+    for name, identity in (("D5", "led-power"), ("D6", "led-usr0"), ("D7", "led-usr1"),
+                           ("D12", "led-pmu-stat")):
+        x0, y0, x1, y1 = parts[name][4]
+        vertical = y1 - y0 > x1 - x0
+        cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
+        add(f'<g id="part-{name.lower()}" transform="translate({f(cx)} {f(cy)})'
+            + (' rotate(90)' if vertical else '') + '">')
+        rect(-16, -8, 32, 16, BB_METAL, 1)
+        rect(-12, -8, 24, 16, "#ece9dc", .5)
+        add(f'<rect id="{identity}" x="-9" y="-6" width="18" height="12" rx="3" fill="{BB_LED_OFF}"/>')
+        rect(-2.5, -2, 5, 4, "#9a7a4a", .5)
+        add("</g>")
+
+    # Connectors, redrawn from the photographs onto the assembly-drawing outlines.
+    add('<g id="connector-dvi">')
+    pins(100, 70, 225, 105, 74, 95)
+    rect(98, 62, 126, 18, BB_BLACK, 2)
+    rect(84, -11, 154, 87, "url(#bb-shell)", 3, 'stroke="#7d827e" stroke-width="1.5"')
+    rect(84, -11, 154, 9, "#aeb2ad", 2)
+    for sx in (110, 198):
+        rect(sx, 6, 14, 46, "#3a3d3b", 2)
+        rect(sx + 4, 8, 9, 40, "#c0c2bc" if sx < 150 else "url(#bb-gold)", 1)
+        rect(sx - 2, 52, 18, 12, "#8f958f", 2)
+    rect(80, 60, 8, 18, "#a7aca7", 1)
+    rect(234, 60, 8, 18, "#a7aca7", 1)
+    add("</g>")
+    add('<g id="part-rt1">')
+    add(f'<path d="M262 30L266 58M248 32L252 58" stroke="{BB_METAL}" stroke-width="3" fill="none"/>')
+    add('<ellipse cx="255" cy="22" rx="17" ry="15" transform="rotate(-25 255 22)" '
+        'fill="url(#bb-polyfuse)" stroke="#a37d1f" stroke-width="1"/>')
+    add("</g>")
+    add('<g id="connector-svideo">')
+    rect(300, 100, 124, 30, BB_BLACK, 2)
+    add('<path d="M290 -6H434V131H376L362 115L348 131H290Z" fill="url(#bb-shell)" '
+        'stroke="#7f8580" stroke-width="1.5" stroke-linejoin="round"/>')
+    rect(292, -6, 140, 8, "#d3d6d0", 2)
+    add('<path d="M296 124H346L362 108L378 124H428" fill="none" stroke="#8f948f" stroke-width="2"/>')
+    add("</g>")
+    for identity, x0 in (("connector-audio-out", 463), ("connector-audio-in", 602.7)):
+        add(f'<g id="{identity}">')
+        rect(x0 + 22, -30, 50, 34, "url(#bb-jack-barrel)", 3)
+        rect(x0 + 26, -30, 42, 4, "#3d4140", 1.5)
+        rect(x0, 1.8, 95, 120, "#262928", 3)
+        rect(x0 + 3, 5, 89, 113, "#2f3331", 2)
+        add(f'<path d="M{f(x0 + 40)} 8L{f(x0 + 82)} 8L{f(x0 + 86)} 16L{f(x0 + 80)} 50'
+            f'L{f(x0 + 70)} 50L{f(x0 + 74)} 22L{f(x0 + 42)} 26Z" fill="url(#bb-gold)"/>')
+        rect(x0 + 88, 22, 18, 22, BB_METAL, 1.5)
+        rect(x0 - 6, 82, 10, 20, BB_METAL, 1)
+        rect(x0 + 91, 82, 10, 20, BB_METAL, 1)
+        add("</g>")
+    add('<g id="connector-usb-otg">')
+    for i in range(5):
+        rect(711, 232 + i * 9.5, 17, 3, "#5e5233")
+    rect(705, 204, 22, 12, BB_METAL, 1)
+    rect(705, 290, 22, 12, BB_METAL, 1)
+    rect(726, 218, 82, 74, "url(#bb-steel)", 2, 'stroke="#6f736e" stroke-width="1.5"')
+    rect(733, 225, 70, 61, "#d1832a", 1)
+    add('<path d="M733 225H803V231H739V286H733Z" fill="#8a4c12" opacity=".6"/>')
+    add('<path d="M748 240H800V271H748Z" fill="#a95f18"/>')
+    add('<path d="M756 247H800V263H756Z" fill="#e7a24a"/>')
+    add('<path d="M748 240H800M748 271H800" stroke="#5b330c" stroke-width="2"/>')
+    add("</g>")
+    add('<g id="connector-power">')
+    rect(645, 338, 140, 86, "#1b1d1c", 4)
+    rect(652, 344, 120, 74, "url(#bb-barrel)", 3)
+    rect(782, 340, 18, 82, "#101211", 3)
+    rect(786, 350, 10, 62, "#2c302e", 2)
+    rect(632, 350, 14, 14, BB_METAL, 1)
+    rect(632, 396, 14, 14, BB_METAL, 1)
+    add("</g>")
+    add('<g id="connector-usb-host">')
+    for cx in (268, 408):
+        circle(cx, 661, 16, "url(#bb-steel)", 'stroke="#6f736e" stroke-width="1.5"')
+    for px in (299, 326, 351, 375):
+        rect(px - 6, 620, 12, 12, "#d9dbd3", 2)
+    rect(271, 627, 134, 155, "url(#bb-steel)", 2, 'stroke="#6f736e" stroke-width="1.5"')
+    for sx in (277, 296, 318, 340, 365, 389):
+        add(f'<path d="M{sx} 632V776" stroke="#4d514c" stroke-width="1.2" opacity=".3"/>')
+    for x1, x2 in ((289, 322), (349, 384)):
+        xm = (x1 + x2) / 2
+        tongue = f"M{x1} 782V722Q{x1} 705 {f(xm)} 705Q{x2} 705 {x2} 722V782"
+        add(f'<path d="{tongue}" fill="none" stroke="#3f423e" stroke-width="9"/>')
+        add(f'<path d="{tongue}" fill="none" stroke="#f4f5f0" stroke-width="3.5"/>')
+    add('<path d="M273 779H403" stroke="#f2f3ee" stroke-width="2" opacity=".7"/>')
+    add("</g>")
+    add('<g id="connector-sd">')
+    pins(440, 565, 680, 590, 576, 600)
+    for tx in (421, 700):
+        rect(tx, 735, 13, 20, BB_HASL, 1.5)
+    add('<path d="M431 590H705V760H700Q640 737 587 737Q530 737 474 760H431Z" fill="url(#bb-sd-shell)" '
+        'stroke="#a2a59f" stroke-width="2" stroke-linejoin="round"/>')
+    rect(462, 594, 160, 26, "#4c4e4b", 1)
+    rect(464, 620, 155, 59, "#121312", 1)
+    for i in range(11):
+        cx = 471 + i * 14
+        depth = (44, 52, 40, 50, 46, 52, 42, 54, 48, 44, 52)[i]
+        rect(cx - 2.5, 622, 5, depth, "#6b5627", 1)
+        rect(cx - 2, 618 + depth, 4, 7, "#f3dc98", 1.5)
+    for x, y, w, h in ((433, 624, 16, 46), (433, 707, 14, 38), (657, 627, 19, 113)):
+        rect(x, y, w, h, "#1b1c1b", 1.5)
+    add('<path d="M436 628L446 660" stroke="#9fa29c" stroke-width="2"/>')
+    add('<path d="M660 668L670 650V640H675V704L670 708V690Z" fill="#8a8d88"/>')
+    rect(667, 700, 7, 12, "#cfd1ca", 2)
+    add(f'<path d="{fonts.word_path("OCONN", "OpenSans_Regular.ttf", 11, 568, 716, "middle", None)}" '
+        'fill="none" stroke="#565955" stroke-width="1"/>')
+    add("</g>")
+
+    def header(identity, x, y, columns, rows, angle=0):
+        add(f'<g id="{identity}" transform="translate({f(x)} {f(y)}) rotate({angle})">')
+        w, h = columns * 25.4, rows * 25.4
+        rect(-w / 2, -h / 2, w, h, BB_BLACK, 2)
+        for column in range(columns):
+            for row in range(rows):
+                px, py = -w / 2 + 12.7 + column * 25.4, -h / 2 + 12.7 + row * 25.4
+                rect(px - 11.5, py - 11.5, 23, 23, "#2d302e", 1.5)
+                rect(px - 3.2, py - 3.2, 6.4, 6.4, "#b3b5ab", .8)
+                rect(px - 1.8, py - 1.8, 3.6, 3.6, "#dcdcd2", .5)
+        add("</g>")
+
+    header("connector-serial", 730.3, 533.4, 2, 5)
+    header("connector-jtag", 228.15, 433.95, 7, 2, 45)
+    add('<g id="connector-expansion"><rect x="31.8" y="311.2" width="50.8" height="355.6" '
+        'fill="#fff" fill-opacity="0"/></g>')
+    add('<g id="connector-lcd"><rect x="19.1" y="154.9" width="80" height="127" '
+        'fill="#fff" fill-opacity="0"/></g>')
+    for identity, name in (("button-reset", "S2"), ("button-user", "S1")):
+        y0 = 561.8 if name == "S2" else 644.4
+        cx, cy = 153.15, y0 + 31.75
+        add(f'<g id="{identity}">')
+        for dx in (-34, 26):
+            for dy in (-22, 14):
+                rect(cx + dx, cy + dy, 8, 8, BB_METAL, 1)
+        rect(cx - 30, cy - 30, 60, 60, "#2a2e2c", 4)
+        for dx in (-21, 21):
+            for dy in (-21, 21):
+                circle(cx + dx, cy + dy, 5, "#191b1a")
+        circle(cx, cy, 18, "url(#bb-cap)", 'stroke="#8f948d" stroke-width="1.2"')
+        add("</g>")
+    x, y = parts["TP1"][1], parts["TP1"][2]
+    add('<g id="part-tp1">')
+    circle(x, y, 15, "#1c1e1d")
+    circle(x - 4, y - 4, 6, "#4a4e4b")
+    add("</g>")
+    add("</svg>")
+    return "\n".join(out) + "\n"
+
+
 @dataclass(frozen=True)
 class Model:
     """Builder: Fonts -> SVG text; path: repository-relative.
@@ -4447,12 +4861,18 @@ APPLIANCE_MODELS = {
                            ("OpenSans_Regular.ttf", "OpenSans_Bold.ttf"))
     for view in NSLU2_VIEWS
 }
+BOARD_MODELS = {
+    "beagleboard": Model("beagleboard/beagleboard.svg", build_beagleboard, None,
+                         ("Comfortaa_Bold.ttf", "RobotoCondensed_Bold.ttf",
+                          "RobotoCondensed_Regular.ttf", "OpenSans_Regular.ttf")),
+}
 ALIASES = {
     "sl-c700": ("sl-c700-laptop", "sl-c700-pda"),
     "nslu2": tuple(APPLIANCE_MODELS),
     "all": tuple(MODELS),
     "camera": tuple(CAMERA_MODELS),
     "accessories": tuple(ACCESSORY_MODELS),
+    "boards": tuple(BOARD_MODELS),
 }
 
 
@@ -4778,7 +5198,7 @@ def validate_svg(drawing, model):
                     or not all(math.isfinite(value) and 0 <= value <= 1 for value in times)
                     or any(a > b for a, b in zip(times, times[1:]))):
                 raise ValueError("invalid SVG animation timeline")
-    for name in ("led-mail", "led-charge", *NSLU2_LEDS):
+    for name in ("led-mail", "led-charge", *NSLU2_LEDS, "led-usr0", "led-usr1", "led-pmu-stat"):
         if name in ids and (not ids[name].get("fill") or "url(" in ids[name].get("fill")):
             raise ValueError(f"#{name} must have a directly editable fill")
     if model.screen is None:
@@ -4855,7 +5275,7 @@ def validate_svg(drawing, model):
 
 def select_models(names, camera=None, keyboard=False, sleeve=None):
     selected = {}
-    available = {**MODELS, **CAMERA_MODELS, **MANUAL_MODELS, **ACCESSORY_MODELS, **APPLIANCE_MODELS}
+    available = {**MODELS, **CAMERA_MODELS, **MANUAL_MODELS, **ACCESSORY_MODELS, **APPLIANCE_MODELS, **BOARD_MODELS}
     for name in names:
         keys = ALIASES.get(name, (name,))
         if name == "all":
@@ -5032,12 +5452,13 @@ def main(argv=None):
         elif args.list:
             if args.models or args.output or args.output_dir or args.check or args.camera or args.keyboard or args.sleeve:
                 raise ValueError("--list cannot be combined with generation options")
-            for name, model in {**MODELS, **CAMERA_MODELS, **ACCESSORY_MODELS, **APPLIANCE_MODELS}.items():
+            for name, model in {**MODELS, **CAMERA_MODELS, **ACCESSORY_MODELS, **APPLIANCE_MODELS, **BOARD_MODELS}.items():
                 print(f"{name:16} {model.path}")
             print("sl-c700          both C700 views\nall              all generated handheld views")
             print("camera           all four standalone camera views")
             print("accessories      three CF cards and two iPAQ expansion sleeves")
             print("nslu2            NSLU2 front and three-quarter views")
+            print("boards           development boards")
             print("h2200            manual source; compose with --camera and/or --keyboard")
             print("Camera poses: " + ", ".join(CAMERA_POSES))
             print("Sleeve devices: " + ", ".join(sleeve_devices()))
@@ -5047,7 +5468,7 @@ def main(argv=None):
                 raise ValueError("--output requires exactly one view and a .svg filename")
             if args.output:
                 name, model = next(iter(selected.items()))
-                available = {**MODELS, **CAMERA_MODELS, **MANUAL_MODELS, **ACCESSORY_MODELS, **APPLIANCE_MODELS}
+                available = {**MODELS, **CAMERA_MODELS, **MANUAL_MODELS, **ACCESSORY_MODELS, **APPLIANCE_MODELS, **BOARD_MODELS}
                 reserved = {Path(item.path).name for item in available.values()}
                 for item in (*MODELS.values(), *MANUAL_MODELS.values()):
                     stem = Path(item.path).stem
